@@ -1,0 +1,92 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select a.*, $2::integer as userId
+            from cur_asutused a
+            where libs.check_asutus(a.id, $1)</sql>
+    <alias>curAsutused</alias>
+  </grid>
+  <select>
+    <sql>select *, $2::integer as userid, 'ASUTUSED' as doc_type_id,
+                (properties-&gt;&gt;'pank')::text as pank,
+                (properties-&gt;&gt;'kmkr')::text as kmkr,
+                (properties-&gt;&gt;'kehtivus')::date as kehtivus                
+                from libs.asutus where id = $1</sql>
+    <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
+            null::text as  regkood,
+            null::text as nimetus,
+            null::text as omvorm,
+            null::text as aadress,
+            null::text as kontakt,
+            null::text as tel,
+            null::text as faks,
+            null::text as email,
+            null::text as muud,
+            null::text as tp,
+            0::integer as staatus,
+            null::text as pank,
+            null::text as kmkr,
+            null::text as mark</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: varchar(20) AS aa,
+                $2 :: INTEGER            AS userid
+                FROM libs.asutus a,
+                      json_array_elements((a.properties -&gt; 'asutus_aa') :: JSON) AS e(element)
+                WHERE a.id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>asutus_aa</alias>
+  </select>
+  <select>
+    <sql>SELECT Asutus.id 
+                    FROM libs.asutus Asutus 
+                    WHERE (rtrim(ltrim(Asutus.regkood)) = $1 or empty($1))
+                    or (rtrim(ltrim(Asutus.nimetus)) = $2 or empty($2))</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>validate_asutus</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from com_asutused a 
+        where libs.check_asutus(a.id, $1) 
+        and (kehtivus is null or kehtivus &gt;= date())
+        order by nimetus</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_asutus($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_asutus($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>regkood,nimetus,omvorm</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

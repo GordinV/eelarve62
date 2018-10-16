@@ -1,0 +1,179 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select a.*, $2::integer as userId
+            from palk.cur_tootajad a
+            where rekvid = $1</sql>
+    <alias>curTootajad</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  a.id,
+                  a.regkood,
+                  a.nimetus,
+                  a.omvorm,
+                  a.aadress,
+                  a.kontakt,
+                  a.aadress,
+                  a.tel,
+                  a.faks,
+                  a.email,
+                  a.muud,
+                  a.tp,
+                  a.staatus,
+                  true::boolean as is_tootaja,
+                  a.mark,
+                    $2:: INTEGER AS userid,
+                'TOOTAJA' AS doc_type_id,
+                (properties-&gt;&gt;'pank'):: TEXT AS pank,
+                a.tp
+                FROM libs.asutus a 
+                where id = $1</sql>
+    <sqlAsNew>SELECT
+                  $1 :: INTEGER            AS id,
+                  $2 :: INTEGER            AS userid,
+                  'TOOTAJA'               AS doc_type_id,
+                  '' :: VARCHAR(20)     AS regkood,
+                  '' :: VARCHAR(254)    AS nimetus,
+                  'ISIK' :: VARCHAR(20)   AS omvorm,
+                  NULL :: TEXT            AS aadress,
+                  NULL :: TEXT            AS kontakt,
+                  NULL :: VARCHAR(254)    AS tel,
+                  NULL :: VARCHAR(254)    AS faks,
+                  NULL :: VARCHAR(254)    AS email,
+                  NULL :: TEXT            AS muud,
+                  '800699' :: VARCHAR(20) AS tp,
+                  0 :: INTEGER            AS staatus,
+                  NULL :: TEXT            AS pank,
+                  true::boolean           AS is_tootaja,
+                  NULL :: TEXT            AS mark</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: varchar(20) AS aa,
+                $2 :: INTEGER            AS userid
+                FROM libs.asutus a,
+                      json_array_elements((a.properties -&gt; 'asutus_aa') :: JSON) AS e(element)
+                WHERE a.id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>asutus_aa</alias>
+  </select>
+  <select>
+    <sql>SELECT * from palk.cur_toolepingud t
+                WHERE t.parentid = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>tooleping</alias>
+  </select>
+  <select>
+    <sql>select 
+                    liik_::varchar(20),
+                    tund_::varchar(20),
+                    maks_::varchar(20),
+                    id,
+                    parentid,
+                    lepingid,
+                    libid,
+                    summa,
+                    case WHEN not empty(percent_::INTEGER)
+                        THEN 'JAH'
+                      ELSE 'EI' END :: VARCHAR(5) AS percent_,
+                    CASE WHEN empty(tulumaks::INTEGER)
+                        THEN 'JAH'
+                      ELSE 'EI' END :: VARCHAR(5) AS tulumaks_,                    tulumaks,
+                    tulumaar,
+                    status,
+                    muud,
+                    alimentid,
+                    tunnus,
+                    amet::varchar(20),
+                    osakond::varchar(20),
+                    osakondid,
+                    tund,
+                    liik,
+                    maks,
+                    asutusest,
+                    round,
+                    tululiik,
+                    minsots,
+                    rekvid,
+                    kood::varchar(20) as kood,
+                    nimetus::varchar(254) as nimetus                     
+                    from palk.cur_palk_kaart pk
+                    WHERE pk.parentid = $1 --asutus_id
+                    AND pk.rekvid IN (SELECT rekvid
+                                           FROM ou.userid u
+                                           WHERE u.id = $2)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>palk_kaart</alias>
+  </select>
+  <select>
+    <sql>select * from palk.get_taotlus_mvt_data($1, (select rekvid from ou.userid where id = $2)::integer)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>taotlus_mvt</alias>
+  </select>
+  <select>
+    <sql>select sum(p.summa) as summa,
+                    p.isik,
+                    p.amet
+                    from palk.cur_used_mvt p
+                    where p.isikid = $1
+                    and month(alg_kpv) &lt;= $2
+                    and month(lopp_kpv) &gt;= $2
+                    and year(alg_kpv) = $3 
+                    group by isik, amet</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>curUsed_mvt</alias>
+  </select>
+  <select>
+    <sql>SELECT a.id 
+                    FROM libs.asutus a
+                    WHERE  RTRIM(LTRIM(a.regkood)) = RTRIM(LTRIM($1)) order by id desc limit 1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_asutus</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from palk.com_tootajad a 
+        where rekvid = $1</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_asutus($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_asutus($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>regkood,nimetus</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

@@ -1,0 +1,137 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql />
+    <alias />
+  </grid>
+  <select>
+    <sql>select l.id, 
+                l.rekvid, 
+                l.kood, 
+                l.nimetus, 
+                l.muud, 
+                l.status, 
+                l.library, 
+                $2::integer as userid, 
+                $1::integer as rekv_id,
+                'EEL_CONFIG' as doc_type_id
+                from libs.library l 
+                where l.library = 'KASSAKONTOD'</sql>
+    <sqlAsNew>select  
+                    $1::integer as id , 
+                    $2::integer as userid, 
+                    'EEL_CONFIG' as doc_type_id,
+                    null::text as  kood,
+                    null::integer as rekvid,
+                    null::text as nimetus,
+                    'KASSAKONTOD'::text as library,
+                    0::integer as status,
+                    null::text as muud</sqlAsNew>
+    <query />
+    <multiple>true</multiple>
+    <alias>kassa_kontod</alias>
+  </select>
+  <select>
+    <sql>select l.id, 
+                l.rekvid, 
+                l.kood, 
+                l.nimetus, 
+                l.muud, 
+                l.status, 
+                l.library, 
+                $2::integer as userid, 
+                $1::integer as rekv_id,
+                'EEL_CONFIG' as doc_type_id
+                from libs.library l 
+                where l.library = 'KASSAKULUD'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kassa_kulud</alias>
+  </select>
+  <select>
+    <sql>select l.id, 
+                l.rekvid, 
+                l.kood, 
+                l.nimetus, 
+                l.muud, 
+                l.status, 
+                l.library, 
+                $2::integer as userid, 
+                $1::integer as rekv_id,
+                'EEL_CONFIG' as doc_type_id
+                from libs.library l 
+                where l.library = 'KULUKONTOD'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kulu_kontod</alias>
+  </select>
+  <select>
+    <sql>select l.id, 
+                l.rekvid, 
+                l.kood, 
+                l.nimetus, 
+                l.muud, 
+                l.status, 
+                l.library, 
+                $2::integer as userid, 
+                $1::integer as rekv_id,
+                'EEL_CONFIG' as doc_type_id
+                from libs.library l 
+                where l.library = 'KASSATULUD'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kassa_tulud</alias>
+  </select>
+  <select>
+    <sql>select l.id, 
+                l.rekvid, 
+                l.kood, 
+                l.nimetus, 
+                l.muud, 
+                l.status, 
+                l.library, 
+                $2::integer as userid, 
+                $1::integer as rekv_id,
+                'EEL_CONFIG' as doc_type_id
+                from libs.library l 
+                where l.library = 'TULUKONTOD'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>tulu_kontod</alias>
+  </select>
+  <selectAsLibs>
+    <sql />
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select eelarve.sp_salvesta_eel_config($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,library</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

@@ -1,0 +1,96 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT  d.id,
+                        d.rekvid,
+                        d.dok,
+                        d.selg::varchar(254),
+                        d.deebet,
+                        d.kreedit,
+                        d.summa,
+                        d.tegev,
+                        d.allikas,
+                        d.rahavoog,
+                        d.artikkel,
+                        d.lisa_d,
+                        d.lisa_k,
+                        d.lausend
+                    FROM cur_doklausend d
+                    WHERE (d.rekvId = $1 or d.rekvid is null)</sql>
+    <alias>curDoklausend</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                    d.id,
+                    u.id as userid,
+                    d.rekvId,
+                    d.dok,
+                    d.selg,
+                    d.muud,
+                    d.status
+                    FROM docs.doklausheader d
+                    INNER JOIN docs.doklausend d1 ON d1.parentId = d.id
+                    INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                    WHERE d.id = $1</sql>
+    <sqlAsNew>SELECT
+                          $1 :: INTEGER        AS id,
+                          $2 :: INTEGER        AS userid,
+                          NULL :: INTEGER     AS rekvid,
+                          NULL :: VARCHAR(50) AS dok,
+                          NULL :: TEXT        AS selg,
+                          NULL :: TEXT        AS muud,
+                          1 :: INTEGER        AS status</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT
+                      d1.id,
+                      $2 :: INTEGER   AS userid,
+                      d1.*
+                    FROM docs.doklausend AS d1
+                      INNER JOIN docs.doklausheader d ON d.id = d1.parentId
+                      INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                    WHERE d1.parentid = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select docs.sp_salvesta_doklausend($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from docs.sp_delete_doklausend($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>selg</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

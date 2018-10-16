@@ -1,0 +1,59 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      qry.rekv_id,
+                      qry.asutus_id,
+                      qry.konto,
+                      l.nimetus,
+                      qry.alg_saldo,
+                      qry.deebet,
+                      qry.kreedit,
+                      (qry.alg_saldo + qry.deebet - qry.kreedit) as lopp_saldo,
+                      a.regkood,
+                      a.nimetus as asutus,
+                      a.tp
+                    FROM docs.kaibeasutusandmik($1::text, $2::integer, $3::date, $4::date, $5::integer) qry
+                      INNER JOIN com_asutused a on a.id = qry.asutus_id  
+                      INNER JOIN com_kontoplaan l ON l.kood = qry.konto
+                      WHERE (qry.alg_saldo &lt;&gt; 0 or qry.deebet &lt;&gt; 0 or qry.kreedit &lt;&gt; 0)</sql>
+    <alias>kaibeasutusandmik_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

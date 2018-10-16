@@ -1,0 +1,119 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select id, pad::varchar(120), bar::varchar(20), idx, name::varchar(120), eesti::varchar(120), vene::varchar(120), proc, groups, modules,users, level,message::varchar(120), keyshortcut::varchar(120), $1 as rekvid
+                        from ou.cur_menu m</sql>
+    <alias>curMenu</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+               'MENU' as doc_type_id,
+               $2::integer as userid,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('EELARVE' :: TEXT)            AS is_eelarve,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('POHIVARA' :: TEXT)           AS is_pv,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('RAAMA' :: TEXT)              AS is_raama,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('EELPROJ' :: TEXT)            AS is_eelproj,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('PALK' :: TEXT)               AS is_palk,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('LADU' :: TEXT)               AS is_ladu,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('HOOLDEKODU' :: TEXT)         AS is_hooldekodu,
+              (m.properties -&gt; 'modules') @&gt; to_jsonb('REKLMAKS' :: TEXT)         AS is_reklmaks,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('KASUTAJA' :: TEXT)            AS is_kasutaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('PEAKASUTAJA' :: TEXT)         AS is_peakasutaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('ADMIN' :: TEXT)               AS is_admin,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('VAATLEJA' :: TEXT)             AS is_vaatleja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('ASUTUSTE_KORRALDAJA' :: TEXT) AS is_asutuste_korraldaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_KOOSTAJA' :: TEXT)        AS is_eel_koostaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ALLKIRJASTAJA' :: TEXT)   AS is_eel_allkirjastaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ESITAJA' :: TEXT)         AS is_eel_esitaja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_AKTSEPTERJA' :: TEXT)     AS is_eel_aktsepterja,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_MAKSUHALDUR' :: TEXT)    AS is_rekl_maksuhaldur,
+              (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_ADMINISTRAATOR' :: TEXT) AS is_rekl_administraator,
+              m.properties -&gt;&gt; 'proc'                                               AS proc,
+              (m.properties -&gt;&gt; 'name')::varchar(120)                                               AS name,
+              (m.properties -&gt;&gt; 'eesti')::varchar(120)                                              AS eesti,
+              (m.properties -&gt;&gt; 'vene')::varchar(120)                                               AS vene,
+              (m.properties -&gt;&gt; 'level') :: INTEGER                                 AS level,
+              (m.properties-&gt;&gt;'keyshortcut')::varchar(120) as keyshortcut,
+              m.status,
+              m.pad::varchar(120),
+              m.bar::varchar(120),
+              m.idx,
+              m.id
+            FROM ou.menupohi m
+            WHERE m.id = $1</sql>
+    <sqlAsNew>SELECT                      
+                    $1 :: INTEGER        AS id,
+                    $2 :: INTEGER        AS userid,
+                    'MENU'               AS doc_type_id,
+                    false as is_eelarve,
+                    false as is_pv,
+                    false as is_raama,
+                    false as is_eelproj,
+                    false as is_palk,
+                    false as is_ladu,
+                    false as is_hooldekodu,
+                    false as is_reklmaks,
+                    false as is_kasutaja,
+                    false as is_peakasutaja,
+                    false as is_admin,
+                    false as is_vaatleja,
+                    false as is_asutuste_korraldaja,
+                    false as is_eel_koostaja,
+                    false as is_eel_allkirjastaja,
+                    false as is_eel_esitaja,
+                    false as is_eel_aktsepterja,
+                    false as is_rekl_maksugaldur,
+                    false as is_rekl_administraator,
+                    null::text as proc,
+                    null::varchar(120) as name,
+                    null::varchar(120) as eesti,
+                    null::varchar(120) as vene,
+                    1 as level,
+                    null::varchar(120) as pad,
+                    null::varchar(120) as bar,
+                    null::varchar(120) as keyshortcut,
+                    0 as idx,
+                    'active' as status</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql>SELECT menu.*
+                        FROM get_menu($1 :: TEXT [], $2 :: TEXT [])  menu
+                        ORDER BY idx</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select ou.sp_salvesta_menupohi($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from ou.sp_delete_menupohi($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

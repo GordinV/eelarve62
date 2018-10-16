@@ -1,0 +1,58 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      sum(deebet)
+                        FILTER (WHERE korr_konto IS NULL) OVER (
+                        PARTITION BY rekv_id, konto ) AS alg_saldo,
+                      CASE WHEN korr_konto IS NOT NULL
+                        THEN deebet
+                      ELSE 0 END                      AS deebet,
+                      kreedit,
+                      sum(deebet - kreedit)
+                      OVER (
+                        PARTITION BY rekv_id, konto ) AS lopp_saldo,
+                      rekv_id,
+                      konto,
+                      korr_konto                    
+                    FROM docs.pearaamat($1::text, $2::date, $3 :: DATE, $4::integer)</sql>
+    <alias>pearaamat_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

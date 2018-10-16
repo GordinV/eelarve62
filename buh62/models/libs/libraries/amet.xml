@@ -1,0 +1,104 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select * from cur_ametid a
+            where (a.rekvId = $1 or a.rekvid is null)</sql>
+    <alias>curAmetid</alias>
+  </grid>
+  <select>
+    <sql>select l.id, l.rekvid, 
+                l.kood::varchar(20) as kood, 
+                l.nimetus::varchar(254) as nimetus, 
+                l.muud, 
+                l.status, 
+                l.library::varchar(20) as library,
+                $2::integer as userid, 'AMET' as doc_type_id,
+                (l.properties:: JSONB -&gt;&gt; 'osakondid') :: INTEGER AS osakondId,
+                (l.properties:: JSONB -&gt;&gt; 'kogus') :: numeric(18,2) AS kogus,
+                (l.properties:: JSONB -&gt;&gt; 'palgamaar') ::integer AS palgamaar,
+                (l.properties:: JSONB -&gt;&gt; 'tunnusid') ::integer AS tunnusId
+                from libs.library l 
+                where l.id = $1</sql>
+    <sqlAsNew>select  $1::integer as id , 
+            $2::integer as userid, 
+            'AMET' as doc_type_id,
+            null::varchar(20) as  kood,
+            0::integer as rekvid,
+            null::varchar(254) as nimetus,
+            'AMET'::varchar(20) as library,
+            0::integer as status,
+            null::integer as osakondId,
+            null::numeric(18,2) as kogus,
+            null::integer as palgamaar,
+            null::integer as tunnusId,
+            null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT
+              tmpl.id,
+              tmpl.parentid,
+              tmpl.libid,
+              tmpl.summa,
+              tmpl.percent_,
+              tmpl.tulumaks,
+              tmpl.tulumaar,
+              tmpl.tunnus,
+              tmpl.amet,
+              tmpl.kood :: VARCHAR(20),
+              tmpl.nimetus :: VARCHAR(254),
+              tmpl.liik,
+              tmpl.tund,
+              tmpl.maks,
+              tmpl.asutusest,
+              tmpl.tululiik,
+              tmpl.liik_ :: VARCHAR(20),
+              tmpl.tund_ :: VARCHAR(20),
+              tmpl.maks_ :: VARCHAR(20),
+              $2::integer as userid
+            from palk.cur_palk_tmpl tmpl
+            where parentid = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from com_ametid l
+        where  l.rekvId = $1</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_amet($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,nimetus,osakondid</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

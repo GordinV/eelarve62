@@ -1,0 +1,51 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql />
+    <alias />
+  </grid>
+  <select>
+    <sql />
+    <alias />
+  </select>
+  <selectAsLibs>
+    <sql>SELECT
+              id,
+              trim(arve)::varchar(20)    AS kood,
+              trim(nimetus)::varchar(120) AS nimetus,
+              aa.default_,
+              aa.konto
+            FROM ou.aa aa
+            WHERE (parentid = $1 OR aa.parentid IS NULL)
+                  AND kassa = 1
+            ORDER BY default_ DESC</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql />
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+</VFPData>

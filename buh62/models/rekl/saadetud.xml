@@ -1,0 +1,46 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                          d.*
+                        FROM cur_saadetud d
+                        WHERE d.rekvId = $1
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+    <alias>curSaadetud</alias>
+  </grid>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql />
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select * from sp_execute_task($1::integer, $2::JSON, $3::TEXT )</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

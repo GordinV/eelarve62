@@ -1,0 +1,114 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select j.* 
+            from cur_journal j
+            where  j.rekvId in (select rekv_id from get_asutuse_struktuur($1))
+            and coalesce(docs.usersRigths(j.id, 'select', $2),true)</sql>
+    <alias>curJournal</alias>
+  </grid>
+  <select>
+    <sql>select d.id, $2::integer as userid, d.docs_ids, (to_char(created,'DD.MM.YYYY HH:MM:SS'))::text as created, 
+                (to_char(lastupdate,'DD.MM.YYYY HH:MM:SS'))::text as lastupdate, d.bpm, 
+                 trim(l.nimetus) as doc, trim(l.kood) as doc_type_id, 
+                 trim(s.nimetus) as status, d.status as doc_status,
+                 jid.number as number, 
+                 j.rekvId, j.kpv as kpv, j.asutusid,  trim(j.dok)::varchar(120) as dok, j.selg, j.muud, j.objekt,
+                 (select sum(j1.summa) as summa from docs.journal1 as j1 where parentid = j.id) as summa, 
+                 asutus.regkood, trim(asutus.nimetus) as asutus,
+                 u.ametnik as kasutaja
+                 from docs.doc d 
+                 inner join libs.library l on l.id = d.doc_type_id 
+                 inner join docs.journal j on j.parentId = d.id 
+                 inner join ou.userid u on u.id = $2::integer 
+                 left outer join docs.journalid jid on j.Id = jid.journalid 
+                 left outer join libs.library s on s.library = 'STATUS' and s.kood = d.status::text
+                 left outer join libs.asutus as asutus on asutus.id = j.asutusId 
+                 where d.id = $1</sql>
+    <sqlAsNew>select $1::integer as id, 
+                    to_char(now(), 'DD.MM.YYYY HH:MM:SS')::text as created, 
+                    to_char(now(), 'DD.MM.YYYY HH:MM:SS')::text as lastupdate,            
+                    null::text[] as bpm,
+                    trim(l.nimetus) as doc, trim(l.kood) as doc_type_id,
+                    trim(s.nimetus) as status, 0 as doc_status, 
+                    null::integer as number,  
+                    null::integer as rekvId,  
+                    now()::date as kpv, 
+                    null::integer as asutusid, 
+                    null::varchar(120) as dok, 
+                    null::text as selg, 
+                    null::text as muud, 
+                    null::varchar(20) as objekt,
+                    0::numeric as summa,  
+                    null::varchar(20) as regkood, 
+                    null::varchar(254) as asutus ,
+                    null::varchar(120) as kasutaja
+                    from libs.library l,   libs.library s, ou.userid u
+                    where l.library = 'DOK' and l.kood = 'JOURNAL'
+                    and u.id = $2::integer 
+                    and s.library = 'STATUS' and s.kood = '0'</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>select j1.*, $2::integer as userid ,
+                    1::numeric as kuurs, 
+                    'EUR'::varchar(20) as valuuta
+                    from docs.journal1 as j1 
+                    inner join docs.journal j on j.id = j1.parentId 
+                    inner join ou.userid u on u.id = $2::integer 
+                    where j.parentid = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <select>
+    <sql>select rd.id, $2::integer as userid, trim(l.kood) as doc_type, trim(l.nimetus) as name  from docs.doc d  left outer join docs.doc rd on rd.id in (select unnest(d.docs_ids))  left outer join libs.library l on rd.doc_type_id = l.id  inner join ou.userid u on u.id = $2::integer  where d.id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>relations</alias>
+  </select>
+  <select>
+    <sql>select * from libs.asutus where regkood = $1 order by staatus limit </sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>validate_asutus</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select docs.sp_salvesta_journal($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from docs.sp_delete_journal($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kpv,selg,summa</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql>update docs.doc set status = 1 where id = $1</sql>
+    <alias>registrateDoc</alias>
+  </register>
+  <endProcess>
+    <sql>update docs.doc set status = 2 where id = $1</sql>
+    <alias>end</alias>
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

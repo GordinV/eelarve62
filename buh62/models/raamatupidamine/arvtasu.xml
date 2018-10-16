@@ -1,0 +1,86 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT * 
+                    FROM cur_arvtasud a
+                    WHERE (a.rekvId = $1 OR a.rekvid IS NULL)</sql>
+    <alias>curArvTasud</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  a.id,  
+                  $2 :: INTEGER                                       AS userid,
+                  a.rekvid,
+                  a.doc_arv_id,
+                  a.doc_tasu_id,
+                  a.kpv,
+                  a.summa,
+                  a.dok,
+                  a.pankkassa,
+                  a.muud,
+                  (case when a.pankkassa = 3 then 'JOURNAL' when a.pankkassa = 1 then 'MK' when a.pankkassa = 2 then 'KASSA' end)::text as dok_type,
+                  (case when a.pankkassa = 3 then j.number::text when a.pankkassa = 1 then m.number when a.pankkassa = 2 then k.number end)::text as number,
+                  coalesce(v.kuurs,1)::numeric(12,4) as kuurs, 
+                  coalesce(v.valuuta,'EUR')::varchar(20) as valuuta
+                FROM docs.arvtasu a
+                LEFT OUTER JOIN docs.journalid j on j.journalid = a.doc_tasu_id
+                LEFT OUTER JOIN docs.mk m on m.id = a.doc_tasu_id
+                LEFT OUTER JOIN docs.korder1 k on k.id = a.doc_tasu_id
+                LEFT JOIN docs.dokvaluuta1 v ON a.id = v.dokid AND v.dokliik = array_position((enum_range(NULL :: DOK_VALUUTA)), 'arvtasu')
+                WHERE a.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1::integer as id,
+                      $2 :: INTEGER                                       AS userid,
+                      null::integer as rekvid,
+                      null::integer as doc_arv_id,
+                      null::integer as doc_tasu_id,
+                      now()::date as kpv,
+                      0::numeric(14,2) as summa,
+                      null::text as dok,
+                      0 as pankkassa,
+                      null::text as muud,
+                      null::text as dok_type,
+                      null::text as number,
+                      1::numeric(12,4) as kuurs,
+                      'EUR'::varchar(20) as valuuta</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select docs.sp_salvesta_arvtasu($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from docs.sp_delete_arvtasu($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>doc_arv_id,summa</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

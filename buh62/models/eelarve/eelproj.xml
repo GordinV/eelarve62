@@ -1,0 +1,72 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                          d.*
+                        FROM cur_eelproj d
+                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1))</sql>
+    <alias>curEelproj</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                      e.id,
+                      $2                                                  AS userid,
+                      e.rekvid,
+                      e.aasta,
+                      e.kuu,
+                      e.kinnitaja,
+                      e.muud,
+                      e.status,                    
+                      (enum_range(NULL :: DOK_STATUS)) [e.status] :: TEXT AS dok_status
+                    FROM eelarve.eelproj e
+                    WHERE e.id = $1</sql>
+    <sqlAsNew>SELECT 
+                      $1 :: INTEGER                                 AS id,
+                      $2 :: INTEGER                                 AS userid,
+                      0::integer as rekvid,
+                      extract(year from current_date)::integer as aasta,
+                      0::integer as kuu,
+                      $2::integer as kinnitaja,
+                      null::text as muud,
+                      1::integer as status,
+                      'new' as dok_status</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select eelarve.sp_salvesta_eelproj($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from eelarve.sp_delete_eelproj($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>aasta,rekvid,kinnitaja</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select error_code, result, error_message from sp_execute_task($1::integer, $2::JSON, $3::TEXT )</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

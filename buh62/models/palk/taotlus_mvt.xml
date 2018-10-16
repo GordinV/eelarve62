@@ -1,0 +1,100 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select *, $2::integer as userId
+            from palk.get_taotlus_mvt_data($1, (select rekvid from ou.userid where id = $2)::integer)</sql>
+    <alias>curTaotlus_mvt</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  $2 :: INTEGER            AS userid,
+                 'TAOTLUS_MVT' AS doc_type_id,
+                  p.id,
+                  p.lepingid,
+                  p.kpv,
+                  p.alg_kpv,
+                  p.lopp_kpv,
+                  p.summa,
+                  p.status,
+                  p.muud,
+                  t.parentid
+                FROM palk.taotlus_mvt p
+                inner join palk.tooleping t on t.id = p.lepingid
+                WHERE p.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER        AS id,
+                      $2 :: INTEGER        AS userid,
+                     'TAOTLUS_MVT' AS doc_type_id,
+                      0 as id,
+                      0::integer as lepingid,
+                      now()::date as kpv,
+                      make_date(date_part('year', now())::INT, date_part('month', now())::INT, 1)::date as alg_kpv,
+                      make_date(date_part('year', now())::INT, 12, 31)::date as lopp_kpv,
+                      coalesce((select tulubaas 
+                        from palk.palk_config 
+                        where status &lt;&gt; 'deleted' 
+                        and rekvid in (select rekvid from ou.userid where id = $2) ),500)::numeric(12,2) as summa,
+                      1 as status,
+                      0::integer          as parentid,
+                      null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>select 
+                $1 as doc_id,
+                p.* 
+                from palk.palk_config p 
+                where status &lt;&gt; 'deleted' 
+                and rekvid in (select rekvid from ou.userid where id = $2)</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>palk_config</alias>
+  </select>
+  <select>
+    <sql>SELECT t.*, 
+                $2 as user_id 
+                from palk.isiku_mvt_taotlused t
+                WHERE t.isikid = $1</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>v_isiku_mvt_taotlused</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select palk.sp_salvesta_taotlus_mvt($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from palk.sp_delete_taotlus_mvt($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>lepingid,kpv,alg_kpv,lopp_kpv,summa</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

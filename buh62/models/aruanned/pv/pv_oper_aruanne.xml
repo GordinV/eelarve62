@@ -1,0 +1,62 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      p.kood          AS pvkood,
+                      p.nimetus       AS pvnimetus,
+                      po.kood,
+                      p.nimetus,
+                      case when po.liik in (1, 3, 5) then po.summa else 0::numeric(14,2) end as deebet,
+                      case when po.liik in (2, 4) then po.summa else 0::numeric(14,2) end as kreedit,
+                      po.kpv,
+                      g.nimetus as grupp,
+                      g.id as grupp_id,
+                      p.rekvid as rekv_id,
+                      p.properties::jsonb-&gt;&gt;'konto' as konto
+                    FROM libs.library p
+                      INNER JOIN cur_pv_oper po ON p.id = po.pv_kaart_id
+                      INNER JOIN libs.library g ON g.id = (p.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER
+                    WHERE p.library = 'POHIVARA'
+                      and p.rekvid = $3
+                      and po.kpv &gt;= $1
+                      and po.kpv &lt;= $2</sql>
+    <alias>pv_oper_aruanne_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

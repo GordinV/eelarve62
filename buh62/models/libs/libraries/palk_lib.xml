@@ -1,0 +1,106 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select l.id, l.kood, l.nimetus, l.tun5 as kehtiv,
+            coalesce((l.properties::JSONB -&gt;&gt; 'tululiik'),'')::varchar(20) as tululiik,  
+            coalesce((l.properties::JSONB -&gt;&gt; 'liik')::integer,1) as liik,
+            $2::integer as userId,
+            l.tun5 as is_arhiiv
+            from libs.library l
+            where l.library = 'PALK'
+            and l.status &lt;&gt; 3
+            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <alias>curPalklib</alias>
+  </grid>
+  <select>
+    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.status, l.library, l.tun1, l.tun5,
+                $2::integer as userid, 'PALK_LIB' as doc_type_id,
+                (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER as liik,
+                (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER as tund,
+                (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER as maks,
+                (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER as asutusest,
+                (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER as palgafond,
+                (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER as sots,
+                (l.properties::JSONB -&gt;&gt; 'round') :: numeric(12,4) as round,
+                (l.properties::JSONB -&gt;&gt; 'konto') :: varchar(20) as konto,
+                (l.properties::JSONB -&gt;&gt; 'korrkonto') :: varchar(20) as korrkonto,
+                (l.properties::JSONB -&gt;&gt; 'tunnusid') :: integer as tunnusId,
+                (l.properties::JSONB -&gt;&gt; 'elatis') :: integer as elatis,
+                (l.properties::JSONB -&gt;&gt; 'uuritus') :: varchar(20) as uuritus,
+                (l.properties::JSONB -&gt;&gt; 'proj') :: varchar(20) as proj,
+                (l.properties::JSONB -&gt;&gt; 'tegev') :: varchar(20) as tegev,
+                (l.properties::JSONB -&gt;&gt; 'allikas') :: varchar(20) as allikas,
+                (l.properties::JSONB -&gt;&gt; 'artikkel') :: varchar(20) as artikkel,
+                (l.properties::JSONB -&gt;&gt; 'tululiik') :: varchar(20) as tululiik,
+                l.muud                 
+                from libs.library l 
+                where l.id = $1</sql>
+    <sqlAsNew>select  $1::integer as id , 
+            null::integer as tun1, null::integer as tun5,
+            $2::integer as userid, 
+            'PALK_LIB' as doc_type_id,
+            null::text as  kood,
+            null::integer as rekvid,
+            null::text as nimetus,
+            'PALK'::text as library,
+            0::integer as status,
+            null::integer as liik,
+            null::integer as tund,
+            null::integer as maks,
+            null::integer as asutusest,
+            null::integer as palgafond,
+            null::integer as sots,
+            null::numeric(12,4) as round,
+            NULL::varchar(20) as konto,
+            NULL::varchar(20) as korrkonto,
+            null::integer as tunnusId,
+            null::integer as elatis,
+            null::varchar(20) as uuritus,
+            null::varchar(20) as proj,
+            null::varchar(20) as tegev,
+            null::varchar(20) as allikas,
+            null::varchar(20) as artikkel,
+            null::varchar(20) as tululiik,
+            null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from palk.com_palk_lib l
+        where  l.rekvId = $1</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_palk_lib($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,nimetus,library</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

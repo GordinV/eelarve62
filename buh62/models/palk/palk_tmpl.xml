@@ -1,0 +1,80 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select a.*, $2::integer as userId
+            from palk.cur_palk_tmpl a
+            where (rekvid = $1 or rekvid is null)</sql>
+    <alias>curPalkTmpl</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  $2 :: INTEGER            AS userid,
+                 'PALK_TMPL' AS doc_type_id,
+                  pk.id,
+                  pk.parentid,
+                  pk.libid,
+                  pk.summa,
+                  pk.percent_,
+                  pk.tulumaks,
+                  pk.tulumaar,
+                  pk.status,
+                  pk.muud,
+                  pk.tunnus   AS tunnus
+                FROM libs.library l
+                  INNER JOIN palk.palk_tmpl pk ON pk.libId = l.id
+                WHERE pk.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER        AS id,
+                      $2 :: INTEGER        AS userid,
+                      'PALK_TMPL'        AS doc_type_id,
+                      0 :: INTEGER        AS parentid,
+                      0 :: INTEGER        AS libid,
+                      0 :: NUMERIC(14, 4) AS summa,
+                      0 :: INTEGER        AS percent_,
+                      0 :: INTEGER        AS tulumaks,
+                      0 :: NUMERIC        AS tulumaar,
+                      1::integer        AS status,
+                      NULL :: TEXT        AS muud,
+                      0 :: INTEGER        AS alimentid,
+                      NULL :: VARCHAR(20) AS tunnus,
+                      0 :: INTEGER        AS minsots</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select palk.sp_salvesta_palk_tmpl($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from palk.sp_delete_palk_tmpl($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>libid,parentid,summa</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select error_code, result, error_message from palk.palk_kaart_from_tmpl($1, $2)</sql>
+    <alias>importTmpl</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

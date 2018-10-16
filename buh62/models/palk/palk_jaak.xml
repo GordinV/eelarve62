@@ -1,0 +1,54 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                          p.*,
+                          $2 as user_id
+                        FROM palk.cur_palk_jaak p
+                        WHERE p.rekvId in (select rekv_id from get_asutuse_struktuur($1))</sql>
+    <alias>curPalkJaak</alias>
+  </grid>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql />
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select palk.sp_calc_palgajaak($1::integer, $2::JSON)::integer as result</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print>
+    <sql>SELECT
+                          p.*,
+                          $2 as user_id
+                        FROM palk.print_palk_jaak p
+                        WHERE p.rekvId in (select rekv_id from get_asutuse_struktuur($1))</sql>
+    <alias>printPalkJaak</alias>
+  </print>
+</VFPData>

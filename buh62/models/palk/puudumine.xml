@@ -1,0 +1,90 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select a.*, $2::integer as userId
+            from palk.cur_puudumine a
+            where rekvid = $1</sql>
+    <alias>curPuudumine</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  $2 :: INTEGER            AS userid,
+                 'PUUDUMINE' AS doc_type_id,
+                  p.id,
+                  p.lepingid,
+                  p.libid,
+                  p.summa,
+                  p.kpv1,
+                  p.kpv2,
+                  p.paevad,
+                  p.puudumiste_liik::varchar(20),
+                  p.tyyp,
+                  p.status,
+                  p.muud,
+                  t.parentid
+                FROM palk.puudumine p
+                inner join palk.tooleping t on t.id = p.lepingid
+                WHERE p.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER        AS id,
+                      $2 :: INTEGER        AS userid,
+                      'PUUDUMINE'        AS doc_type_id,
+                      0::integer          as parentid,
+                      0 :: INTEGER        AS lepingid,
+                      0 :: INTEGER        AS libid,
+                      0 :: NUMERIC(14, 4) AS summa,
+                      now()::date as kpv1,
+                      now()::date as kpv2,
+                      0::integer as paevad,
+                      'PUHKUS'::varchar(20) as puudumiste_liik,
+                      0 as tyyp,
+                      1 as status,
+                      null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>select id, liik::varchar(20), eesti::varchar(120), vene::varchar(120) 
+                    from palk.com_puudumiste_tyyp</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>com_puudumised</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select palk.sp_salvesta_puudumine($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from palk.sp_delete_puudumine($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>puudumiste_liik,tyyp,lepingid,kpv1,kpv2</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select error_code, result, error_message from palk.sp_calc_puhkuse_paevad($1, $2)</sql>
+    <alias>calcPuhkusePaevad</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

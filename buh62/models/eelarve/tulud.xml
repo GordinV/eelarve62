@@ -1,0 +1,96 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                          d.*,
+                          'TULUD'::varchar(20) as liik
+                        FROM cur_tulud d
+                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1)) 
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+    <alias>curEelarve</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                    e.id,
+                    $2 AS userid,
+                    e.rekvid,
+                    e.aasta,
+                    e.kuu,
+                    e.summa,
+                    e.muud,
+                    e.kood1::varchar(20) as kood1 ,
+                    e.kood2::varchar(20) as kood2,
+                    e.kood3::varchar(20) as kood3,
+                    e.kood4::varchar(20) as kood4,
+                    e.kood5::varchar(20) as kood5,
+                    e.tunnus,
+                    e.is_parandus,
+                    coalesce(e.is_kulud,0)::integer as is_kulud,
+                    e.kpv  as kpv,
+                    'EUR' as valuuta,
+                    1::numeric as kuurs,
+                    (enum_range(NULL :: DOK_STATUS))[e.status]::varchar(20) as dok_status
+                    FROM eelarve.tulud e
+                    WHERE e.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER                                 AS id,
+                      $2 :: INTEGER                                 AS userid,
+                      null::integer as rekvid,
+                      extract(year from current_date)::integer as aasta,
+                      null::integer as kuu,
+                      0::numeric(12,2) as summa,
+                      null::text as muud,
+                      null::varchar(20) as kood1,
+                      null::varchar(20) as kood2,
+                      null::varchar(20) as kood3,
+                      null::varchar(20) as kood4,
+                      null::varchar(20) as kood5,
+                      null::date as kpv,
+                      null::varchar(20) as tunnus,
+                      'EUR'::varchar(20) as valuuta,
+                      1::numeric(12,4) as kuurs,
+                      'new' as dok_status,
+                      null::date as kpv,
+                      0 as is_paranadus,
+                      0 as is_kulud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select docs.sp_salvesta_eelarve($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from eelarve.sp_delete_eelarve($1, $2, 0)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>summa,kood5,aasta</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

@@ -1,0 +1,8 @@
+Parameter cWhere
+tcKood = '%'+ltrim(rtrim(fltrAllikad.kood))+'%'
+tcNimetus = '%'+ltrim(rtrim(fltrAllikad.nimetus))+'%'
+cQuery = 'curAllikad'
+use (cQuery) in 0 alias allikas_report1 nodata
+select allikas_report1
+=requery('allikas_report1')
+select allikas_report1

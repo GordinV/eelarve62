@@ -1,0 +1,93 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select $2::integer as userId,
+             o.*
+            FROM cur_objekt o 
+            WHERE o.rekvid = $1::integer</sql>
+    <alias>curObjekt</alias>
+  </grid>
+  <select>
+    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library, 
+                $2::integer as userid, 'OBJEKT' as doc_type_id,
+                (l.properties::jsonb-&gt;&gt;'parentid')::integer as parentid,
+                (l.properties::jsonb-&gt;&gt;'asutusid')::integer as asutusid,
+                (l.properties::jsonb-&gt;&gt;'nait02')::numeric as nait02,
+                (l.properties::jsonb-&gt;&gt;'nait03')::numeric as nait03,
+                (l.properties::jsonb-&gt;&gt;'nait04')::numeric as nait04,
+                (l.properties::jsonb-&gt;&gt;'nait05')::numeric as nait05,
+                (l.properties::jsonb-&gt;&gt;'nait06')::numeric as nait06,
+                (l.properties::jsonb-&gt;&gt;'nait07')::numeric as nait07,
+                (l.properties::jsonb-&gt;&gt;'nait08')::numeric as nait08,
+                (l.properties::jsonb-&gt;&gt;'nait09')::numeric as nait09,
+                (l.properties::jsonb-&gt;&gt;'nait10')::numeric as nait10,
+                (l.properties::jsonb-&gt;&gt;'nait11')::numeric as nait11,
+                (l.properties::jsonb-&gt;&gt;'nait14')::numeric as nait14,
+                (l.properties::jsonb-&gt;&gt;'nait15')::numeric as nait15
+                from libs.library l 
+                where l.id = $1</sql>
+    <sqlAsNew>select  $1::integer as id , 
+            $2::integer as userid, 
+            'OBJEKT' as doc_type_id,
+            null::text as  kood,
+            null::integer as rekvid,
+            null::text as nimetus,
+            'OBJEKT'::text as library,
+            null::integer as asutusid,
+            null::integer as parentid,            
+            null::numeric as nait02,
+            null::numeric as nait03,
+            null::numeric as nait04,
+            null::numeric as nait05,
+            null::numeric as nait06,
+            null::numeric as nait07,
+            null::numeric as nait08,
+            null::numeric as nait09,
+            null::numeric as nait10,
+            null::numeric as nait11,
+            null::numeric as nait14,
+            null::numeric as nait15,
+            0::integer as status,
+            null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from com_objekt l 
+        where (l.rekvId = $1 or l.rekvid is null) order by kood</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_objekt($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,nimetus,library</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

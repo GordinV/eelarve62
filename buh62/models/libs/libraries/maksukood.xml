@@ -1,0 +1,66 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select l.id, l.kood, l.nimetus,
+            $2::integer as userId
+            from libs.library l
+            where l.library = 'MAKSUKOOD'
+            and l.status &lt;&gt; 3
+            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <alias>curMaksukood</alias>
+  </grid>
+  <select>
+    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.status, l.library,                
+                l.muud                 
+                from libs.library l 
+                where l.id = $1</sql>
+    <sqlAsNew>select  $1::integer as id , 
+            $2::integer as userid, 
+            'MAKSUKOOD' as doc_type_id,
+            null::text as  kood,
+            null::integer as rekvid,
+            null::text as nimetus,
+            'PALK'::text as library,
+            0::integer as status,
+            null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select * from palk.com_maksukood l
+        where  (l.rekvId = $1 or l.rekvid is null)</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_library($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,nimetus,library</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

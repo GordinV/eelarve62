@@ -1,0 +1,77 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>  SELECT
+                        sum(deebet)
+                          FILTER (WHERE kpv is null) OVER (
+                          PARTITION BY rekv_id, asutus_id, konto ) AS alg_saldo,
+                        CASE WHEN kpv is not null
+                          THEN deebet
+                        ELSE 0 END                                 AS deebet,
+                        kreedit,
+                        sum(deebet - kreedit)
+                        OVER (
+                          PARTITION BY rekv_id, asutus_id, konto ) AS lopp_saldo,
+                        qryReport.kpv,
+                        qryReport.rekv_id,
+                        qryReport.asutus_id,
+                        qryReport.konto,
+                        qryReport.korr_konto,
+                        qryReport.dok,
+                        qryReport.number,
+                        qryReport.kood1,
+                        qryReport.kood2,
+                        qryReport.kood3,
+                        qryReport.kood4,
+                        qryReport.kood5,
+                        qryReport.proj,
+                        qryReport.tunnus,
+                        a.regkood, a.nimetus as asutus, a.tp, a.aadress,
+                        l.nimetus,
+                        r.nimetus as rekv_nimetus,
+                        r.parentid 
+                      FROM docs.kontoasutusandmik($1::text, $2 :: INTEGER, $3::date, $4 :: DATE, $5::integer) qryReport
+                      inner join libs.asutus a on a.id = qryReport.asutus_id
+                      inner join com_kontoplaan l on l.kood = qryReport.konto
+                      inner join com_rekv r on r.id = qryReport.rekv_id
+                      where qryReport.konto is not null</sql>
+    <alias>kontoasutusandmik_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

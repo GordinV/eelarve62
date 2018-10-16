@@ -1,0 +1,80 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                          d.*
+                        FROM cur_ettemaksud d
+                        WHERE d.rekvId = $1</sql>
+    <alias>curEttemaksud</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                      e.id,
+                      e.number AS number,
+                      e.rekvid,
+                      e.asutusid,
+                      e.muud   AS muud,
+                      e.kpv,
+                      e.doktyyp,
+                      e.summa,
+                      e.selg,
+                      e.journalid,
+                      e.staatus,
+                      e.dokid
+                    FROM rekl.ettemaksud e
+                      INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                      INNER JOIN libs.asutus a ON a.id = e.asutusid
+                    WHERE e.id = $1</sql>
+    <sqlAsNew>
+                SELECT
+                    $1 :: INTEGER                                  AS id,
+                    $2 :: INTEGER                                  AS userid,
+                  NULL :: INTEGER            AS number,
+                  NULL :: INTEGER            AS rekvid,
+                  NULL :: INTEGER            AS asutusid,
+                  NULL :: TEXT               AS muud,
+                  current_date               AS kpv,
+                  NULL :: REKL_ETTEMAKS_LIIK AS doktyyp,
+                  NULL :: TEXT               AS selg,
+                  0::numeric(12,2) as summa,
+                  'active' :: DOK_STATUS</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select rekl.sp_salvesta_ettemaksud($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from rekl.sp_delete_ettemaksud($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kpv,asutusid,summa,number,selg</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select * from sp_execute_task($1::integer, $2::JSON, $3::TEXT )</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql>update docs.doc set status = 1 where id = $1</sql>
+    <alias />
+  </register>
+  <endProcess>
+    <sql>update docs.doc set status = 2 where id = $1</sql>
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

@@ -1,0 +1,64 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select id, kood, nimetus,  $2::integer as userId
+            from libs.library l
+            where l.library = 'DOK'
+            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <alias>curDok</alias>
+  </grid>
+  <select>
+    <sql>select l.*, $2::integer as userid, 'DOCUMENT' as doc_type_id,
+                (l.properties::jsonb -&gt;&gt;'type')::text as type,
+                (l.properties::jsonb -&gt;&gt;'module')::text as module
+                from libs.library l 
+                where l.id = $1</sql>
+    <sqlAsNew>select  $1::integer as id , $2::integer as userid, 'DOCUMENT' as doc_type_id,
+            null::text as  kood,
+            null::integer as rekvid,
+            null::text as nimetus,
+            'DOK'::text as library,
+            null::text as muud,
+            '{&#34;type&#34;:&#34;library&#34;, &#34;module&#34;:[&#34;Libraries&#34;]}' as properties,
+            null::text as type,
+            null::text as module</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select id, trim(kood)::varchar(20) as kood, trim(nimetus)::varchar(254) as nimetus from libs.library where library = 'DOK' order by kood</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select libs.sp_salvesta_library($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kood,nimetus,library</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

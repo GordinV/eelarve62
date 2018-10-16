@@ -1,0 +1,89 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select t.*, $2::integer as userId
+            from palk.cur_palk_taabel t
+            where (t.rekvid = $1 or rekvid is null)</sql>
+    <alias>curTaabel1</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  $2 :: INTEGER            AS userid,
+                 'PALK_TAABEL' AS doc_type_id,
+                  p.id,
+                  p.lepingid,
+                  p.kuu,
+                  p.aasta,
+                  p.kokku,
+                  p.too,
+                  p.paev,
+                  p.ohtu,
+                  p.oo,
+                  p.tahtpaev,
+                  p.puhapaev,
+                  p.uleajatoo,
+                  p.status,
+                  p.muud,
+                  t.parentid
+                FROM palk.palk_taabel1 p
+                inner join palk.tooleping t on t.id = p.lepingid
+                WHERE p.id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER        AS id,
+                      $2 :: INTEGER        AS userid,
+                     'PALK_TAABEL' AS doc_type_id,
+                      0 as id,
+                      0::integer as lepingid,
+                      month(current_date)::integer as kuu,
+                      year(current_date)::integer as aasta,
+                      0::numeric(12,4) as kokku,
+                      0::numeric(12,4) as too,
+                      0::numeric(12,4) as paev,
+                      0::numeric(12,4) as ohtu,
+                      0::numeric(12,4) as oo,
+                      0::numeric(12,4) as tahtpaev,
+                      0::numeric(12,4) as puhapaev,
+                      0::numeric(12,4) as uleajatoo,
+                      1 as status,
+                      0::integer          as parentid,
+                      null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select palk.sp_salvesta_palk_taabel($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from palk.sp_delete_palk_taabel($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>lepingid,kuu,aasta</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select error_code, result, error_message from palk.gen_taabel1($1, $2::json)</sql>
+    <alias>genTaabel</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+</VFPData>

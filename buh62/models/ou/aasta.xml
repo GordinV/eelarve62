@@ -1,0 +1,67 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+              id,
+              kuu,
+              aasta,
+              CASE WHEN kinni = 1
+                THEN 'Jah'
+              ELSE 'Ei' END :: VARCHAR AS kinni,
+              CASE WHEN default_ = 1
+                THEN 'JAH'
+              ELSE 'EI' END :: VARCHAR AS default_
+            FROM ou.aasta Aasta
+            WHERE Aasta.rekvid = $1 
+            ORDER BY aasta, kuu</sql>
+    <alias>curAasta</alias>
+  </grid>
+  <select>
+    <sql />
+    <alias />
+  </select>
+  <selectAsLibs>
+    <sql>SELECT
+              id,
+              kuu,
+              aasta,
+              kinni,
+              default_
+            FROM ou.aasta aasta
+            WHERE Aasta.rekvid = $1 
+            ORDER BY default_ DESC</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql />
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select * from sp_execute_task($1::integer, $2::JSON, $3::TEXT )</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

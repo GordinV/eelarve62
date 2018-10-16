@@ -1,0 +1,105 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      $2 AS user_id,
+                      r.*
+                    FROM cur_rekv r
+                    WHERE r.status &lt;&gt; 3
+                          AND r.id IN (SELECT rekv_id
+                                       FROM get_asutuse_struktuur($1))</sql>
+    <alias>curRekv</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                'REKV' as doc_type_id,
+                 $2::integer as userid,
+                  r.id,
+                  r.parentid,
+                  r.nimetus,
+                  r.aadress,
+                  r.email,
+                  r.faks,
+                  r.haldus,
+                  r.juht,
+                  r.raama,
+                  r.kbmkood,
+                  r.muud,
+                  r.regkood,
+                  r.tel,
+                  ((r.properties-&gt;&gt;'arved')::jsonb-&gt;&gt;'tahtpaev')::integer as tahtpaev,
+                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'ftp')::varchar(120) as ftp,
+                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'login')::varchar(120) as login,
+                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'parool')::varchar(120) as parool                  
+                FROM ou.rekv r 
+                where id = $1</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER        AS id,
+                      $2 :: INTEGER        AS userid,
+                      'REKV'               AS doc_type_id,
+                      NULL :: INTEGER      AS parentid,
+                      NULL :: VARCHAR(20)  AS regkood,
+                      NULL :: VARCHAR(254) AS nimetus,
+                      NULL :: VARCHAR(20)  AS kbmkood,
+                      NULL :: TEXT         AS aadress,
+                      NULL :: TEXT         AS haldus,
+                      NULL :: VARCHAR(254) AS tel,
+                      NULL :: VARCHAR(254) AS faks,
+                      NULL :: VARCHAR(254) AS email,
+                      NULL :: VARCHAR(254) AS juht,
+                      NULL :: VARCHAR(254) AS raama,
+                      NULL :: TEXT         AS muud,
+                      null::integer as tahtpaev,
+                     NULL :: VARCHAR(120) AS ftp,
+                     NULL :: VARCHAR(120) AS login,
+                     NULL :: VARCHAR(120) AS parool</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT aa.* , 
+                kassa as kassapank 
+                FROM ou.Aa aa
+                WHERE Aa.parentid = $1</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>details</alias>
+  </select>
+  <selectAsLibs>
+    <sql>select id, nimetus::varchar(254), regkood::varchar(20), parentid from com_rekv</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select ou.sp_salvesta_rekv($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from ou.sp_delete_rekv($1::integer, $2::integer)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>regkood,nimetus</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

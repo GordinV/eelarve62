@@ -1,0 +1,50 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select * from cur_teenused a 
+         where a.rekvId = $1 
+         and docs.usersRigths(a.id, 'select', $2)
+         order by a.lastupdate desc</sql>
+    <alias>curTeenused</alias>
+  </grid>
+  <select>
+    <sql />
+    <alias />
+  </select>
+  <selectAsLibs>
+    <sql />
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql />
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>select error_code, result, error_message from docs.sp_delete_arv($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select docs.sp_kooperi_arv(?gnUser, ?tnId) as result</sql>
+    <alias>kooperiArv</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>
