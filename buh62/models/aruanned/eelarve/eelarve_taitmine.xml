@@ -1,0 +1,59 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      qryReport.rekv_id,  
+                      qryReport.artikkel,
+                      qryReport.tegev,
+                      qryReport.allikas,
+                      sum(eelarve_2)  AS eelarve_2,
+                      sum(taitmine_2) AS taitmine_2,
+                      sum(eelarve_1)  AS eelarve_1,
+                      sum(taitmine_1) AS taitmine_1,
+                      sum(eelarve_0)  AS eelarve_0,
+                      sum(taitmine_0) AS taitmine_0,
+                      a.nimetus :: VARCHAR(254),
+                      coalesce(a.is_kulud,false)::boolean as is_kulud
+                    FROM eelarve.eelarve_taitmine($1::integer, $2::integer, $3::integer) qryReport
+                      LEFT OUTER JOIN com_artikkel a ON a.kood :: TEXT = qryReport.artikkel :: TEXT
+                    GROUP BY qryReport.rekv_id, qryReport.artikkel, qryReport.tegev, qryReport.allikas, a.nimetus, a.is_kulud</sql>
+    <alias>eelarve_taitmine_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>
