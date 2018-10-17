@@ -1,6 +1,6 @@
 cd ..
 git reset --hard HEAD
 git pull
-git show HEAD --oneline > buh62/version
-git log FETCH_HEAD --oneline > buh62/updates
-sleep 10
+git show HEAD --oneline > c:/temp/buh60/version
+git log FETCH_HEAD --oneline > c:/temp/buh60/updates
+sleep 5
