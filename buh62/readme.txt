@@ -1,1 +1,1 @@
-echo "# eelarve62" >> README.mdgit initgit remote add eelarve62 https://github.com/GordinV/eelarve62.gitgit fetch eelarve62git checkout mastergit push -u origin master#git fetch#git diff
+echo "# eelarve62" >> README.mdgit initgit remote add eelarve62 https://github.com/GordinV/eelarve62.gitgit fetch eelarve62git checkout mastergit push -u origin master#git fetch#git diff test
