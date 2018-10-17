@@ -4,4 +4,7 @@ buh62/updates
 buh62/*.xl*
 buh62/*.dbf
 buh62/*.fpt
+buh62/*
+buh62/**/*
+
 
