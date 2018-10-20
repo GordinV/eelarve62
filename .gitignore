@@ -1,0 +1,10 @@
+buh62/buh50viga.log
+buh62/version
+buh62/updates
+buh62/*.xl*
+buh62/*.dbf
+buh62/*.fpt
+#buh62/*
+#buh62/**/*
+.gitignore
+
