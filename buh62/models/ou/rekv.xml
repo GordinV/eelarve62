@@ -66,6 +66,14 @@
     <multiple>false</multiple>
     <alias>details</alias>
   </select>
+  <select>
+    <sql>SELECT * 
+                FROM ou.config 
+                WHERE rekvid = $1</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>config</alias>
+  </select>
   <selectAsLibs>
     <sql>select id, nimetus::varchar(254), regkood::varchar(20), parentid from com_rekv</sql>
     <alias>selectAsLibs</alias>
