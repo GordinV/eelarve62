@@ -38,8 +38,8 @@
                   d.bpm,
                   trim(l.nimetus)                                     AS doc,
                   trim(l.kood)                                        AS doc_type_id,
-                  trim(s.nimetus)                                     AS status,
-                  d.status                                            AS doc_status,
+                  d.status                                            AS status,
+                  t.status                                            AS taotlus_status,
                   t.rekvid,
                   t.koostajaId,
                   t.ametnikId,
@@ -80,12 +80,13 @@
                       NULL                                                        AS bpm,
                       trim(l.nimetus)                                             AS doc,
                       trim(l.kood)                                                AS doc_type_id,
-                      trim(s.nimetus)                                             AS status,
-                      0                                                           AS doc_status,
+                      0::integer                                                           AS status,
+                      0                                                           AS taotlus_status,
                       0 as taotlus_status,
-                      docs.sp_get_number(u.rekvId, 'TAOTLUS', year(date()), NULL) AS number,
+                      docs.sp_get_number(u.rekvId, 'TAOTLUS', year(date()), NULL)::varchar(20) AS number,
                       NULL :: INTEGER                                             AS rekvId,
-                      $2 :: INTEGER                                             AS koostajaId,
+                      $2 :: INTEGER                                               AS koostajaId,
+                      u.ametnik :: VARCHAR(120)                                   AS koostaja,
                       NULL :: INTEGER                                             AS ametnikId,
                       NULL :: INTEGER                                             AS aktseptid,
                       now() :: DATE                                               AS kpv,
@@ -94,7 +95,6 @@
                       NULL :: INTEGER                                             AS allkiri,
                       NULL :: TEXT                                                AS muud,
                       NULL :: INTEGER                                             AS tunnus,
-                      NULL :: VARCHAR(120)                                        AS koostaja,
                       NULL :: VARCHAR(120)                                        AS esitaja,
                       null::varchar(120) as aktseptja,
                       0::numeric(12,2) as summa
@@ -107,7 +107,9 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>select $2::integer as userid, 
+    <sql>SELECT
+                  $2 :: INTEGER                                    AS userid,
+                  a.is_kulud,
                   t1.id,
                   t1.parentid,
                   t1.eelprojid,
@@ -124,9 +126,10 @@
                   t1.status,
                   t1.markused,
                   t1.muud,
-                  coalesce(left(t1.selg,254),'')::varchar(254) as selgrea
+                  coalesce(left(t1.selg, 254), '') :: VARCHAR(254) AS selgrea
                 FROM eelarve.taotlus1 t1
-                inner join eelarve.taotlus t on t.id = t1.parentid
+                  INNER JOIN eelarve.taotlus t ON t.id = t1.parentid
+                  LEFT OUTER JOIN com_artikkel a ON a.kood = t1.kood5
                 WHERE t.parentid = $1
                 ORDER BY kood1, kood2, kood5</sql>
     <query />
