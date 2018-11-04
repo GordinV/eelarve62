@@ -64,7 +64,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>puudumiste_liik,tyyp,lepingid,kpv1,kpv2</validate>
+    <validate>puudumiste_liik,tyyp,lepingid,kpv1,kpv2,paev,summa</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
