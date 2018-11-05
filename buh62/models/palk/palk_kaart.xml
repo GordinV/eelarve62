@@ -79,7 +79,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>libid,lepingid,summa</validate>
+    <validate>libid,lepingid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
@@ -101,4 +101,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>
