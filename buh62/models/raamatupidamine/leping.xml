@@ -104,8 +104,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql></sql>
-    <alias></alias>
+    <sql>select * from docs.sp_calc_viivised($1::integer, $2::JSON)</sql>
+    <alias>calcViivised</alias>
   </executeCommand>
   <register>
     <sql>update docs.doc set status = 1 where id = $1</sql>
