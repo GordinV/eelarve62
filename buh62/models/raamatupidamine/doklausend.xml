@@ -35,10 +35,10 @@
     <sqlAsNew>SELECT
                           $1 :: INTEGER        AS id,
                           $2 :: INTEGER        AS userid,
-                          NULL :: INTEGER     AS rekvid,
-                          NULL :: VARCHAR(50) AS dok,
-                          NULL :: TEXT        AS selg,
-                          NULL :: TEXT        AS muud,
+                          0 :: INTEGER     AS rekvid,
+                          '' :: VARCHAR(50) AS dok,
+                          '' :: TEXT        AS selg,
+                          '' :: TEXT        AS muud,
                           1 :: INTEGER        AS status</sqlAsNew>
     <query />
     <multiple>false</multiple>
