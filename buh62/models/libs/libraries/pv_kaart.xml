@@ -99,7 +99,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>kood,nimetus,library,gruppid</validate>
+    <validate>kood,nimetus,gruppid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
