@@ -55,6 +55,7 @@
                               0 :: NUMERIC                                                                AS volg,
                               NULL :: VARCHAR                                                             AS alus,
                               0                                                                           AS staatus,
+                              0                                                                           AS doc_status,
                               'KUU' :: VARCHAR(20)                                                        AS kord,
                               0 :: NUMERIC                                                                AS intress
                        FROM libs.library t,
@@ -96,7 +97,10 @@
     <alias>relations</alias>
   </select>
   <selectAsLibs>
-    <sql></sql>
+    <sql>SELECT *
+                   FROM rekl.com_asutus_rekl
+                   WHERE rekvid = $1
+                   ORDER BY nimetus</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
