@@ -6,5 +6,7 @@ buh62/*
 buh62/**/*
 buh62/
 buh62/config.dbf
+buh62/key.dbf
+buh62/key.fpt
 #.gitignore
 
