@@ -24,13 +24,12 @@
             null::integer as tun1, null::integer as tun2,
             $2::integer as userid, 
             'PVGRUPP' as doc_type_id,
-            null::text as  kood,
-            null::integer as rekvid,
-            null::text as nimetus,
+            ''::varchar(20) as  kood,
+            ''::varchar(254) as nimetus,
             'PVGRUPP'::text as library,
             0::integer as status,
-            NULL::varchar(20) as konto,
-            NULL::varchar(20) as kulum_konto,
+           ''::varchar(20) as konto,
+            ''::varchar(20) as kulum_konto,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
