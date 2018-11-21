@@ -1,12 +1,11 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                          d.*
-                        FROM palk.cur_palkoper d
-                        WHERE d.rekvId = $3
-                            and d.kpv &gt;= $1
-                            and d.kpv &lt;= $2</sql>
+    <sql>SELECT d.palk_liik :: VARCHAR(20) AS liik, nimetus, kpv, isik, summa, osakond, kood, isikid,osakondid
+                    FROM palk.cur_palkoper d
+                    WHERE d.rekvId = $3
+                      AND d.kpv &gt;= $1
+                      AND d.kpv &lt;= $2</sql>
     <alias>palk_oper</alias>
   </grid>
   <select></select>
