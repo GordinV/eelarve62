@@ -1,37 +1,33 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                      $2 AS user_id,
-                      u.*
+    <sql>SELECT $2 AS user_id, u.*
                     FROM ou.cur_userid u
-                    WHERE u.id IN (SELECT rekv_id
-                                       FROM get_asutuse_struktuur($1))</sql>
+                    WHERE u.id IN (SELECT rekv_id FROM get_asutuse_struktuur($1))</sql>
     <alias>curUserid</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  'USERID'                                                            AS doc_type_id,
-                  $2 :: INTEGER                                                        AS userid,
-                  u.id,
-                  u.rekvid,
-                  u.kasutaja,
-                  u.ametnik,
-                  u.muud,
-                  coalesce((u.roles -&gt;&gt; 'is_kasutaja') :: BOOLEAN, FALSE)::boolean           AS is_kasutaja,
-                  coalesce((u.roles -&gt;&gt; 'is_peakasutaja') :: BOOLEAN, FALSE)::boolean        AS is_peakasutaja,
-                  coalesce((u.roles -&gt;&gt; 'is_admin') :: BOOLEAN, FALSE)::boolean              AS is_admin,
-                  coalesce((u.roles -&gt;&gt; 'is_vaatleja') :: BOOLEAN, FALSE)::boolean              AS is_vaatleja,
-                  coalesce((u.roles -&gt;&gt; 'is_eel_koostaja') :: BOOLEAN, FALSE)::boolean        AS is_eel_koostaja,
-                  coalesce((u.roles -&gt;&gt; 'is_eel_allkirjastaja') :: BOOLEAN, FALSE)::boolean   AS is_eel_allkirjastaja,
-                  coalesce((u.roles -&gt;&gt; 'is_eel_esitaja') :: BOOLEAN, FALSE)::boolean         AS is_eel_esitaja,
-                  coalesce((u.roles -&gt;&gt; 'is_eel_aktsepterja') :: BOOLEAN, FALSE)::boolean     AS is_eel_aktsepterja,
-                  coalesce((u.roles -&gt;&gt; 'is_asutuste_korraldaja') :: BOOLEAN, FALSE)::boolean AS is_asutuste_korraldaja,
-                  coalesce((u.roles -&gt;&gt; 'is_rekl_administraator') :: BOOLEAN, FALSE)::boolean AS is_rekl_administraator,
-                  coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE)::boolean    AS is_rekl_maksuhaldur,
-                  (u.properties -&gt;&gt; 'email') :: VARCHAR(254)                          AS email
-                FROM ou.userid u
-                where id = $1</sql>
+    <sql>SELECT 'USERID'                                                                      AS doc_type_id,
+                     $2 :: INTEGER                                                                 AS userid,
+                     u.id,
+                     u.rekvid,
+                     u.kasutaja,
+                     u.ametnik,
+                     u.muud,
+                     coalesce((u.roles -&gt;&gt; 'is_kasutaja') :: BOOLEAN, FALSE) :: INTEGER            AS is_kasutaja,
+                     coalesce((u.roles -&gt;&gt; 'is_peakasutaja') :: BOOLEAN, FALSE) :: INTEGER         AS is_peakasutaja,
+                     coalesce((u.roles -&gt;&gt; 'is_admin') :: BOOLEAN, FALSE) :: INTEGER               AS is_admin,
+                     coalesce((u.roles -&gt;&gt; 'is_vaatleja') :: BOOLEAN, FALSE) :: INTEGER            AS is_vaatleja,
+                     coalesce((u.roles -&gt;&gt; 'is_eel_koostaja') :: BOOLEAN, FALSE) :: INTEGER        AS is_eel_koostaja,
+                     coalesce((u.roles -&gt;&gt; 'is_eel_allkirjastaja') :: BOOLEAN, FALSE) :: INTEGER   AS is_eel_allkirjastaja,
+                     coalesce((u.roles -&gt;&gt; 'is_eel_esitaja') :: BOOLEAN, FALSE) :: INTEGER         AS is_eel_esitaja,
+                     coalesce((u.roles -&gt;&gt; 'is_eel_aktsepterja') :: BOOLEAN, FALSE) :: INTEGER     AS is_eel_aktsepterja,
+                     coalesce((u.roles -&gt;&gt; 'is_asutuste_korraldaja') :: BOOLEAN, FALSE) :: INTEGER AS is_asutuste_korraldaja,
+                     coalesce((u.roles -&gt;&gt; 'is_rekl_administraator') :: BOOLEAN, FALSE) :: INTEGER AS is_rekl_administraator,
+                     coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE) :: INTEGER    AS is_rekl_maksuhaldur,
+                     (u.properties -&gt;&gt; 'email') :: VARCHAR(254)                                    AS email
+              FROM ou.userid u
+              WHERE id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER         AS id,
                       $2 :: INTEGER         AS userid,
@@ -40,31 +36,37 @@
                       NULL :: VARCHAR(20)  AS kasutaja,
                       NULL :: VARCHAR(254) AS ametnik,
                       NULL :: TEXT         AS muud,
-                      FALSE :: BOOLEAN     AS is_kasutaja,
-                      FALSE :: BOOLEAN     AS is_peakasutaja,
-                      FALSE :: BOOLEAN     AS is_admin,
-                      TRUE :: BOOLEAN     AS is_vaatleja,
-                      FALSE :: BOOLEAN     AS is_eel_koostaja,
-                      FALSE :: BOOLEAN     AS is_eel_allkirjastaja,
-                      FALSE :: BOOLEAN     AS is_eel_esitaja,
-                      FALSE :: BOOLEAN     AS is_eel_aktsepterja,
-                      FALSE :: BOOLEAN     AS is_asutuste_korraldaja,
-                      FALSE :: BOOLEAN     AS is_rekl_administrator,
-                      FALSE :: BOOLEAN     AS is_rekl_maksuhaldur,
-                      FALSE :: BOOLEAN     AS is_kasutaja,
+                      0 :: INTEGER     AS is_kasutaja,
+                      0 :: INTEGER     AS is_peakasutaja,
+                      0 :: INTEGER     AS is_admin,
+                      1 :: INTEGER     AS is_vaatleja,
+                      0 :: INTEGER     AS is_eel_koostaja,
+                      0 :: INTEGER     AS is_eel_allkirjastaja,
+                      0 :: INTEGER     AS is_eel_esitaja,
+                      0 :: INTEGER     AS is_eel_aktsepterja,
+                      0 :: INTEGER     AS is_asutuste_korraldaja,
+                      0 :: INTEGER     AS is_rekl_administrator,
+                      0 :: INTEGER     AS is_rekl_maksuhaldur,
+                      0 :: INTEGER     AS is_kasutaja,
                       NULL :: VARCHAR(254) AS email</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <select>
-    <sql>select distinct rekvid from ou.userid where kasutaja = $1</sql>
+    <sql>SELECT r.id, r.regkood, r.nimetus:: VARCHAR(254), r.parentid, u.id AS user_id
+              FROM ou.userid u
+                     INNER JOIN ou.rekv r ON r.id = u.rekvid
+              WHERE kasutaja = $1
+                AND r.status &lt;&gt; 3</sql>
     <query />
     <multiple>true</multiple>
     <alias>com_user_rekv</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from ou.cur_userid where rekvid = $1</sql>
+    <sql>SELECT *
+                   FROM ou.cur_userid
+                   WHERE rekvid = $1</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -72,7 +74,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from ou.sp_delete_userid($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM ou.sp_delete_userid($1 :: INTEGER, $2 :: INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
