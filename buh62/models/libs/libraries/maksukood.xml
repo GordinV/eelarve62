@@ -2,16 +2,16 @@
 <VFPData>
   <grid>
     <sql>select l.id, l.kood, l.nimetus,
-            $2::integer as userId
+            $2::integer as userId,
+            l.tun1, l.tun2, l.tun3, l.tun4, l.tun5
             from libs.library l
             where l.library = 'MAKSUKOOD'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+            and l.status &lt;&gt; 3</sql>
     <alias>curMaksukood</alias>
   </grid>
   <select>
     <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.status, l.library,                
-                l.muud                 
+                l.muud, l.tun1, l.tun2, l.tun3. l.tun4. l.tun5                
                 from libs.library l 
                 where l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
@@ -22,6 +22,12 @@
             null::text as nimetus,
             'PALK'::text as library,
             0::integer as status,
+            0 as tun1,
+            0 as tun2,
+            0 as tun3,
+            0 as tun4,
+            0 as tun5,
+            
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -63,4 +69,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>

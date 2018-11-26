@@ -6,8 +6,7 @@
             tun1, tun2, tun3, tun4, tun5
             from libs.library l
             where l.library = 'MAKSUKOOD'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+            and l.status &lt;&gt; 3</sql>
     <alias>curMaksukoodid</alias>
   </grid>
   <select>
@@ -70,4 +69,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>

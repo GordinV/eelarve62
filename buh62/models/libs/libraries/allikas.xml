@@ -4,8 +4,7 @@
     <sql>select id, kood, nimetus,  $2::integer as userId, muud
             from libs.library l
             where l.library = 'ALLIKAD'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+            and l.status &lt;&gt; 3</sql>
     <alias>curAllikad</alias>
   </grid>
   <select>

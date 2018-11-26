@@ -4,8 +4,7 @@
     <sql>select id, kood, nimetus,  $2::integer as userId
             from libs.library l
             where l.library = 'TULUDEALLIKAD'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+            and l.status &lt;&gt; 3</sql>
     <alias>curTuludeAllikad</alias>
   </grid>
   <select>
@@ -30,7 +29,7 @@
   <select>
     <sql>SELECT Library.id 
                     FROM libs.library Library 
-                    WHERE Library.library = 'TULUDEALLIKAD'   
+                    WHERE Library.library = 'ARTIKKEL'   
                     AND RTRIM(LTRIM(Library.kood)) = $1</sql>
     <query />
     <multiple>true</multiple>
