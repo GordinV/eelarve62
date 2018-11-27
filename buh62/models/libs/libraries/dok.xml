@@ -3,8 +3,7 @@
   <grid>
     <sql>select id, kood, nimetus,  $2::integer as userId
             from libs.library l
-            where l.library = 'DOK'
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+            where l.library = 'DOK'</sql>
     <alias>curDok</alias>
   </grid>
   <select>
@@ -61,4 +60,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>
