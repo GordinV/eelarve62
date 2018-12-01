@@ -1,46 +1,62 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, pad::varchar(120), bar::varchar(20), idx, name::varchar(120), eesti::varchar(120), vene::varchar(120), proc, groups, modules,users, level,message::varchar(120), keyshortcut::varchar(120), $1 as rekvid
-                        from ou.cur_menu m</sql>
+    <sql>SELECT id,
+                           pad::VARCHAR(120),
+                           bar::VARCHAR(20),
+                           idx,
+                           name::VARCHAR(120),
+                           eesti::VARCHAR(120),
+                           vene::VARCHAR(120),
+                           proc,
+                           groups,
+                           modules,
+                           users,
+                           level,
+                           message::VARCHAR(120),
+                           keyshortcut::VARCHAR(120),
+                           $1 AS rekvid
+                    FROM ou.cur_menu m
+                    ORDER BY m.idx</sql>
     <alias>curMenu</alias>
   </grid>
   <select>
     <sql>SELECT
-               'MENU' as doc_type_id,
-               $2::integer as userid,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('EELARVE' :: TEXT)            AS is_eelarve,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('POHIVARA' :: TEXT)           AS is_pv,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('RAAMA' :: TEXT)              AS is_raama,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('EELPROJ' :: TEXT)            AS is_eelproj,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('PALK' :: TEXT)               AS is_palk,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('LADU' :: TEXT)               AS is_ladu,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('HOOLDEKODU' :: TEXT)         AS is_hooldekodu,
-              (m.properties -&gt; 'modules') @&gt; to_jsonb('REKLMAKS' :: TEXT)         AS is_reklmaks,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('KASUTAJA' :: TEXT)            AS is_kasutaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('PEAKASUTAJA' :: TEXT)         AS is_peakasutaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('ADMIN' :: TEXT)               AS is_admin,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('VAATLEJA' :: TEXT)             AS is_vaatleja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('ASUTUSTE_KORRALDAJA' :: TEXT) AS is_asutuste_korraldaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_KOOSTAJA' :: TEXT)        AS is_eel_koostaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ALLKIRJASTAJA' :: TEXT)   AS is_eel_allkirjastaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ESITAJA' :: TEXT)         AS is_eel_esitaja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_AKTSEPTERJA' :: TEXT)     AS is_eel_aktsepterja,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_MAKSUHALDUR' :: TEXT)    AS is_rekl_maksuhaldur,
-              (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_ADMINISTRAATOR' :: TEXT) AS is_rekl_administraator,
-              m.properties -&gt;&gt; 'proc'                                               AS proc,
-              (m.properties -&gt;&gt; 'name')::varchar(120)                                               AS name,
-              (m.properties -&gt;&gt; 'eesti')::varchar(120)                                              AS eesti,
-              (m.properties -&gt;&gt; 'vene')::varchar(120)                                               AS vene,
-              (m.properties -&gt;&gt; 'level') :: INTEGER                                 AS level,
-              (m.properties-&gt;&gt;'keyshortcut')::varchar(120) as keyshortcut,
-              m.status,
-              m.pad::varchar(120),
-              m.bar::varchar(120),
-              m.idx,
-              m.id
-            FROM ou.menupohi m
-            WHERE m.id = $1</sql>
+                'MENU'                                                                AS doc_type_id,
+                $2::INTEGER                                                          AS userid,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('EELARVE' :: TEXT)            AS is_eelarve,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('POHIVARA' :: TEXT)           AS is_pv,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('RAAMA' :: TEXT)              AS is_raama,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('EELPROJ' :: TEXT)            AS is_eelproj,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('PALK' :: TEXT)               AS is_palk,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('LADU' :: TEXT)               AS is_ladu,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('HOOLDEKODU' :: TEXT)         AS is_hooldekodu,
+                (m.properties -&gt; 'modules') @&gt; to_jsonb('REKLMAKS' :: TEXT)           AS is_reklmaks,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('KASUTAJA' :: TEXT)            AS is_kasutaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('PEAKASUTAJA' :: TEXT)         AS is_peakasutaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('ADMIN' :: TEXT)               AS is_admin,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('VAATLEJA' :: TEXT)            AS is_vaatleja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('ASUTUSTE_KORRALDAJA' :: TEXT) AS is_asutuste_korraldaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_KOOSTAJA' :: TEXT)        AS is_eel_koostaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ALLKIRJASTAJA' :: TEXT)   AS is_eel_allkirjastaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_ESITAJA' :: TEXT)         AS is_eel_esitaja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('EEL_AKTSEPTERJA' :: TEXT)     AS is_eel_aktsepterja,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_MAKSUHALDUR' :: TEXT)    AS is_rekl_maksuhaldur,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('REKL_ADMINISTRAATOR' :: TEXT) AS is_rekl_administraator,
+                (m.properties -&gt; 'groups') @&gt; to_jsonb('LADU_KASUTAJA' :: TEXT)       AS is_ladu_kasutaja,
+                m.properties -&gt;&gt; 'proc'                                               AS proc,
+                (m.properties -&gt;&gt; 'name')::VARCHAR(120)                               AS name,
+                (m.properties -&gt;&gt; 'eesti')::VARCHAR(120)                              AS eesti,
+                (m.properties -&gt;&gt; 'vene')::VARCHAR(120)                               AS vene,
+                (m.properties -&gt;&gt; 'level') :: INTEGER                                 AS level,
+                (m.properties -&gt;&gt; 'keyshortcut')::VARCHAR(120)                        AS keyshortcut,
+                m.status,
+                m.pad::VARCHAR(120),
+                m.bar::VARCHAR(120),
+                m.idx,
+                m.id
+              FROM ou.menupohi m
+              WHERE m.id = $1</sql>
     <sqlAsNew>SELECT                      
                     $1 :: INTEGER        AS id,
                     $2 :: INTEGER        AS userid,
@@ -64,6 +80,7 @@
                     false as is_eel_aktsepterja,
                     false as is_rekl_maksugaldur,
                     false as is_rekl_administraator,
+                    false as is_ladu_kasutaja,
                     null::text as proc,
                     null::varchar(120) as name,
                     null::varchar(120) as eesti,
@@ -80,16 +97,17 @@
   </select>
   <selectAsLibs>
     <sql>SELECT menu.*
-                        FROM get_menu($1 :: TEXT [], $2 :: TEXT [])  menu
-                        ORDER BY idx</sql>
+                   FROM get_menu($1 :: TEXT [], $2 :: TEXT []) menu
+                   ORDER BY idx</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select ou.sp_salvesta_menupohi($1, $2, $3) as id</sql>
+    <sql>select ou.sp_salvesta_menupohi($1, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from ou.sp_delete_menupohi($1, $2)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM ou.sp_delete_menupohi($1, $2)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
