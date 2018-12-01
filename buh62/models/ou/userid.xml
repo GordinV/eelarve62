@@ -1,9 +1,10 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT $2 AS user_id, u.*
+    <sql>SELECT $2 AS user_id, u.id, u.asutus::varchar(254), u.kasutaja::varchar(254), u.ametnik::varchar(254),
+                    u.is_admin::integer, u.is_kasutaja::integer, u.is_peakasutaja::INTEGER
                     FROM ou.cur_userid u
-                    WHERE u.id IN (SELECT rekv_id FROM get_asutuse_struktuur($1))</sql>
+                    WHERE u.id IN (SELECT rekv_id FROM get_asutuse_struktuur($1::integer))</sql>
     <alias>curUserid</alias>
   </grid>
   <select>
@@ -25,6 +26,7 @@
                      coalesce((u.roles -&gt;&gt; 'is_asutuste_korraldaja') :: BOOLEAN, FALSE) :: INTEGER AS is_asutuste_korraldaja,
                      coalesce((u.roles -&gt;&gt; 'is_rekl_administraator') :: BOOLEAN, FALSE) :: INTEGER AS is_rekl_administraator,
                      coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE) :: INTEGER    AS is_rekl_maksuhaldur,
+                     coalesce((u.roles -&gt;&gt; 'is_ladu_kasutaja') :: BOOLEAN, FALSE) :: INTEGER    AS is_ladu_kasutaja,
                      (u.properties -&gt;&gt; 'email') :: VARCHAR(254)                                    AS email
               FROM ou.userid u
               WHERE id = $1</sql>
@@ -47,6 +49,7 @@
                       0 :: INTEGER     AS is_asutuste_korraldaja,
                       0 :: INTEGER     AS is_rekl_administrator,
                       0 :: INTEGER     AS is_rekl_maksuhaldur,
+                      0 :: INTEGER     AS is_ladu_kasutaja,
                       0 :: INTEGER     AS is_kasutaja,
                       NULL :: VARCHAR(254) AS email</sqlAsNew>
     <query />
