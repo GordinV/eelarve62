@@ -3,8 +3,8 @@
   <grid>
     <sql>SELECT j.*
                     FROM cur_journal j
-                    WHERE j.rekvId IN (SELECT rekv_id FROM get_asutuse_struktuur($1))
-                      AND coalesce(docs.usersRigths(j.id, 'select', $2), TRUE)</sql>
+                    WHERE j.rekvId IN (SELECT rekv_id FROM get_asutuse_struktuur($1::integer))
+                      AND coalesce(docs.usersRigths(j.id, 'select', $2::integer), TRUE)</sql>
     <alias>curJournal</alias>
   </grid>
   <select>
