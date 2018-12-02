@@ -73,7 +73,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select ou.sp_salvesta_userid($1, $2, $3) as id</sql>
+    <sql>select ou.sp_salvesta_userid($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
