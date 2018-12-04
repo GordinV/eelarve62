@@ -2,16 +2,23 @@
 <VFPData>
   <grid>
     <sql>SELECT n.id,
-                           coalesce(n.kood, '')            AS kood,
-                           coalesce(n.nimetus, '')         AS nimetus,
-                           $2::INTEGER                    AS userId,
-                           (n.properties::JSONB -&gt;&gt; 'grupp')::varchar(120) AS grupp,
+                           coalesce(n.kood, '')                            AS kood,
+                           coalesce(n.nimetus, '')                         AS nimetus,
+                           $2::INTEGER                                     AS userId,
+                           (n.properties::JSONB -&gt;&gt; 'grupp')::VARCHAR(120) AS grupp,
                            n.hind,
                            n.uhik,
-                           n.kogus
+                           coalesce(v.kogus, 0)                            AS kogus,
+                           coalesce(l.nimetus, '')::VARCHAR(254)           AS ladu
                     FROM libs.nomenklatuur n
+                           LEFT OUTER JOIN (SELECT sum(kogus) AS kogus, vara_id, ladu_id, rekv_id
+                                            FROM ladu.get_stock(current_date, NULL, NULL,
+                                                                NULL)
+                                            GROUP BY vara_id, ladu_id, rekv_id) v ON n.id = v.vara_id AND n.rekvid = v.rekv_id
+                           LEFT OUTER JOIN libs.library l ON l.id = v.ladu_id
                     WHERE (n.rekvId = $1 OR n.rekvid IS NULL)
-                      AND n.dok = 'VARA'
+                      AND
+                      n.dok = 'VARA'
                       AND n.status &lt;&gt; 3</sql>
     <alias>curVara</alias>
   </grid>
@@ -89,7 +96,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>kood,nimetus,gruppid,dok</validate>
+    <validate>kood,nimetus,grupp,dok</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
