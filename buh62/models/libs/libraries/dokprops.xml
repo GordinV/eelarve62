@@ -66,11 +66,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_dokprop($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_dokprop($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_dokprop($1, $2)</sql>
+    <sql>select error_code, result, error_message from libs.sp_delete_dokprop($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

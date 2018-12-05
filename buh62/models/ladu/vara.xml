@@ -80,9 +80,8 @@
   </select>
   <selectAsLibs>
     <sql>SELECT *
-                   FROM com_varad
+                   FROM ladu.com_varad
                    WHERE (rekvid = $1 OR rekvid IS NULL)
-                     AND status &lt;&gt; 3
                    ORDER BY kood</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
