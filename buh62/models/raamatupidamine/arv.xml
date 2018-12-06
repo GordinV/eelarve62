@@ -23,8 +23,8 @@
                            lausnr,
                            docs_ids
                     FROM cur_arved a
-                    WHERE a.rekvId = $1
-                      AND docs.usersRigths(a.id, 'select', $2)</sql>
+                    WHERE a.rekvId = $1::integer
+                      AND docs.usersRigths(a.id, 'select', $2::integer)</sql>
     <alias>curArved</alias>
   </grid>
   <select>
@@ -45,7 +45,7 @@
                          a.kpv                                                             AS kpv,
                          a.asutusid,
                          a.arvId,
-                         trim(a.lisa) :: VARCHAR(120)                                      AS lisa,
+                         trim(coalesce(a.lisa,'')) :: VARCHAR(120)                         AS lisa,
                          a.tahtaeg                                                         AS tahtaeg,
                          a.kbmta,
                          a.kbm,
@@ -94,7 +94,7 @@
                               now() :: DATE                                                          AS kpv,
                               NULL :: INTEGER                                                        AS asutusid,
                               NULL :: INTEGER                                                        AS arvId,
-                              NULL :: VARCHAR(120)                                                   AS lisa,
+                              '' :: VARCHAR(120)                                                     AS lisa,
                               (now() + INTERVAL '14 days') :: DATE                                   AS tahtaeg,
                               0 :: NUMERIC                                                           AS kbmta,
                               0.00 :: NUMERIC                                                        AS kbm,
@@ -274,17 +274,17 @@
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_arved a
-                   WHERE (a.rekvId = $1)
-                     AND docs.usersRigths(a.id, 'select', $2)</sql>
+                   WHERE (a.rekvId = $1::integer)
+                     AND docs.usersRigths(a.id, 'select', $2::integer)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_arv($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_arv($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
     <sql>SELECT error_code, result, error_message
-                FROM docs.sp_delete_arv($1, $2)</sql>
+                FROM docs.sp_delete_arv($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -295,7 +295,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select docs.sp_kooperi_arv(?gnUser, ?tnId) as result</sql>
+    <sql>select docs.sp_kooperi_arv($1::integer, $2::integer) as result</sql>
     <alias>kooperiArv</alias>
   </executeCommand>
   <register>

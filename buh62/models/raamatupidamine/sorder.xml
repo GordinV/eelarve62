@@ -4,7 +4,7 @@
     <sql>SELECT *
                     FROM cur_korder k
                     WHERE k.rekvId = $1
-                          AND coalesce(docs.usersRigths(k.id, 'select', $2), TRUE)</sql>
+                          AND coalesce(docs.usersRigths(k.id, 'select', $2::integer), TRUE)</sql>
     <alias>curKorder</alias>
   </grid>
   <select>
@@ -53,6 +53,7 @@
                   LEFT OUTER JOIN docs.arv AS arv ON k.arvid = arv.Id
                   left outer join docs.journal j on j.parentid = k.journalid                  
                   left outer join docs.journalid jid on jid.journalid = j.id                  
+                  
                   left outer join libs.dokprop dp on dp.id = k.doklausid 
                 WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
@@ -144,11 +145,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_korder($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_korder($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_korder($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_korder($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -171,7 +172,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_sorder($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_sorder($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>

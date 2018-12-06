@@ -4,7 +4,7 @@
     <sql>SELECT *
                     FROM cur_korder k
                     WHERE k.rekvId = $1
-                          AND coalesce(docs.usersRigths(k.id, 'select', $2), TRUE)</sql>
+                          AND coalesce(docs.usersRigths(k.id, 'select', $2::integer), TRUE)</sql>
     <alias>curKorder</alias>
   </grid>
   <select>
@@ -144,11 +144,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_korder($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_korder($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_korder($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_korder($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -171,7 +171,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_vorder($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_vorder($2::integer, $1::integer)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
