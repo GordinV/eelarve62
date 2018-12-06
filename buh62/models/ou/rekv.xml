@@ -7,7 +7,7 @@
                     FROM cur_rekv r
                     WHERE r.status &lt;&gt; 3
                           AND r.id IN (SELECT rekv_id
-                                       FROM get_asutuse_struktuur($1))</sql>
+                                       FROM get_asutuse_struktuur($1::integer))</sql>
     <alias>curRekv</alias>
   </grid>
   <select>
@@ -79,7 +79,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select ou.sp_salvesta_rekv($1, $2, $3) as id</sql>
+    <sql>select ou.sp_salvesta_rekv($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
