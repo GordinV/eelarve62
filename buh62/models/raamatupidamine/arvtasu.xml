@@ -18,15 +18,12 @@
                   a.dok,
                   a.pankkassa,
                   a.muud,
-                  (case when a.pankkassa = 3 then 'JOURNAL' when a.pankkassa = 1 then 'MK' when a.pankkassa = 2 then 'KASSA' end)::text as dok_type,
-                  (case when a.pankkassa = 3 then j.number::text when a.pankkassa = 1 then m.number when a.pankkassa = 2 then k.number end)::text as number,
-                  coalesce(v.kuurs,1)::numeric(12,4) as kuurs, 
-                  coalesce(v.valuuta,'EUR')::varchar(20) as valuuta
+                  (case when a.pankkassa = 3 then 'JOURNAL' when a.pankkassa = 1 then 'MK' when a.pankkassa = 2 then 'KASSA' else 'MUUD' end)::text as dok_type,
+                  (case when a.pankkassa = 3 then j.number::text when a.pankkassa = 1 then m.number when a.pankkassa = 2 then k.number else 'MUUD' end)::text as number
                 FROM docs.arvtasu a
                 LEFT OUTER JOIN docs.journalid j on j.journalid = a.doc_tasu_id
                 LEFT OUTER JOIN docs.mk m on m.id = a.doc_tasu_id
                 LEFT OUTER JOIN docs.korder1 k on k.id = a.doc_tasu_id
-                LEFT JOIN docs.dokvaluuta1 v ON a.id = v.dokid AND v.dokliik = array_position((enum_range(NULL :: DOK_VALUUTA)), 'arvtasu')
                 WHERE a.id = $1</sql>
     <sqlAsNew>SELECT
                       $1::integer as id,
@@ -40,9 +37,7 @@
                       0 as pankkassa,
                       null::text as muud,
                       null::text as dok_type,
-                      null::text as number,
-                      1::numeric(12,4) as kuurs,
-                      'EUR'::varchar(20) as valuuta</sqlAsNew>
+                      null::text as number</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
@@ -52,11 +47,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_arvtasu($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_arvtasu($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_arvtasu($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_arvtasu($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
