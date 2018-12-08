@@ -22,11 +22,11 @@
                 from libs.nomenklatuur n 
                 where n.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , $2::integer as userid, 'NOMENCLATURE' as doc_type_id,
-            null::varchar(20) as  kood,
-            null::integer as rekvid,
-            null::varchar(254) as nimetus,
-            null::varchar(20) as dok,
-            null::varchar(20) as uhik,
+            ''::varchar(20) as  kood,
+            0::integer as rekvid,
+            ''::varchar(254) as nimetus,
+            ''::varchar(20) as dok,
+            ''::varchar(20) as uhik,
             0::numeric as hind,
             0::numeric as ulehind,
             1::numeric as kogus,
