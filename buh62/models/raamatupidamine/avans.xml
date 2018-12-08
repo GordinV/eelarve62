@@ -34,7 +34,8 @@
                       dp.selg :: VARCHAR(120)                                        AS dokprop,
                       d1.dokpropid,
                       coalesce(jid.number, 0) :: INTEGER                             AS lausend,
-                      (select sum(summa) from docs.avans2 where parentid = d1.id)::numeric(14,2) as summa
+                      (select sum(summa) from docs.avans2 where parentid = d1.id)::numeric(14,2) as summa,
+                      (d.history-&gt;0-&gt;&gt;'user')::varchar(120)                          AS koostaja
                     FROM docs.doc d
                       INNER JOIN docs.avans1 d1 ON d1.parentId = d.id
                       INNER JOIN ou.userid u ON u.id = $2 :: INTEGER

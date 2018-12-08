@@ -5,8 +5,8 @@
                           d.*, 
                           'KULUD'::varchar(20) as liik
                         FROM cur_kulud d
-                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1)) 
-                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1::INTEGER)) 
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curEelarve</alias>
   </grid>
   <select>
@@ -35,7 +35,7 @@
     <sqlAsNew>SELECT
                       $1 :: INTEGER                                 AS id,
                       $2 :: INTEGER                                 AS userid,
-                      null::integer as rekvid,
+                      0::integer as rekvid,
                       extract(year from current_date)::integer as aasta,
                       null::integer as kuu,
                       0::numeric(12,2) as summa,
@@ -62,11 +62,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_eelarve($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_eelarve($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from eelarve.sp_delete_eelarve($1, $2, 1)</sql>
+    <sql>select error_code, result, error_message from eelarve.sp_delete_eelarve($1::INTEGER, $2::INTEGER, 1)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

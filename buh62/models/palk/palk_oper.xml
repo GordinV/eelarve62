@@ -5,7 +5,7 @@
                           d.*
                         FROM palk.cur_palkoper d
                         WHERE d.rekvId = $1
-                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curPalkOper</alias>
   </grid>
   <select>
@@ -50,7 +50,8 @@
                       coalesce(jid.number, 0) :: INTEGER                     AS lausend,
                       t.parentid,
                       (pl.properties::jsonb-&gt;&gt;'liik')::integer as liik,
-                      (pl.properties::jsonb-&gt;&gt;'asutusest')::integer as asutusest                                             
+                      (pl.properties::jsonb-&gt;&gt;'asutusest')::integer as asutusest,
+                      (d.history-&gt;0-&gt;&gt;'user')::varchar(120)                                          AS koostaja
                     FROM docs.doc d
                       INNER JOIN palk.palk_oper p ON p.parentId = d.id
                       INNER JOIN palk.tooleping t ON t.id = p.lepingid
@@ -130,11 +131,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select palk.sp_salvesta_palk_oper($1, $2, $3) as id</sql>
+    <sql>select palk.sp_salvesta_palk_oper($1::json, $2::INTEGER, $3::INTEGER) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_palk_oper($1, $2)</sql>
+    <sql>select error_code, result, error_message from palk.sp_delete_palk_oper($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -157,7 +158,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_avans($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_avans($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>

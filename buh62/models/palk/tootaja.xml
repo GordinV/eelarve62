@@ -112,7 +112,7 @@
     <alias>palk_kaart</alias>
   </select>
   <select>
-    <sql>select * from palk.get_taotlus_mvt_data($1, (select rekvid from ou.userid where id = $2)::integer)</sql>
+    <sql>select * from palk.get_taotlus_mvt_data($1::INTEGER, (select rekvid from ou.userid where id = $2)::integer)</sql>
     <query />
     <multiple>true</multiple>
     <alias>taotlus_mvt</alias>
@@ -145,11 +145,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_asutus($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_asutus($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_asutus($1, $2)</sql>
+    <sql>select error_code, result, error_message from libs.sp_delete_asutus($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

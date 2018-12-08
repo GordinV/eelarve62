@@ -34,7 +34,8 @@
                    WHERE parentid = k.id)                                                                             AS summa,
                    coalesce((dp.details :: JSONB -&gt;&gt; 'konto'),'') :: VARCHAR(20)                                      AS konto,
                    dp.selg::varchar(120)                                                                              as dokprop,
-                   k.doklausid
+                   k.doklausid,
+                  (d.history-&gt;0-&gt;&gt;'user')::varchar(120)                                          AS koostaja
 
                 FROM docs.doc d
                   INNER JOIN docs.mk k ON k.parentId = d.id
