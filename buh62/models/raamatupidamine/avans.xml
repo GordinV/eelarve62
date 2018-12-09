@@ -5,7 +5,7 @@
                           d.*
                         FROM cur_avans d
                         WHERE d.rekvId = $1
-                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curAvans</alias>
   </grid>
   <select>
@@ -139,11 +139,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_avans($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_avans($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_avans($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_avans($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -154,7 +154,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select result, error_message from docs.fnc_avansijaak(?tnId)</sql>
+    <sql>select result, error_message from docs.fnc_avansijaak(?tnId::integer)</sql>
     <alias>fncAvansiJaak</alias>
   </executeCommand>
   <register>
@@ -166,7 +166,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_avans($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_avans($2::integer, $1::integer)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>

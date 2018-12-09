@@ -1,17 +1,20 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select a.*, $2::integer as userId
-            from cur_asutused a
-            where libs.check_asutus(a.id, $1)</sql>
+    <sql>SELECT a.*, $2::INTEGER AS userId
+                    FROM cur_asutused a
+                    WHERE libs.check_asutus(a.id::INTEGER, $1::INTEGER)</sql>
     <alias>curAsutused</alias>
   </grid>
   <select>
-    <sql>select *, $2::integer as userid, 'ASUTUSED' as doc_type_id,
-                (properties-&gt;&gt;'pank')::text as pank,
-                (properties-&gt;&gt;'kmkr')::text as kmkr,
-                (properties-&gt;&gt;'kehtivus')::date as kehtivus                
-                from libs.asutus where id = $1</sql>
+    <sql>SELECT *,
+                     $2::INTEGER                      AS userid,
+                     'ASUTUSED'                        AS doc_type_id,
+                     (properties -&gt;&gt; 'pank')::TEXT     AS pank,
+                     (properties -&gt;&gt; 'kmkr')::TEXT     AS kmkr,
+                     (properties -&gt;&gt; 'kehtivus')::DATE AS kehtivus
+              FROM libs.asutus
+              WHERE id = $1</sql>
     <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
             null::text as  regkood,
             null::text as nimetus,
@@ -32,29 +35,30 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT (e.element -&gt;&gt; 'aa') :: varchar(20) AS aa,
-                $2 :: INTEGER            AS userid
-                FROM libs.asutus a,
-                      json_array_elements((a.properties -&gt; 'asutus_aa') :: JSON) AS e(element)
-                WHERE a.id = $1</sql>
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20) AS aa,
+                         $2 :: INTEGER                      AS userid
+                  FROM libs.asutus a,
+                       json_array_elements(case when (a.properties -&gt;&gt; 'asutus_aa') is null then '[]'::json else (a.properties -&gt; 'asutus_aa') :: JSON end) AS e (element)
+                  WHERE a.id = $1</sql>
     <query />
     <multiple>true</multiple>
     <alias>asutus_aa</alias>
   </select>
   <select>
-    <sql>SELECT Asutus.id 
-                    FROM libs.asutus Asutus 
-                    WHERE (rtrim(ltrim(Asutus.regkood)) = $1 or empty($1))
-                    or (rtrim(ltrim(Asutus.nimetus)) = $2 or empty($2))</sql>
+    <sql>SELECT Asutus.id
+                  FROM libs.asutus Asutus
+                  WHERE (rtrim(ltrim(Asutus.regkood)) = $1 OR empty($1))
+                     OR (rtrim(ltrim(Asutus.nimetus)) = $2 OR empty($2))</sql>
     <query />
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from com_asutused a 
-        where libs.check_asutus(a.id, $1) 
-        and (kehtivus is null or kehtivus &gt;= date())
-        order by nimetus</sql>
+    <sql>SELECT *
+                   FROM com_asutused a
+                   WHERE libs.check_asutus(a.id::integer, $1::INTEGER)
+                     AND (kehtivus IS NULL OR kehtivus &gt;= date())
+                   ORDER BY nimetus</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -62,7 +66,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_asutus($1, $2)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_asutus($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

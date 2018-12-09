@@ -3,7 +3,7 @@
   <grid>
     <sql>select d.*, 0 as valitud from cur_mk d
                 where d.rekvId = $1
-                and coalesce(docs.usersRigths(d.id, 'select', $2),true)</sql>
+                and coalesce(docs.usersRigths(d.id, 'select', $2::integer),true)</sql>
     <alias>curMk</alias>
   </grid>
   <select>
@@ -62,8 +62,8 @@
                        select rekvid from ou.userid where id = $2)
                        ) :: INTEGER + 1                         AS number,
                       now() :: DATE                                 AS maksepaev,
-                      aa.id                                         AS aaid,
-                      trim(aa.name)                                 AS pank,
+                      0                                         AS aaid,
+                      trim('')::varchar(20)                                AS pank,
                       NULL::integer                                 AS rekvId,
                       now() :: DATE                                 AS kpv,
                       NULL::varchar(120)                            AS viitenr,
@@ -137,11 +137,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_mk($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_mk($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_mk($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_mk($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -164,7 +164,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_smk($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_smk($2::integer, $1::integer)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>

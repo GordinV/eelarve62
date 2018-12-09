@@ -6,7 +6,7 @@
                           0 AS valitud
                         FROM cur_mk d
                         WHERE d.rekvId = $1
-                              AND coalesce(docs.usersRigths(d.id, 'select', $2), TRUE)</sql>
+                              AND coalesce(docs.usersRigths(d.id, 'select', $2::integer), TRUE)</sql>
     <alias>curMk</alias>
   </grid>
   <select>
@@ -65,9 +65,9 @@
                        select rekvid from ou.userid where id = $2)
                        ),0) :: INTEGER + 1                          AS number,
                       now() :: DATE                                 AS maksepaev,
-                      aa.id                                         AS aaid,
-                      aa.pank                                       AS pank,
-                      trim(aa.arve)::varchar(20)                    as omaarve,
+                      0                                         AS aaid,
+                      1                                       AS pank,
+                      trim('')::varchar(20)                    as omaarve,
                       NULL::integer                                 AS rekvId,
                       now() :: DATE                                 AS kpv,
                       NULL::varchar(120)                            AS viitenr,
@@ -146,11 +146,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_mk($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_mk($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_mk($1, $2)</sql>
+    <sql>select error_code, result, error_message from docs.sp_delete_mk($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -173,7 +173,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_vmk($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_vmk($2::integer, $1::integer)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
