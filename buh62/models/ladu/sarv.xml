@@ -46,6 +46,7 @@
                          coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS konto,
                          coalesce((dp.details :: JSONB -&gt;&gt; 'kbmkonto'), '') :: VARCHAR(20) AS kbmkonto,
                          dp.selg :: VARCHAR(120)                                           AS dokprop,
+                         dp.vaatalaus as is_show_journal,
                          (d.history-&gt;0-&gt;&gt;'user') :: VARCHAR(120)                           AS koostaja,
                          ladu.nimetus as ladu
                   FROM docs.doc d
@@ -99,7 +100,8 @@
                               NULL :: INTEGER                                                        AS journalid,
                               NULL :: INTEGER                                                        AS laus_nr,
                               NULL :: VARCHAR(120)                                                   AS koostaja,
-                              NULL::TEXT as ladu
+                              NULL::TEXT as ladu,
+                              0 ::integer as is_show_journal
                        FROM ou.userid u
                        WHERE u.id = $2 :: INTEGER</sqlAsNew>
     <query />
@@ -281,7 +283,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>SELECT error_code, result, error_message FROM docs.gen_lausend_arv($2, $1)</sql>
+    <sql>SELECT error_code, result, error_message FROM ladu.gen_lausend_sarv($2::integer, $1::integer)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
