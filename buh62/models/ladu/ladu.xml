@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select l.id, l.kood, l.nimetus, l.muud,
+    <sql>select l.id, l.kood, l.nimetus, l.muud, (l.properties::json-&gt;&gt;'konto')::varchar(20) as konto,
             $2::integer as userId
             from libs.library l
             where l.library = 'LADU'
