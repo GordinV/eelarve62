@@ -30,7 +30,7 @@
                          asutus.regkood,
                          trim(asutus.nimetus)                                                           AS asutus,
                          u.ametnik                                                                      AS kasutaja,
-                         (d.history-&gt;0-&gt;&gt;'user')::varchar(120)                                                          AS koostaja
+                         (d.history-&gt;0-&gt;&gt;'user')::varchar(120)                                          AS koostaja
                   FROM docs.doc d
                          INNER JOIN libs.library l ON l.id = d.doc_type_id
                          INNER JOIN docs.journal j ON j.parentId = d.id
@@ -103,12 +103,12 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_journal($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_journal($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
     <sql>SELECT error_code, result, error_message
-                FROM docs.sp_delete_journal($1, $2)</sql>
+                FROM docs.sp_delete_journal($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
