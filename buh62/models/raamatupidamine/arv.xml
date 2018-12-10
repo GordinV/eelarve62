@@ -276,14 +276,14 @@
   </select>
   <select>
     <sql>SELECT result, error_code, error_message
-                  FROM docs.create_new_mk($1::integer, $2::integer)</sql>
+                  FROM docs.create_new_mk($1::integer, $2::jsonb)</sql>
     <query />
     <multuple>false</multuple>
     <alias>create_new_mk</alias>
   </select>
   <select>
     <sql>SELECT result, error_code, error_message
-                  FROM docs.create_new_order($1::integer, $2::integer)</sql>
+                  FROM docs.create_new_order($1::integer, $2::jsonb)</sql>
     <query />
     <multuple>false</multuple>
     <alias>create_new_order</alias>

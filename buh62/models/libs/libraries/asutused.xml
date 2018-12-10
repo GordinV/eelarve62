@@ -62,7 +62,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_asutus($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_asutus($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
