@@ -23,13 +23,13 @@
                            lausnr,
                            docs_ids
                     FROM cur_arved a
-                    WHERE a.rekvId = $1::integer
-                      AND docs.usersRigths(a.id, 'select', $2::integer)</sql>
+                    WHERE a.rekvId = $1::INTEGER
+                      AND docs.usersRigths(a.id, 'select', $2::INTEGER)</sql>
     <alias>curArved</alias>
   </grid>
   <select>
     <sql>SELECT d.id,
-                         $2 :: INTEGER                                                     AS userid,
+                         $2 :: INTEGER                                                    AS userid,
                          to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                   AS created,
                          to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT                AS lastupdate,
                          d.bpm,
@@ -45,7 +45,7 @@
                          a.kpv                                                             AS kpv,
                          a.asutusid,
                          a.arvId,
-                         trim(coalesce(a.lisa,'')) :: VARCHAR(120)                         AS lisa,
+                         trim(coalesce(a.lisa, '')) :: VARCHAR(120)                        AS lisa,
                          a.tahtaeg                                                         AS tahtaeg,
                          a.kbmta,
                          a.kbm,
@@ -59,15 +59,16 @@
                          asutus.regkood,
                          trim(asutus.nimetus)                                              AS asutus,
                          asutus.aadress,
-                         (asutus.properties-&gt;&gt;'kmkr') :: VARCHAR(20)                       AS kmkr,
+                         (asutus.properties -&gt;&gt; 'kmkr') :: VARCHAR(20)                     AS kmkr,
                          a.doklausid,
                          a.journalid,
                          coalesce(jid.number, 0) :: INTEGER                                AS laus_nr,
                          coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS konto,
                          coalesce((dp.details :: JSONB -&gt;&gt; 'kbmkonto'), '') :: VARCHAR(20) AS kbmkonto,
                          dp.selg :: VARCHAR(120)                                           AS dokprop,
-                         dp.vaatalaus as is_show_journal,
-                         (d.history-&gt;0-&gt;&gt;'user') :: VARCHAR(120)                           AS koostaja
+                         dp.vaatalaus                                                      AS is_show_journal,
+                         (d.history -&gt; 0 -&gt;&gt; 'user') :: VARCHAR(120)                       AS koostaja,
+                         coalesce((a.properties -&gt;&gt; 'aa')::text,qry_aa.arve)::varchar(20)  AS aa
                   FROM docs.doc d
                          INNER JOIN libs.library l ON l.id = d.doc_type_id
                          INNER JOIN docs.arv a ON a.parentId = d.id
@@ -76,10 +77,17 @@
                          LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
                          LEFT OUTER JOIN libs.dokprop dp ON dp.id = a.doklausid
                          LEFT OUTER JOIN docs.journal j ON j.parentid = a.journalid
-                         LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+                         LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id,
+                         (SELECT arve
+                                          FROM ou.aa aa
+                                          inner join ou.userid u on u.id = $2 :: INTEGER
+                                          WHERE aa.parentid = u.rekvid
+                                            AND NOT empty(default_::INTEGER)
+                                            AND NOT empty(kassa::INTEGER)
+                                          LIMIT 1) qry_aa
                   WHERE d.id = $1</sql>
-    <sqlAsNew>SELECT $1 :: INTEGER                                                          AS id,
-                              $2 :: INTEGER                                                          AS userid,
+    <sqlAsNew>SELECT $1 :: INTEGER                                                         AS id,
+                              $2 :: INTEGER                                                         AS userid,
                               to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                          AS created,
                               to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                          AS lastupdate,
                               NULL                                                                   AS bpm,
@@ -87,6 +95,13 @@
                               trim(l.kood)                                                           AS doc_type_id,
                               trim(s.nimetus)                                                        AS status,
                               0                                                                      AS doc_status,
+                              (SELECT arve
+                               FROM ou.aa aa
+                               WHERE aa.parentid = u.rekvid
+                                 AND NOT empty(default_::INTEGER)
+                                 AND NOT empty(kassa::INTEGER)
+                               LIMIT 1)::VARCHAR(20)                                                 AS aa,
+
                               docs.sp_get_number(u.rekvId, 'ARV', year(date()), NULL) :: VARCHAR(20) AS number,
                               0.00                                                                   AS summa,
                               NULL :: INTEGER                                                        AS rekvId,
@@ -117,7 +132,7 @@
                               NULL :: INTEGER                                                        AS journalid,
                               NULL :: INTEGER                                                        AS laus_nr,
                               NULL :: VARCHAR(120)                                                   AS koostaja,
-                              0 ::integer as is_show_journal
+                              0 ::INTEGER                                                            AS is_show_journal
                        FROM libs.library l,
                             libs.library s,
                             ou.userid u
@@ -132,7 +147,7 @@
   </select>
   <select>
     <sql>SELECT a1.id,
-                         $2 :: INTEGER                                                   AS userid,
+                         $2 :: INTEGER                                                  AS userid,
                          a1.nomid,
                          a1.kogus,
                          a1.hind,
@@ -211,7 +226,7 @@
                          1 :: NUMERIC                  AS kuurs
                   FROM docs.arvtasu arvtasu
                          INNER JOIN docs.korder1 korder1
-                           ON (arvtasu.doc_tasu_id = korder1.parentid AND arvtasu.pankkassa = 2)
+                                    ON (arvtasu.doc_tasu_id = korder1.parentid AND arvtasu.pankkassa = 2)
                          LEFT OUTER JOIN docs.journalid journalid ON korder1.journalId = journalId.journalId
                   WHERE Arvtasu.doc_arv_id = $1
                     AND arvtasu.summa &lt;&gt; 0
@@ -230,7 +245,7 @@
                          1 :: NUMERIC                  AS kuurs
                   FROM docs.arvtasu arvtasu
                          LEFT OUTER JOIN docs.journal journal
-                           ON (arvtasu.doc_tasu_id = journal.parentId AND arvtasu.pankkassa = 3)
+                                         ON (arvtasu.doc_tasu_id = journal.parentId AND arvtasu.pankkassa = 3)
                          LEFT OUTER JOIN docs.journalid journalid ON (journal.id = journalId.journalId)
                   WHERE Arvtasu.doc_arv_id = $1
                     AND arvtasu.summa &lt;&gt; 0
@@ -261,14 +276,14 @@
   </select>
   <select>
     <sql>SELECT result, error_code, error_message
-                  FROM docs.create_new_mk($1, $2)</sql>
+                  FROM docs.create_new_mk($1::integer, $2::integer)</sql>
     <query />
     <multuple>false</multuple>
     <alias>create_new_mk</alias>
   </select>
   <select>
     <sql>SELECT result, error_code, error_message
-                  FROM docs.create_new_order($1, $2)</sql>
+                  FROM docs.create_new_order($1::integer, $2::integer)</sql>
     <query />
     <multuple>false</multuple>
     <alias>create_new_order</alias>
@@ -276,8 +291,8 @@
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_arved a
-                   WHERE (a.rekvId = $1::integer)
-                     AND docs.usersRigths(a.id, 'select', $2::integer)</sql>
+                   WHERE (a.rekvId = $1::INTEGER)
+                     AND docs.usersRigths(a.id, 'select', $2::INTEGER)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -286,7 +301,7 @@
   </saveDoc>
   <deleteDoc>
     <sql>SELECT error_code, result, error_message
-                FROM docs.sp_delete_arv($1::integer, $2::integer)</sql>
+                FROM docs.sp_delete_arv($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -311,7 +326,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>SELECT error_code, result, error_message FROM docs.gen_lausend_arv($2::integer, $1::integer)</sql>
+    <sql>SELECT error_code, result, error_message FROM docs.gen_lausend_arv($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
