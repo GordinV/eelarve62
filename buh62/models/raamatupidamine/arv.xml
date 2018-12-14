@@ -9,10 +9,15 @@
                            summa,
                            tahtaeg,
                            jaak,
+                           lisa,
                            tasud,
                            tasudok,
                            userid,
                            asutus :: VARCHAR(254),
+                           regkood::varchar(20),
+                           omvorm::varchar(20),
+                           aadress::text, 
+                           email::VARCHAR(254),
                            asutusid,
                            journalid,
                            liik,
@@ -21,8 +26,15 @@
                            objekt :: VARCHAR(254),
                            markused,
                            lausnr,
-                           docs_ids
-                    FROM cur_arved a
+                           docs_ids,
+                           coalesce(a.arve,qry_aa.arve)::varchar(20)  AS aa
+                    FROM cur_arved a,
+                         (SELECT arve
+                          FROM ou.aa aa
+                          WHERE aa.parentid = $1
+                            AND NOT empty(default_::INTEGER)
+                            AND NOT empty(kassa::INTEGER)
+                          LIMIT 1) qry_aa
                     WHERE a.rekvId = $1::INTEGER
                       AND docs.usersRigths(a.id, 'select', $2::INTEGER)</sql>
     <alias>curArved</alias>
