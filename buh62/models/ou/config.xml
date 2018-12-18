@@ -1,0 +1,71 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                      $2 AS user_id,
+                      c.*
+                    FROM ou.config c
+                          where c.rekvid IN (SELECT rekv_id
+                                       FROM get_asutuse_struktuur($1::integer))</sql>
+    <alias>curConfig</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                'CONFIG'     AS doc_type_id,
+                $2::INTEGER AS userid,
+                c.id,
+                c.rekvid,
+                c.number::VARCHAR(20),
+                coalesce((u.properties-&gt;&gt;'keel')::integer,2)::integer as keel,
+                c.tahtpaev
+              FROM ou.config c, ou.userid u
+              WHERE c.rekvid = $1 and u.id = $2</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER         AS id,
+                      $2 :: INTEGER         AS userid,
+                      'CONFIG'              AS doc_type_id,
+                      0 :: INTEGER          AS rekvid,
+                      NULL :: VARCHAR(20)   AS number,
+                      1 :: integer          AS keel,
+                      5::integer as tahtpaev</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select ou.sp_salvesta_config($1::json, $2::integer, $3::integer) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>

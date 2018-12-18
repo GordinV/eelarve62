@@ -67,9 +67,10 @@
     <alias>details</alias>
   </select>
   <select>
-    <sql>SELECT * 
-                FROM ou.config 
-                WHERE rekvid = $1</sql>
+    <sql>SELECT c.id, c.number, c.rekvid, c.toolbar1, c.toolbar2, c.toolbar3,c.tahtpaev,
+                coalesce((u.properties-&gt;&gt;'keel')::integer,2)::integer as keel
+                FROM ou.config c, ou.userid u
+                WHERE c.rekvid = $1 and u.id = $2</sql>
     <query />
     <multiple>false</multiple>
     <alias>config</alias>
