@@ -33,15 +33,13 @@
                   (l.properties :: JSONB -&gt;&gt; 'maks') :: INTEGER         AS maks,
                   (l.properties :: JSONB -&gt;&gt; 'asutusest') :: INTEGER    AS asutusest,
                   (l.properties :: JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20) AS tululiik,
-                  coalesce(v.valuuta, 'EUR') :: VARCHAR                 AS valuuta,
-                  coalesce(v.kuurs, 1) :: NUMERIC                       AS kuurs
+                  'EUR' :: VARCHAR                                      AS valuuta,
+                  1 :: NUMERIC                                          AS kuurs
                 FROM libs.library l
                   INNER JOIN palk.palk_kaart pk ON pk.libId = l.id
                   INNER JOIN palk.tooleping t ON pk.lepingId = t.id
                   INNER JOIN libs.library amet ON amet.id = t.ametid
                   INNER JOIN libs.library osakond ON osakond.id = t.osakondid
-                  LEFT OUTER JOIN docs.dokvaluuta1 v
-                    ON pk.id = v.dokid AND v.dokliik = array_position((enum_range(NULL :: DOK_VALUUTA)), 'palk_kaart')
                 WHERE pk.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
@@ -71,11 +69,11 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select palk.sp_salvesta_palk_kaart($1, $2, $3) as id</sql>
+    <sql>select palk.sp_salvesta_palk_kaart($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_palk_kaart($1, $2)</sql>
+    <sql>select error_code, result, error_message from palk.sp_delete_palk_kaart($1::integer, $2::integer)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -86,7 +84,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from palk.change_kaart_status($1, $2)</sql>
+    <sql>select error_code, result, error_message from palk.change_kaart_status($1::integer, $2::integer)</sql>
     <alias>changeStatus</alias>
   </executeCommand>
   <register>
