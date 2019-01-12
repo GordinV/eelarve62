@@ -6,33 +6,33 @@
                       r.*
                     FROM cur_rekv r
                     WHERE r.status &lt;&gt; 3
-                          AND r.id IN (SELECT rekv_id
-                                       FROM get_asutuse_struktuur($1::integer))</sql>
+                      AND r.id IN (SELECT rekv_id
+                                   FROM get_asutuse_struktuur($1::INTEGER))</sql>
     <alias>curRekv</alias>
   </grid>
   <select>
     <sql>SELECT
-                'REKV' as doc_type_id,
-                 $2::integer as userid,
-                  r.id,
-                  r.parentid,
-                  r.nimetus::varchar(254),
-                  r.aadress,
-                  r.email::varchar(254),
-                  r.faks::varchar(254),
-                  r.haldus::varchar(254),
-                  r.juht::varchar(254),
-                  r.raama::varchar(254),
-                  r.kbmkood::varchar(20),
-                  r.muud,
-                  r.regkood::varchar(20),
-                  r.tel::varchar(254),
-                  ((r.properties-&gt;&gt;'arved')::jsonb-&gt;&gt;'tahtpaev')::integer as tahtpaev,
-                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'ftp')::varchar(120) as ftp,
-                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'login')::varchar(120) as login,
-                  ((r.properties-&gt;&gt;'reklftp')::jsonb-&gt;&gt;'parool')::varchar(120) as parool                  
-                FROM ou.rekv r 
-                where id = $1</sql>
+                'REKV'                                                           AS doc_type_id,
+                $2::INTEGER                                                     AS userid,
+                r.id,
+                r.parentid,
+                r.nimetus::VARCHAR(254),
+                r.aadress,
+                r.email::VARCHAR(254),
+                r.faks::VARCHAR(254),
+                r.haldus::VARCHAR(254),
+                r.juht::VARCHAR(254),
+                r.raama::VARCHAR(254),
+                r.kbmkood::VARCHAR(20),
+                r.muud,
+                r.regkood::VARCHAR(20),
+                r.tel::VARCHAR(254),
+                ((r.properties -&gt;&gt; 'arved')::JSONB -&gt;&gt; 'tahtpaev')::INTEGER      AS tahtpaev,
+                ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'ftp')::VARCHAR(120)    AS ftp,
+                ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'login')::VARCHAR(120)  AS login,
+                ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'parool')::VARCHAR(120) AS parool
+              FROM ou.rekv r
+              WHERE id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -58,25 +58,39 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT aa.* , 
-                kassa as kassapank 
-                FROM ou.Aa aa
-                WHERE Aa.parentid = $1</sql>
+    <sql>SELECT aa.*,
+                         kassa AS kassapank
+                  FROM ou.Aa aa
+                  WHERE Aa.parentid = $1</sql>
     <query />
     <multiple>false</multiple>
     <alias>details</alias>
   </select>
   <select>
-    <sql>SELECT c.id, c.number, c.rekvid, c.toolbar1, c.toolbar2, c.toolbar3,c.tahtpaev,
-                coalesce((u.properties-&gt;&gt;'keel')::integer,2)::integer as keel
-                FROM ou.config c, ou.userid u
-                WHERE c.rekvid = $1 and u.id = $2</sql>
+    <sql>SELECT c.id,
+                         c.number,
+                         c.rekvid,
+                         c.toolbar1,
+                         c.toolbar2,
+                         c.toolbar3,
+                         c.tahtpaev,
+                         coalesce((u.properties -&gt;&gt; 'keel')::INTEGER, 2)::INTEGER         AS keel,
+                         coalesce((u.properties -&gt;&gt; 'port')::VARCHAR(100))::VARCHAR(254)  AS port,
+                         coalesce((u.properties -&gt;&gt; 'smtp')::VARCHAR(100))::VARCHAR(254)  AS smtp,
+                         coalesce((u.properties -&gt;&gt; 'user')::VARCHAR(100))::VARCHAR(254)  AS user,
+                         coalesce((u.properties -&gt;&gt; 'pass')::VARCHAR(100))::VARCHAR(254)  AS pass,
+                         coalesce((u.properties -&gt;&gt; 'email')::VARCHAR(100))::VARCHAR(254) AS email
+                  FROM ou.config c,
+                       ou.userid u
+                  WHERE c.rekvid = $1
+                    AND u.id = $2</sql>
     <query />
     <multiple>false</multiple>
     <alias>config</alias>
   </select>
   <selectAsLibs>
-    <sql>select id, nimetus::varchar(254), regkood::varchar(20), parentid from com_rekv</sql>
+    <sql>SELECT id, nimetus::VARCHAR(254), regkood::VARCHAR(20), parentid
+                   FROM com_rekv</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -84,7 +98,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from ou.sp_delete_rekv($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM ou.sp_delete_rekv($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

@@ -17,6 +17,11 @@
                 c.rekvid,
                 c.number::VARCHAR(20),
                 coalesce((u.properties-&gt;&gt;'keel')::integer,2)::integer as keel,
+                coalesce((u.properties-&gt;&gt;'port')::varchar(100))::varchar(254) as port,
+                coalesce((u.properties-&gt;&gt;'smtp')::varchar(100))::varchar(254) as smtp,
+                coalesce((u.properties-&gt;&gt;'user')::varchar(100))::varchar(254) as user,
+                coalesce((u.properties-&gt;&gt;'pass')::varchar(100))::varchar(254) as pass,
+                coalesce((u.properties-&gt;&gt;'email')::varchar(100))::varchar(254) as email,
                 c.tahtpaev
               FROM ou.config c, ou.userid u
               WHERE c.rekvid = $1 and u.id = $2</sql>
@@ -27,6 +32,11 @@
                       0 :: INTEGER          AS rekvid,
                       NULL :: VARCHAR(20)   AS number,
                       1 :: integer          AS keel,
+                      ''::varchar(254) as port,
+                      ''::varchar(254) as smtp,
+                      ''::varchar(254) as user,
+                      ''::varchar(254) as pass,
+                      ''::varchar(254) as email,
                       5::integer as tahtpaev</sqlAsNew>
     <query />
     <multiple>false</multiple>
