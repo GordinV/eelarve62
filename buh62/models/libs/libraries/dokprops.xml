@@ -11,7 +11,9 @@
                       INNER JOIN libs.dokprop d ON l.id = d.parentId
                     WHERE l.library = 'DOK'
                           AND d.status &lt;&gt; 3
-                          AND d.rekvId = $1 </sql>
+                          AND d.rekvId = $1
+                    ORDER by trim(selg)
+        </sql>
     <alias>curDokprop</alias>
   </grid>
   <select>
