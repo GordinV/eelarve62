@@ -34,7 +34,8 @@
                       inner join libs.asutus a on a.id = qryReport.asutus_id
                       inner join com_kontoplaan l on l.kood = qryReport.konto
                       inner join com_rekv r on r.id = qryReport.rekv_id
-                      where qryReport.konto is not null and qryReport.asutus_id is not null</sql>
+                      where qryReport.konto is not null and qryReport.asutus_id is not null
+                      order by qryReport.rekv_id, qryReport.konto, a.nimetus, qryReport.kpv</sql>
     <alias>kontoasutusandmik_report</alias>
   </grid>
   <select></select>

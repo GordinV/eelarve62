@@ -16,7 +16,8 @@
                     FROM docs.kaibeasutusandmik($1::text, $2::integer, $3::date, $4::date, $5::integer) qry
                       INNER JOIN com_asutused a on a.id = qry.asutus_id  
                       INNER JOIN com_kontoplaan l ON l.kood = qry.konto
-                      WHERE (qry.alg_saldo &lt;&gt; 0 or qry.deebet &lt;&gt; 0 or qry.kreedit &lt;&gt; 0)</sql>
+                      WHERE (qry.alg_saldo &lt;&gt; 0 or qry.deebet &lt;&gt; 0 or qry.kreedit &lt;&gt; 0)
+                      ORDER BY a.nimetus, qry.konto</sql>
     <alias>kaibeasutusandmik_report</alias>
   </grid>
   <select></select>

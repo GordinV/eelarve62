@@ -14,7 +14,8 @@
                     FROM docs.kontosaldoandmik($1::text, $2::integer, $3::date, $4::integer) qry
                       INNER JOIN libs.asutus a on a.id = qry.asutus_id  
                       INNER JOIN com_kontoplaan l ON l.kood = qry.konto
-                      WHERE qry.saldo &lt;&gt; 0</sql>
+                      WHERE qry.saldo &lt;&gt; 0
+                      ORDER BY qry.konto, a.nimetus</sql>
     <alias>kontosaldoandmik_report</alias>
   </grid>
   <select></select>
