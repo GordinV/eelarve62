@@ -303,6 +303,12 @@
     <multuple>false</multuple>
     <alias>create_new_order</alias>
   </select>
+  <select>
+    <sql>SELECT docs.check_arv_number($1::integer, $2::JSON)::integer as tulemus</sql>
+    <query />
+    <multuple>false</multuple>
+    <alias>validate_arve_number</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_arved a
