@@ -9,6 +9,11 @@
   <select>
     <sql>SELECT l.id,
                      l.rekvid,
+                     (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER                                         AS parent_id,
+                     (SELECT kood FROM libs.library WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(20)    AS parent_kood,
+                     (SELECT nimetus
+                      FROM libs.library
+                      WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(254)                                  AS parent_nimetus,
                      l.kood,
                      l.nimetus,
                      l.muud,
@@ -46,6 +51,9 @@
     <sqlAsNew>SELECT
                       $1 :: INTEGER               AS id,
                       $2 :: INTEGER               AS userid,
+                      NULL::INTEGER               as parent_id,
+                      NULL::VARCHAR(20)           as parent_kood,
+                      NULL::VARCHAR(254)         as parent_nimetus,
                       'POHIVARA'                 AS doc_type_id,
                       NULL :: TEXT               AS kood,
                       NULL :: INTEGER            AS rekvid,
@@ -66,6 +74,7 @@
                       NULL :: TEXT               AS selg,
                       'põhivara' :: VARCHAR(100) AS liik,
                       NULL :: DATE               AS mahakantud,
+                      NULL::INTEGER              AS parent_id,
                       'EUR' :: VARCHAR(20)       AS valuuta,
                       1 :: NUMERIC(12, 2)        AS kuurs,
                       NULL :: TEXT               AS grupp,
@@ -83,6 +92,13 @@
     <multiple>true</multiple>
     <alias>details</alias>
   </select>
+  <select>
+    <sql>select $2::integer as user_id, $1 as pv_id, po.* 
+                from cur_pohivara po
+                where parent_id is not null and parent_id = $1</sql>
+    <multiple>true</multiple>
+    <alias>seotatud_kaardid</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM cur_pohivara l
@@ -90,7 +106,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_pv_kaart($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_pv_kaart($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
