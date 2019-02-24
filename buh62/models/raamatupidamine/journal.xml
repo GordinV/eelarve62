@@ -43,31 +43,23 @@
                               to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT AS created,
                               to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT AS lastupdate,
                               NULL :: TEXT []                               AS bpm,
-                              trim(l.nimetus)                               AS doc,
-                              trim(l.kood)                                  AS doc_type_id,
-                              trim(s.nimetus)                               AS status,
+                              'JOURNAL'                                     AS doc,
+                              'JOURNAL'                                     AS doc_type_id,
+                              ''                                            AS status,
                               0                                             AS doc_status,
-                              NULL :: INTEGER                               AS number,
-                              NULL :: INTEGER                               AS rekvId,
+                              0 :: INTEGER                               AS number,
+                              0 :: INTEGER                               AS rekvId,
                               now() :: DATE                                 AS kpv,
-                              NULL :: INTEGER                               AS asutusid,
-                              NULL :: VARCHAR(120)                          AS dok,
-                              NULL :: TEXT                                  AS selg,
+                              0 :: INTEGER                               AS asutusid,
+                              '' :: VARCHAR(120)                          AS dok,
+                              '' :: TEXT                                  AS selg,
                               NULL :: TEXT                                  AS muud,
-                              NULL :: VARCHAR(254)                           AS objekt,
+                              '' :: VARCHAR(254)                           AS objekt,
                               0 :: NUMERIC                                  AS summa,
-                              NULL :: VARCHAR(20)                           AS regkood,
-                              NULL :: VARCHAR(254)                          AS asutus,
-                              NULL :: VARCHAR(120)                          AS kasutaja,
-                              NULL :: VARCHAR(120)                          AS koostaja
-                       FROM libs.library l,
-                            libs.library s,
-                            ou.userid u
-                       WHERE l.library = 'DOK'
-                         AND l.kood = 'JOURNAL'
-                         AND u.id = $2 :: INTEGER
-                         AND s.library = 'STATUS'
-                         AND s.kood = '0'</sqlAsNew>
+                              '' :: VARCHAR(20)                           AS regkood,
+                              '' :: VARCHAR(254)                          AS asutus,
+                              '' :: VARCHAR(120)                          AS kasutaja,
+                              '' :: VARCHAR(120)                          AS koostaja</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
