@@ -7,7 +7,10 @@
     <alias>curNomenklatuur</alias>
   </grid>
   <select>
-    <sql>select n.kood, n.id, n.nimetus, n.dok, n.muud, n.rekvid, $2::integer as userid, 'NOMENCLATURE' as doc_type_id,
+    <sql>select n.kood, 
+                n.id, n.nimetus, 
+                n.dok::varchar(20), 
+                n.muud, n.rekvid, $2::integer as userid, 'NOMENCLATURE' as doc_type_id,
                 'EUR' as valuuta, 1 as kuurs,
                 n.uhik as uhik,
                 n.hind as hind,
