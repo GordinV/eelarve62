@@ -58,12 +58,12 @@
                       trim(l.nimetus)                               AS doc,
                       trim(l.kood)                                  AS doc_type_id,
                       trim(s.nimetus)                               AS status,
-                      coalesce((SELECT max(val(array_to_string(regexp_match(number, '\d+'),'')))
+                      (coalesce((SELECT max(val(array_to_string(regexp_match(number, '\d+'),'')))
                        FROM docs.mk
                        WHERE opt = 0 
                        and rekvid in (
                        select rekvid from ou.userid where id = $2)
-                       ),0) :: INTEGER + 1                          AS number,
+                       ),0) :: INTEGER + 1)::varchar(20)                          AS number,
                       now() :: DATE                                 AS maksepaev,
                       0                                         AS aaid,
                       1                                       AS pank,

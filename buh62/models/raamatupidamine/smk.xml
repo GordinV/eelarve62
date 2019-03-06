@@ -20,7 +20,8 @@
                   k.maksepaev                                                                                         AS maksepaev,
                   k.viitenr,
                   k.aaid                                                                                              AS aa_id,
-                  trim(aa.nimetus)                                                                                    AS pank,
+                  aa.pank                                                                                             AS pank,
+                  trim(aa.arve)::varchar(20)                                                                          AS omaArve,
                   k.rekvId,
                   k.kpv                                                                                               AS kpv,
                   k.selg,
@@ -55,12 +56,12 @@
                       trim(l.nimetus)                               AS doc,
                       trim(l.kood)                                  AS doc_type_id,
                       trim(s.nimetus)                               AS status,
-                      (SELECT max(val(array_to_string(regexp_match(number, '\d+'),'')))
+                      ((SELECT max(val(array_to_string(regexp_match(number, '\d+'),'')))
                        FROM docs.mk
                        WHERE opt = 1
                        and rekvid in (
                        select rekvid from ou.userid where id = $2)
-                       ) :: INTEGER + 1                         AS number,
+                       ) :: INTEGER + 1)::varchar(20)                        AS number,
                       now() :: DATE                                 AS maksepaev,
                       0                                         AS aaid,
                       trim('')::varchar(20)                                AS pank,
@@ -104,6 +105,8 @@
                       trim(n.kood)    AS kood,
                       trim(n.nimetus) AS nimetus,
                       trim(a.nimetus) AS asutus,
+                      trim(a.aadress) as aadress,
+                      k.parentid as parent_id,
                       k1.*,
                       'EUR'::varchar(20) as valuuta,
                       1::numeric(12,4) as kuurs,
