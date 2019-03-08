@@ -103,7 +103,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select docs.sp_salvesta_pv_oper($1, $2, $3) as id</sql>
+    <sql>select docs.sp_salvesta_pv_oper($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
@@ -118,7 +118,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>SELECT result, selgitus, summa from docs.sp_calc_kulum(?tnId)</sql>
+    <sql>SELECT result, selgitus, summa from docs.sp_calc_kulum(?tnId::INTEGER)</sql>
     <alias>arvestaKulum</alias>
   </executeCommand>
   <register>
@@ -130,7 +130,7 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_pv_oper($2, $1)</sql>
+    <sql>select error_code, result, error_message from docs.gen_lausend_pv_oper($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
