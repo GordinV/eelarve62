@@ -90,6 +90,12 @@
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
   </select>
+  <select>
+    <sql>select docs.sp_kooperi_journal($1::integer, $2::integer) as result</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>kooperi_journal</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
