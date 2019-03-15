@@ -3,7 +3,8 @@
   <grid>
     <sql>SELECT
                       *
-                    FROM docs.pv_kaibe_aruanne($1::date, $2::date, $3::integer) qry</sql>
+                    FROM docs.pv_kaibe_aruanne($1::date, $2::date, $3::integer) qry
+                    ORDER by konto, kood</sql>
     <alias>pv_kaibe_aruanne_report</alias>
   </grid>
   <select></select>
