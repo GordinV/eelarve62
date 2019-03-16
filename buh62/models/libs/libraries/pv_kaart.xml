@@ -115,6 +115,12 @@
     <multiple>true</multiple>
     <alias>seotatud_kaardid</alias>
   </select>
+  <select>
+    <sql>SELECT $2 :: INTEGER AS userid, po.*
+              FROM libs.get_pv_kaart_jaak($1::integer) po</sql>
+    <multiple>false</multiple>
+    <alias>pv_jaak</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM cur_pohivara l

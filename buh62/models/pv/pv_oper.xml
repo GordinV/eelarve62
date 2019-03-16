@@ -97,6 +97,12 @@
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql> select * from docs.sp_pv_kulum_umber_arvestamine($1::INTEGER, $2::INTEGER)</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>kulum_umber_arvestamine</alias>
+  </select>
   <selectAsLibs>
     <sql>select * from cur_pohivara    l
         where  (l.rekvId = $1 or l.rekvid is null)</sql>
@@ -118,7 +124,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>SELECT result, selgitus, summa from docs.sp_calc_kulum(?tnId::INTEGER)</sql>
+    <sql>SELECT result, selgitus, summa from docs.sp_calc_kulum(?tnId::INTEGER, current_date::date)</sql>
     <alias>arvestaKulum</alias>
   </executeCommand>
   <register>
