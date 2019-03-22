@@ -13,7 +13,7 @@
                       qryReport.taitmine_tekke,
                       a.nimetus :: VARCHAR(254) as nimetus,
                       r.nimetus:: VARCHAR(254) as asutus,
-                      coalesce(a.is_kulud,false)::boolean as is_kulud
+                      qryReport.is_kulud::INTEGER as is_kulud
                     FROM  eelarve.eelarve_kassa_tekkepohine_taitmine($1::date, $2::integer, $3::integer) qryReport
                       LEFT OUTER JOIN com_artikkel a ON a.kood :: TEXT = qryReport.artikkel :: TEXT
                       INNER JOIN ou.rekv r on r.id = qryReport.rekv_id
