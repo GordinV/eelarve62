@@ -5,8 +5,7 @@
                           d.*, 
                           'KULUD'::varchar(20) as liik
                         FROM cur_kulud d
-                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1::INTEGER)) 
-                              AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
+                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1::INTEGER))</sql>
     <alias>curEelarve</alias>
   </grid>
   <select>
