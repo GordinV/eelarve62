@@ -136,6 +136,12 @@
     <multiple>true</multiple>
     <alias>details</alias>
   </select>
+  <select>
+    <sql>select eelarve.sp_kooperi_taotlus($1::integer, $2::INTEGER) as id</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kooperi_taotlus</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
