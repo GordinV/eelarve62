@@ -25,8 +25,8 @@
                       ametnik::varchar(254)
                         FROM cur_taotlused t
                         WHERE t.rekvId IN (SELECT rekv_id
-                            FROM get_asutuse_struktuur($1))
-                            and docs.usersRigths(t.id, 'select', $2)</sql>
+                            FROM get_asutuse_struktuur($1::integer))
+                            and docs.usersRigths(t.id::integer, 'select', $2::integer)</sql>
     <alias>curTaotlus</alias>
   </grid>
   <select>
@@ -147,7 +147,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select eelarve.sp_salvesta_taotlus($1, $2, $3) as id</sql>
+    <sql>select eelarve.sp_salvesta_taotlus($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
