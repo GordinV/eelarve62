@@ -8,6 +8,7 @@
                       coalesce((SELECT sum(summa)
                                 FROM docs.pv_oper po
                                 WHERE po.pv_kaart_id = p.id AND liik IN (1, 3)), 0)        AS soetmaks,
+                      (SELECT eluiga FROM libs.get_pv_kaart_jaak(p.id::INTEGER, $1::DATE))::NUMERIC(12,4) AS eluiga,
                       p.*
                     FROM cur_pohivara p
                     WHERE (p.mahakantud IS NULL or p.mahakantud &lt; $1)
