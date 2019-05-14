@@ -65,7 +65,7 @@
                       trim(l.nimetus)                                 AS doc,
                       trim(l.kood)                                    AS doc_type_id,
                       trim(s.nimetus)                                 AS status,
-                      docs.get_new_number('VORDER', 1, year(now()::date))::varchar(20)  AS number,
+                      docs.sp_get_number((select rekvid from ou.userid where id = $2)::integer, 'VORDER'::text, year(now()::date), null::integer)::varchar(20)   AS number,
                       0                                               AS summa,
                       aa.id                                           AS kassa_id,
                       trim(aa.name)                                   AS kassa,
