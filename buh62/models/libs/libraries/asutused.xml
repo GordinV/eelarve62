@@ -10,8 +10,8 @@
     <sql>SELECT *,
                      $2::INTEGER                      AS userid,
                      'ASUTUSED'                        AS doc_type_id,
-                     (properties -&gt;&gt; 'pank')::TEXT     AS pank,
-                     (properties -&gt;&gt; 'kmkr')::TEXT     AS kmkr,
+                     (properties -&gt;&gt; 'pank')::varchar(20)     AS pank,
+                     (properties -&gt;&gt; 'kmkr')::varchar(20)     AS kmkr,
                      (properties -&gt;&gt; 'kehtivus')::DATE AS kehtivus
               FROM libs.asutus
               WHERE id = $1</sql>
@@ -27,8 +27,8 @@
             null::text as muud,
             ''::text as tp,
             0::integer as staatus,
-            ''::text as pank,
-            ''::text as kmkr,
+            ''::varchar(20) as pank,
+            ''::varchar(20) as kmkr,
             ''::text as mark</sqlAsNew>
     <query />
     <multiple>false</multiple>
