@@ -35,6 +35,7 @@
                           WHERE aa.parentid = $1
                             AND NOT empty(default_::INTEGER)
                             AND NOT empty(kassa::INTEGER)
+                            and kassa = 1
                           LIMIT 1) qry_aa
                     WHERE a.rekvId = $1::INTEGER
                       AND docs.usersRigths(a.id, 'select', $2::INTEGER)</sql>
@@ -98,6 +99,7 @@
                                           WHERE aa.parentid = u.rekvid
                                             AND NOT empty(default_::INTEGER)
                                             AND NOT empty(kassa::INTEGER)
+                                            and kassa = 1
                                           LIMIT 1) qry_aa
                   WHERE d.id = $1</sql>
     <sqlAsNew>SELECT $1 :: INTEGER                                                         AS id,
@@ -114,6 +116,7 @@
                                WHERE aa.parentid = u.rekvid
                                  AND NOT empty(default_::INTEGER)
                                  AND NOT empty(kassa::INTEGER)
+                                 and kassa = 1
                                LIMIT 1)::VARCHAR(20)                                                 AS aa,
 
                               docs.sp_get_number(u.rekvId, 'ARV', year(date()), NULL) :: VARCHAR(20) AS number,
