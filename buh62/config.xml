@@ -1,6 +1,6 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
-<VFPData>
   <connection>
-  	<name>test_server</name>	 
+	<name>test_server</name>			 
+	<description>test_server 1</description>			 
+	<type>odbc</type>			 
   </connection>
-</VFPData>
