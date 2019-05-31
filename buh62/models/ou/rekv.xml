@@ -30,7 +30,8 @@
                 ((r.properties -&gt;&gt; 'arved')::JSONB -&gt;&gt; 'tahtpaev')::INTEGER      AS tahtpaev,
                 ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'ftp')::VARCHAR(120)    AS ftp,
                 ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'login')::VARCHAR(120)  AS login,
-                ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'parool')::VARCHAR(120) AS parool
+                ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'parool')::VARCHAR(120) AS parool,
+                (r.properties -&gt;&gt; 'earved') ::VARCHAR(254) AS earved
               FROM ou.rekv r
               WHERE id = $1</sql>
     <sqlAsNew>SELECT
@@ -52,6 +53,7 @@
                       null::integer as tahtpaev,
                      NULL :: VARCHAR(120) AS ftp,
                      NULL :: VARCHAR(120) AS login,
+                     NULL :: VARCHAR(254) AS earved,
                      NULL :: VARCHAR(120) AS parool</sqlAsNew>
     <query />
     <multiple>false</multiple>
