@@ -81,7 +81,8 @@
                          coalesce((u.properties -&gt;&gt; 'smtp')::VARCHAR(100))::VARCHAR(254)  AS smtp,
                          coalesce((u.properties -&gt;&gt; 'user')::VARCHAR(100))::VARCHAR(254)  AS user,
                          coalesce((u.properties -&gt;&gt; 'pass')::VARCHAR(100))::VARCHAR(254)  AS pass,
-                         coalesce((u.properties -&gt;&gt; 'email')::VARCHAR(100))::VARCHAR(254) AS email
+                         coalesce((u.properties -&gt;&gt; 'email')::VARCHAR(100))::VARCHAR(254) AS email,
+                         coalesce((c.properties-&gt;&gt;'earved')::varchar(254))::varchar(254) as earved
                   FROM ou.config c,
                        ou.userid u
                   WHERE c.rekvid = $1
