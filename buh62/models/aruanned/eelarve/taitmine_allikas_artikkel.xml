@@ -1,0 +1,54 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT
+                        qryReport.*,
+                        a.nimetus::varchar(254),
+                        r.regkood::varchar(20),
+                        r.nimetus::varchar(254) AS asutus,
+                        coalesce(p.regkood,'')::varchar(20) AS parregkood,
+                        coalesce(p.nimetus,'')::varchar(254) AS parasutus
+                    FROM eelarve.eelarve_taitmine_allikas_artikkel($1::integer,$2::date, $3::integer, $4::integer) qryReport
+                    LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
+                    INNER JOIN ou.rekv r ON r.id = qryReport.rekv_id
+                    LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id                    </sql>
+    <alias>kulud_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+</VFPData>
