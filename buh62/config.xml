@@ -1,6 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
   <connection>
-	<name>test_server</name>			 
-	<description>test_server 1</description>			 
-	<type>odbc</type>			 
+	<name>narvalv</name>			 
+	<description>narvalv test_server</description>			 
+	<type>connection</type>	
+	<conn_str>DRIVER=PostgreSQL Unicode;DATABASE=narvalv;server=dbarch.narva.ee;PORT=5436;MaxVarcharSize=254;</conn_str>  
   </connection>
