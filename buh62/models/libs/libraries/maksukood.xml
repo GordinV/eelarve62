@@ -1,19 +1,34 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select l.id, l.kood, l.nimetus,
-            $2::integer as userId,
-            l.tun1, l.tun2, l.tun3, l.tun4, l.tun5
-            from libs.library l
-            where l.library = 'MAKSUKOOD'
-            and l.status &lt;&gt; 3</sql>
+    <sql>SELECT $1::INTEGER AS rekv_id,
+                           $2::INTEGER AS userId,
+                           l.id,
+                           l.kood,
+                           l.nimetus,
+                           l.tun1,
+                           l.tun2,
+                           l.tun3,
+                           l.tun4,
+                           l.tun5
+                    FROM libs.library l
+                        WHERE l.library = 'MAKSUKOOD'
+                             AND l.status &lt;&gt; 3</sql>
     <alias>curMaksukood</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.status, l.library,                
-                l.muud, l.tun1, l.tun2, l.tun3. l.tun4. l.tun5                
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.status,
+                     l.library,
+                     l.muud,
+                     l.tun1,
+                     l.tun2,
+                     l.tun3.l.tun4.l.tun5
+              FROM libs.library l
+                  WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'MAKSUKOOD' as doc_type_id,
@@ -34,8 +49,8 @@
     <alias>row</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from palk.com_maksukood l
-        where  (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT $1::INTEGER AS rekv_id, *
+                   FROM palk.com_maksukood l</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -43,7 +58,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
