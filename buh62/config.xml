@@ -1,4 +1,5 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
   <connection>
 	<name>narvalv</name>			 
 	<description>narvalv test_server</description>			 
@@ -11,3 +12,4 @@
 	<type>connection</type>	
 	<conn_str>DRIVER=PostgreSQL Unicode;DATABASE=test2;server=dbarch.narva.ee;PORT=5436;MaxVarcharSize=254;</conn_str>  
   </connection>  
+</VFPData>
