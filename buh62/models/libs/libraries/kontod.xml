@@ -9,7 +9,7 @@
     <alias>curKontod</alias>
   </grid>
   <select>
-    <sql>select l.rekvid, 
+    <sql>select coalesce(l.rekvid,0) as rekvid, 
                 case when l.tun5 = 1 then 'SD' when l.tun5 = 2 then 'SK' when l.tun5 = 3 then 'D' when l.tun5 = 4 then 'K' else null end::varchar(20) as konto_tyyp, 
                 l.id, trim(l.kood)::varchar(20) as kood, trim(l.nimetus)::varchar(254) as nimetus, 
                 l.library, l.tun1, l.tun2, l.tun3, l.tun4, l.muud, $2::integer as userid, 
