@@ -1,24 +1,23 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT rekv_id,
-                            sum(deebet)  AS deebet,
-                            sum(kreedit) AS kreedit,
-                            konto,
-                            tp,
-                            tegev,
-                            allikas,
-                            rahavoog,
-                            artikkel
-                     FROM eelarve.saldoandmik_aruanne($1::DATE, $2::DATE, $3::INTEGER)
-                     GROUP BY rekv_id,
-                              konto,
-                              tp,
-                              tegev,
-                              allikas,
-                              rahavoog,
-                              artikkel
-                     ORDER BY konto, tp, tegev, allikas, rahavoog</sql>
+    <sql>
+            SELECT rekv_id,
+                   sum(deebet)  AS deebet,
+                   sum(kreedit) AS kreedit,
+                   konto,
+                   tp,
+                   tegev,
+                   allikas,
+                   rahavoog
+            FROM eelarve.saldoandmik_aruanne($1::DATE, $2::INTEGER, $3::INTEGER)
+            GROUP BY rekv_id,
+                     konto,
+                     tp,
+                     tegev,
+                     allikas,
+                     rahavoog
+            ORDER BY konto, tp, tegev, allikas, rahavoog</sql>
     <alias>saldoandmik_report</alias>
   </grid>
   <select></select>
