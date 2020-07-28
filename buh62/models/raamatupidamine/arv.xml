@@ -326,6 +326,12 @@
     <multuple>false</multuple>
     <alias>get_omniva_bpm</alias>
   </select>
+  <select>
+    <sql>SELECT docs.check_arv_jaak($1, $2)</sql>
+    <query />
+    <multuple>false</multuple>
+    <alias>check_arv_jaak</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_arved a
