@@ -9,14 +9,7 @@
                            coalesce(p.nimetus, '')::VARCHAR(254) AS parasutus
                     FROM eelarve.eelarve_taitmine_allikas_artikkel($1::INTEGER, $2::DATE, $3::INTEGER,
                                                                    $4::INTEGER) qryReport
-                             LEFT OUTER JOIN (
-                        SELECT kood, nimetus
-                        FROM com_artikkel
-                        UNION ALL
-                        SELECT '3, 655' AS kood, 'Tulud (siirded eelarvesse, tagastamine)' AS nimetus
-                        UNION ALL
-                        SELECT '15,2586,4,5,6' AS kood, 'Põhitegevuse kulud' AS nimetus
-                    ) a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
+                             LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
                              INNER JOIN ou.rekv r ON r.id = qryReport.rekv_id
                              LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id                    </sql>
     <alias>kulud_report</alias>
