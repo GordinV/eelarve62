@@ -78,7 +78,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>selg,dok</validate>
+    <validate>selg,dok,parentid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
