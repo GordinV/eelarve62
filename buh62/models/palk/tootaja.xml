@@ -63,7 +63,7 @@
   </select>
   <select>
     <sql>SELECT * from palk.cur_toolepingud t
-                WHERE t.parentid = $1</sql>
+                WHERE t.parentid = $1 and rekvid in (select rekvid from ou.userid where id = $2)</sql>
     <query />
     <multiple>true</multiple>
     <alias>tooleping</alias>
