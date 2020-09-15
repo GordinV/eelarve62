@@ -74,6 +74,7 @@
                   FROM ou.userid u
                            INNER JOIN ou.rekv r ON r.id = u.rekvid
                   WHERE kasutaja = $1
+                    AND u.status &lt;&gt; 3
                     AND r.status &lt;&gt; 3</sql>
     <query />
     <multiple>true</multiple>
@@ -86,8 +87,8 @@
                   WHERE ($1 = 0
                       OR u.id = $1)
                     AND r.status &lt;&gt; 3
-                      ORDER BY u.last_login DESC
-                      , u.id DESC;</sql>
+                  ORDER BY u.last_login DESC
+                         , u.id DESC;</sql>
     <query />
     <multiple>true</multiple>
     <alias>get_all_users</alias>
