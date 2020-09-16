@@ -8,11 +8,12 @@
   </grid>
   <select>
     <sql>SELECT *,
-                     $2::INTEGER                      AS userid,
-                     'ASUTUSED'                        AS doc_type_id,
-                     (properties -&gt;&gt; 'pank')::varchar(20)     AS pank,
-                     (properties -&gt;&gt; 'kmkr')::varchar(20)     AS kmkr,
-                     (properties -&gt;&gt; 'kehtivus')::DATE AS kehtivus
+                     $2::INTEGER                                     AS userid,
+                     'ASUTUSED'                                      AS doc_type_id,
+                     (properties -&gt;&gt; 'pank')::VARCHAR(20)            AS pank,
+                     (properties -&gt;&gt; 'kmkr')::VARCHAR(20)            AS kmkr,
+                     (properties -&gt;&gt; 'kehtivus')::DATE               AS kehtivus,
+                     (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT AS aa
               FROM libs.asutus
               WHERE id = $1</sql>
     <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
@@ -29,16 +30,19 @@
             0::integer as staatus,
             ''::varchar(20) as pank,
             ''::varchar(20) as kmkr,
-            ''::text as mark</sqlAsNew>
+            ''::text as mark,
+            ''::TEXT AS aa</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <select>
     <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20) AS aa,
-                         $2 :: INTEGER                      AS userid
+                         $2 :: INTEGER                       AS userid
                   FROM libs.asutus a,
-                       json_array_elements(case when (a.properties -&gt;&gt; 'asutus_aa') is null then '[]'::json else (a.properties -&gt; 'asutus_aa') :: JSON end) AS e (element)
+                       json_array_elements(CASE
+                                               WHEN (a.properties -&gt;&gt; 'asutus_aa') IS NULL THEN '[]'::JSON
+                                               ELSE (a.properties -&gt; 'asutus_aa') :: JSON END) AS e (element)
                   WHERE a.id = $1</sql>
     <query />
     <multiple>true</multiple>
@@ -48,15 +52,22 @@
     <sql>SELECT Asutus.id
                   FROM libs.asutus Asutus
                   WHERE (upper(rtrim(ltrim(Asutus.regkood))) = upper($1) OR empty($1))
-                     AND (upper(rtrim(ltrim(Asutus.nimetus))) = upper($2) OR empty($2))</sql>
+                    AND (upper(rtrim(ltrim(Asutus.nimetus))) = upper($2) OR empty($2))</sql>
     <query />
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
   </select>
+  <select>
+    <sql>SELECT rekl.get_luba_number($1,
+                                              (SELECT rekvid FROM ou.userid WHERE id = $2 LIMIT 1))::VARCHAR(20) AS number</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>rekl_number</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_asutused a
-                   WHERE libs.check_asutus(a.id::integer, $1::INTEGER)
+                   WHERE libs.check_asutus(a.id::INTEGER, $1::INTEGER)
                      AND (kehtivus IS NULL OR kehtivus &gt;= date())
                    ORDER BY nimetus</sql>
     <alias>selectAsLibs</alias>
@@ -93,5 +104,12 @@
     <sql />
     <alias />
   </generateJournal>
-  <print></print>
+  <print>
+    <view>asutus_register</view>
+    <params>id</params>
+  </print>
+  <print>
+    <view>asutus_register</view>
+    <params>sqlWhere</params>
+  </print>
 </VFPData>

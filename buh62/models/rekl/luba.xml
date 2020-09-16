@@ -30,34 +30,39 @@
                          l.kord,
                          l.intress
                   FROM docs.doc d
-                         INNER JOIN rekl.luba l ON l.parentId = d.id
-                         INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                         INNER JOIN libs.asutus a ON a.id = l.asutusid
-                         LEFT OUTER JOIN libs.library t ON t.id = d.doc_type_id
-                         LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
+                           INNER JOIN rekl.luba l ON l.parentId = d.id
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                           INNER JOIN libs.asutus a ON a.id = l.asutusid
+                           LEFT OUTER JOIN libs.library t ON t.id = d.doc_type_id
+                           LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
                   WHERE d.id = $1</sql>
-    <sqlAsNew>SELECT $1 :: INTEGER                                                               AS id,
-                              $2 :: INTEGER                                                               AS userid,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                               AS created,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                               AS lastupdate,
-                              NULL                                                                        AS bpm,
-                              trim(t.nimetus)                                                             AS doc,
-                              trim(t.kood)                                                                AS doc_type_id,
-                              trim(s.nimetus)                                                             AS status,
-                              docs.sp_get_number(u.rekvId, 'LUBA', year(date()), NULL) + 1 :: VARCHAR(20) AS number,
-                              NULL :: INTEGER                                                             AS rekvId,
-                              NULL :: INTEGER                                                             AS asutusid,
-                              NULL :: TEXT                                                                AS muud,
-                              now() :: DATE                                                               AS algkpv,
-                              date(year(current_date), 12, 31)                                            AS loppkpv,
-                              0 :: NUMERIC                                                                AS summa,
-                              0 :: NUMERIC                                                                AS jaak,
-                              0 :: NUMERIC                                                                AS volg,
-                              NULL :: VARCHAR                                                             AS alus,
-                              0                                                                           AS staatus,
-                              0                                                                           AS doc_status,
-                              'KUU' :: VARCHAR(20)                                                        AS kord,
-                              0 :: NUMERIC                                                                AS intress
+    <sqlAsNew>SELECT $1 :: INTEGER                                                                          AS id,
+                              $2 :: INTEGER                                                                          AS userid,
+                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                                          AS created,
+                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                                          AS lastupdate,
+                              NULL                                                                                   AS bpm,
+                              trim(t.nimetus)                                                                        AS doc,
+                              trim(t.kood)                                                                           AS doc_type_id,
+                              trim(s.nimetus)                                                                        AS status,
+                              docs.sp_get_number(u.rekvId, 'LUBA', year(date()), NULL) +
+                              1 :: VARCHAR(20)                                                                       AS number,
+                              NULL :: INTEGER                                                                        AS rekvId,
+                              NULL :: INTEGER                                                                        AS asutusid,
+                              NULL :: TEXT                                                                           AS muud,
+                              (make_date(date_part('year', current_date)::INTEGER,
+                                         date_part('month', current_date) :: INTEGER, 1) -
+                               INTERVAL '1 month') :: DATE                                                           AS algkpv,
+                              (make_date(date_part('year', current_date)::INTEGER,
+                                         date_part('month', current_date) :: INTEGER, 1) -
+                               INTERVAL '1 day') :: DATE                                                             AS loppkpv,
+                              0 :: NUMERIC                                                                           AS summa,
+                              0 :: NUMERIC                                                                           AS jaak,
+                              0 :: NUMERIC                                                                           AS volg,
+                              NULL :: VARCHAR                                                                        AS alus,
+                              0                                                                                      AS staatus,
+                              0                                                                                      AS doc_status,
+                              'KUU' :: VARCHAR(20)                                                                   AS kord,
+                              0 :: NUMERIC                                                                           AS intress
                        FROM libs.library t,
                             libs.library s,
                             (SELECT * FROM ou.userid u WHERE u.id = $2 :: INTEGER) AS u
@@ -78,8 +83,8 @@
                          NULL :: VARCHAR(20)             AS liik,
                          NULL :: VARCHAR(20)             AS SOODUSTYYP
                   FROM rekl.luba AS l
-                         INNER JOIN rekl.luba1 l1 ON l1.parentid = l.Id
-                         INNER JOIN libs.nomenklatuur n ON n.id = l1.nomid
+                           INNER JOIN rekl.luba1 l1 ON l1.parentid = l.Id
+                           INNER JOIN libs.nomenklatuur n ON n.id = l1.nomid
                   WHERE l.parentid = $1</sql>
     <query />
     <multiple>true</multiple>
@@ -88,9 +93,9 @@
   <select>
     <sql>SELECT rd.id, $2 :: INTEGER AS userid, trim(l.kood) AS doc_type, trim(l.nimetus) AS name
                   FROM docs.doc d
-                         LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
-                         LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
-                         INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                           LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
+                           LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
                   WHERE d.id = $1</sql>
     <query />
     <multiple>true</multiple>
