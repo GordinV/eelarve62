@@ -36,33 +36,33 @@
                            LEFT OUTER JOIN libs.library t ON t.id = d.doc_type_id
                            LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
                   WHERE d.id = $1</sql>
-    <sqlAsNew>SELECT $1 :: INTEGER                                                                          AS id,
-                              $2 :: INTEGER                                                                          AS userid,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                                          AS created,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                                          AS lastupdate,
-                              NULL                                                                                   AS bpm,
-                              trim(t.nimetus)                                                                        AS doc,
-                              trim(t.kood)                                                                           AS doc_type_id,
-                              trim(s.nimetus)                                                                        AS status,
+    <sqlAsNew>SELECT $1 :: INTEGER                                 AS id,
+                              $2 :: INTEGER                                 AS userid,
+                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT AS created,
+                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT AS lastupdate,
+                              NULL                                          AS bpm,
+                              trim(t.nimetus)                               AS doc,
+                              trim(t.kood)                                  AS doc_type_id,
+                              trim(s.nimetus)                               AS status,
                               docs.sp_get_number(u.rekvId, 'LUBA', year(date()), NULL) +
-                              1 :: VARCHAR(20)                                                                       AS number,
-                              NULL :: INTEGER                                                                        AS rekvId,
-                              NULL :: INTEGER                                                                        AS asutusid,
-                              NULL :: TEXT                                                                           AS muud,
+                              1 :: VARCHAR(20)                              AS number,
+                              NULL :: INTEGER                               AS rekvId,
+                              NULL :: INTEGER                               AS asutusid,
+                              NULL :: TEXT                                  AS muud,
                               (make_date(date_part('year', current_date)::INTEGER,
                                          date_part('month', current_date) :: INTEGER, 1) -
-                               INTERVAL '1 month') :: DATE                                                           AS algkpv,
+                               INTERVAL '1 month') :: DATE                  AS algkpv,
                               (make_date(date_part('year', current_date)::INTEGER,
                                          date_part('month', current_date) :: INTEGER, 1) -
-                               INTERVAL '1 day') :: DATE                                                             AS loppkpv,
-                              0 :: NUMERIC                                                                           AS summa,
-                              0 :: NUMERIC                                                                           AS jaak,
-                              0 :: NUMERIC                                                                           AS volg,
-                              NULL :: VARCHAR                                                                        AS alus,
-                              0                                                                                      AS staatus,
-                              0                                                                                      AS doc_status,
-                              'KUU' :: VARCHAR(20)                                                                   AS kord,
-                              0 :: NUMERIC                                                                           AS intress
+                               INTERVAL '1 day') :: DATE                    AS loppkpv,
+                              0 :: NUMERIC                                  AS summa,
+                              0 :: NUMERIC                                  AS jaak,
+                              0 :: NUMERIC                                  AS volg,
+                              NULL :: VARCHAR                               AS alus,
+                              0                                             AS staatus,
+                              0                                             AS doc_status,
+                              'KUU' :: VARCHAR(20)                          AS kord,
+                              0 :: NUMERIC                                  AS intress
                        FROM libs.library t,
                             libs.library s,
                             (SELECT * FROM ou.userid u WHERE u.id = $2 :: INTEGER) AS u
@@ -105,6 +105,7 @@
     <sql>SELECT *
                    FROM rekl.com_asutus_rekl
                    WHERE rekvid = $1
+                     AND summa IS NOT NULL
                    ORDER BY nimetus</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
