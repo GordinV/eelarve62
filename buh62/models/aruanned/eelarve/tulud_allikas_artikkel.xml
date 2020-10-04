@@ -29,6 +29,14 @@
                                          SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus) r
                                         ON r.id = qryReport.rekv_id
                              LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
+                    WHERE (
+                                  eelarve_kinni &lt;&gt; 0
+                                  OR eelarve_parandatud &lt;&gt; 0
+                                  OR eelarve_kassa_kinni &lt;&gt; 0
+                                  OR eelarve_kassa_parandatud &lt;&gt; 0
+                                  OR tegelik &lt;&gt; 0
+                                  OR kassa &lt;&gt; 0
+                              )
         </sql>
     <alias>tulud_report</alias>
   </grid>
