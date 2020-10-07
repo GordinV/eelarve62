@@ -225,7 +225,8 @@
                   FROM docs.arvtasu arvtasu
                          INNER JOIN docs.mk mk ON (arvtasu.doc_tasu_id = mk.parentid AND arvtasu.pankkassa = 1)
                          INNER JOIN docs.mk1 mk1 ON (mk.id = mk1.parentid)
-                         LEFT OUTER JOIN docs.journalid journalid ON mk1.journalId = journalId.journalId
+                         LEFT OUTER JOIN docs.journal j ON mk1.journalId = j.parentid
+                         LEFT OUTER JOIN docs.journalid journalid ON j.id = journalId.journalId
                   WHERE Arvtasu.doc_arv_id = $1
                     AND arvtasu.summa &lt;&gt; 0
                     AND arvtasu.status &lt;&gt; 3
@@ -244,7 +245,8 @@
                   FROM docs.arvtasu arvtasu
                          INNER JOIN docs.korder1 korder1
                                     ON (arvtasu.doc_tasu_id = korder1.parentid AND arvtasu.pankkassa = 2)
-                         LEFT OUTER JOIN docs.journalid journalid ON korder1.journalId = journalId.journalId
+                         LEFT OUTER JOIN docs.journal j ON korder1.journalId = j.parentid
+                         LEFT OUTER JOIN docs.journalid journalid ON j.id = journalId.journalId
                   WHERE Arvtasu.doc_arv_id = $1
                     AND arvtasu.summa &lt;&gt; 0
                     AND arvtasu.status &lt;&gt; 3
