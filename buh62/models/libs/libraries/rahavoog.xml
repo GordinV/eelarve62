@@ -1,19 +1,30 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, kood, nimetus,  
-            $2::integer as userId,
-            muud 
-            from libs.library l
-            where l.library = 'RAHA'
-            and l.status &lt;&gt; 3</sql>
+    <sql>SELECT id,
+                           kood,
+                           nimetus,
+                           $2::INTEGER                           AS userId,
+                           muud,
+                           (properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+                    FROM libs.library l
+                    WHERE l.library = 'RAHA'
+                      AND l.status &lt;&gt; 3</sql>
     <alias>curRaha</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library, 
-                $2::integer as userid, 'RAHAVOOG' as doc_type_id
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.muud,
+                     l.status,
+                     l.library,
+                     $2::INTEGER                             AS userid,
+                     'RAHAVOOG'                              AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'RAHAVOOGS' as doc_type_id,
@@ -22,22 +33,24 @@
             null::text as nimetus,
             'RAHA'::text as library,
             0::integer as status,
+            null::date as valid,                        
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT Library.id 
-                    FROM libs.library Library 
-                    WHERE Library.library = 'RAHA'   
+    <sql>SELECT Library.id
+                  FROM libs.library Library
+                  WHERE Library.library = 'RAHA'
                     AND RTRIM(LTRIM(Library.kood)) = ltrim(rtrim($1))</sql>
     <query />
     <multiple>true</multiple>
     <alias>validate_rahavoog</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from com_rahavoog l</sql>
+    <sql>SELECT *
+                   FROM com_rahavoog l</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -45,7 +58,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
