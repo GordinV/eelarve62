@@ -97,6 +97,12 @@
     <multiple>false</multiple>
     <alias>kooperi_journal</alias>
   </select>
+  <select>
+    <sql>select docs.sp_lausendikontrol($1::JSONB) as result</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>validate_journal</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
