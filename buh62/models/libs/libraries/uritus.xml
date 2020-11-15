@@ -1,40 +1,69 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, kood, nimetus,  $2::integer as userId
-            from libs.library l
-            where l.library = 'URITUS'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT id,
+                           kood,
+                           nimetus,
+                           $2::INTEGER                             AS userId,
+                           (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+                    FROM libs.library l
+                    WHERE l.library = 'URITUS'
+                      AND l.status &lt;&gt; 3
+                      AND (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curUritused</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library,
-                l.tun1, l.tun2, l.tun3, l.tun4, l.tun5, 
-                $2::integer as userid, 'URITUS' as doc_type_id
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.muud,
+                     l.status,
+                     l.library,
+                     l.tun1,
+                     l.tun2,
+                     l.tun3,
+                     l.tun4,
+                     l.tun5,
+                     $2::INTEGER                             AS userid,
+                     'URITUS'                                AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'URITUS' as doc_type_id,
-            null::text as  kood,
-            null::integer as rekvid,
-            null::text as nimetus,
+            ''::text as  kood,
+            0::integer as rekvid,
+            ''::text as nimetus,
             'URITUS'::text as library,
-            null::integer as tun1,
-            null::integer as tun2,
-            null::integer as tun3,
-            null::integer as tun4,
-            null::integer as tun5,
+            0::integer as tun1,
+            0::integer as tun2,
+            0::integer as tun3,
+            0::integer as tun4,
+            0::integer as tun5,
             0::integer as status,
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_uritus_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from com_uritused l
-        where  (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT *
+                   FROM com_uritused l
+                   WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -42,7 +71,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -68,4 +98,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>

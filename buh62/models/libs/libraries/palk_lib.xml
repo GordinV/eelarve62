@@ -1,40 +1,53 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select l.id, l.kood, l.nimetus, l.tun5 as kehtiv,
-            coalesce((l.properties::JSONB -&gt;&gt; 'tululiik'),'')::varchar(20) as tululiik,  
-            coalesce((l.properties::JSONB -&gt;&gt; 'liik')::integer,1) as liik,
-            $2::integer as userId,
-            l.tun5 as is_arhiiv
-            from libs.library l
-            where l.library = 'PALK'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT l.id,
+                           l.kood,
+                           l.nimetus,
+                           l.tun5                                                          AS kehtiv,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'tululiik'), '')::VARCHAR(20) AS tululiik,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'liik')::INTEGER, 1)          AS liik,
+                           $2::INTEGER                                                     AS userId,
+                           l.tun5                                                          AS is_arhiiv,
+                           (l.properties::JSONB -&gt;&gt; 'valid')::DATE                         AS valid
+                    FROM libs.library l
+                    WHERE l.library = 'PALK'
+                      AND l.status &lt;&gt; 3
+                      AND (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curPalklib</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.status, l.library, l.tun1, l.tun5,
-                $2::integer as userid, 'PALK_LIB' as doc_type_id,
-                (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER as liik,
-                (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER as tund,
-                (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER as maks,
-                (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER as asutusest,
-                (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER as palgafond,
-                (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER as sots,
-                (l.properties::JSONB -&gt;&gt; 'round') :: numeric(12,4) as round,
-                (l.properties::JSONB -&gt;&gt; 'konto') :: varchar(20) as konto,
-                (l.properties::JSONB -&gt;&gt; 'korrkonto') :: varchar(20) as korrkonto,
-                (l.properties::JSONB -&gt;&gt; 'tunnusid') :: integer as tunnusId,
-                (l.properties::JSONB -&gt;&gt; 'elatis') :: integer as elatis,
-                (l.properties::JSONB -&gt;&gt; 'uuritus') :: varchar(20) as uuritus,
-                (l.properties::JSONB -&gt;&gt; 'proj') :: varchar(20) as proj,
-                (l.properties::JSONB -&gt;&gt; 'tegev') :: varchar(20) as tegev,
-                (l.properties::JSONB -&gt;&gt; 'allikas') :: varchar(20) as allikas,
-                (l.properties::JSONB -&gt;&gt; 'artikkel') :: varchar(20) as artikkel,
-                (l.properties::JSONB -&gt;&gt; 'tululiik') :: varchar(20) as tululiik,
-                l.muud                 
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.status,
+                     l.library,
+                     l.tun1,
+                     l.tun5,
+                     $2::INTEGER                                          AS userid,
+                     'PALK_LIB'                                           AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER          AS liik,
+                     (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER          AS tund,
+                     (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER          AS maks,
+                     (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER     AS asutusest,
+                     (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER     AS palgafond,
+                     (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER          AS sots,
+                     (l.properties::JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)  AS round,
+                     (l.properties::JSONB -&gt;&gt; 'konto') :: VARCHAR(20)     AS konto,
+                     (l.properties::JSONB -&gt;&gt; 'korrkonto') :: VARCHAR(20) AS korrkonto,
+                     (l.properties::JSONB -&gt;&gt; 'tunnusid') :: INTEGER      AS tunnusId,
+                     (l.properties::JSONB -&gt;&gt; 'elatis') :: INTEGER        AS elatis,
+                     (l.properties::JSONB -&gt;&gt; 'uuritus') :: VARCHAR(20)   AS uuritus,
+                     (l.properties::JSONB -&gt;&gt; 'proj') :: VARCHAR(20)      AS proj,
+                     (l.properties::JSONB -&gt;&gt; 'tegev') :: VARCHAR(20)     AS tegev,
+                     (l.properties::JSONB -&gt;&gt; 'allikas') :: VARCHAR(20)   AS allikas,
+                     (l.properties::JSONB -&gt;&gt; 'artikkel') :: VARCHAR(20)  AS artikkel,
+                     (l.properties::JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20)  AS tululiik,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE              AS valid,
+                     l.muud
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             null::integer as tun1, null::integer as tun5,
             $2::integer as userid, 
@@ -61,22 +74,47 @@
             null::varchar(20) as allikas,
             null::varchar(20) as artikkel,
             null::varchar(20) as tululiik,
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               fnc_check_libs($2::JSON, $3::DATE, $1::INTEGER))
+                           AS x (error_message TEXT)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_libs</alias>
+  </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               get_palk_lib_kasutus($1::INTEGER, $2::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from palk.com_palk_lib l
-        where  l.rekvId = $1</sql>
+    <sql>SELECT *
+                   FROM palk.com_palk_lib l
+                   WHERE l.rekvId = $1</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_palk_lib($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_palk_lib($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

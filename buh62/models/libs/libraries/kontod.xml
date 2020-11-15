@@ -48,6 +48,17 @@
     <multiple>true</multiple>
     <alias>subkonto</alias>
   </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_konto_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
     <sql>select *, $1 as rekv_id from com_kontoplaan l order by kood</sql>
     <alias>selectAsLibs</alias>

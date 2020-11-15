@@ -64,6 +64,18 @@
     <multiple>false</multiple>
     <alias>rekl_number</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               get_asutus_kasutus($2::INTEGER, $3::DATE,
+                                                  $1::INTEGER)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_asutused a

@@ -1,29 +1,45 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, coalesce(kood,'')::varchar(20) as kood, coalesce(nimetus,'')::varchar(254) as nimetus,  $2::integer as userId, dok
-            from libs.nomenklatuur n
-            where (n.rekvId = $1 or n.rekvid is null) and n.status &lt;&gt; 3</sql>
+    <sql>SELECT id,
+                           coalesce(kood, '')::VARCHAR(20)     AS kood,
+                           coalesce(nimetus, '')::VARCHAR(254) AS nimetus,
+                           $2::INTEGER                         AS userId,
+                           n.dok,
+                           (n.properties -&gt;&gt; 'konto')::TEXT    AS konto,
+                           (n.properties -&gt;&gt; 'tunnus')::TEXT   AS tunnus,
+                           n.hind,
+                           (n.properties -&gt;&gt; 'valid')::DATE    AS valid
+                    FROM libs.nomenklatuur n
+                    WHERE (n.rekvId = $1 OR n.rekvid IS NULL)
+                      AND n.status &lt;&gt; 3</sql>
     <alias>curNomenklatuur</alias>
   </grid>
   <select>
-    <sql>select n.kood, 
-                n.id, n.nimetus, 
-                n.dok::varchar(20), 
-                n.muud, n.rekvid, $2::integer as userid, 'NOMENCLATURE' as doc_type_id,
-                'EUR' as valuuta, 1 as kuurs,
-                n.uhik as uhik,
-                n.hind as hind,
-                (n.properties::jsonb -&gt;&gt;'vat')::varchar(20) as vat,
-                (n.properties::jsonb -&gt;&gt;'konto')::varchar(20) as konto,
-                (n.properties::jsonb -&gt;&gt;'projekt')::varchar(20) as projekt,
-                (n.properties::jsonb -&gt;&gt;'tunnus')::varchar(20) as tunnus,
-                (n.properties::jsonb -&gt;&gt;'tegev')::varchar(20) as tegev,
-                (n.properties::jsonb -&gt;&gt;'allikas')::varchar(20) as allikas,
-                (n.properties::jsonb -&gt;&gt;'rahavoog')::varchar(20) as rahavoog,
-                (n.properties::jsonb -&gt;&gt;'artikkel')::varchar(20) as artikkel                
-                from libs.nomenklatuur n 
-                where n.id = $1</sql>
+    <sql>SELECT n.kood,
+                     n.id,
+                     n.nimetus,
+                     n.dok::VARCHAR(20),
+                     n.muud,
+                     n.rekvid,
+                     $2::INTEGER                                                    AS userid,
+                     'NOMENCLATURE'                                                 AS doc_type_id,
+                     'EUR'                                                          AS valuuta,
+                     1                                                              AS kuurs,
+                     n.uhik                                                         AS uhik,
+                     n.hind                                                         AS hind,
+                     (n.properties::JSONB -&gt;&gt; 'vat')::VARCHAR(20)                   AS vat,
+                     (n.properties::JSONB -&gt;&gt; 'konto')::VARCHAR(20)                 AS konto,
+                     (n.properties::JSONB -&gt;&gt; 'projekt')::VARCHAR(20)               AS projekt,
+                     (n.properties::JSONB -&gt;&gt; 'tunnus')::VARCHAR(20)                AS tunnus,
+                     (n.properties::JSONB -&gt;&gt; 'tegev')::VARCHAR(20)                 AS tegev,
+                     (n.properties::JSONB -&gt;&gt; 'allikas')::VARCHAR(20)               AS allikas,
+                     (n.properties::JSONB -&gt;&gt; 'rahavoog')::VARCHAR(20)              AS rahavoog,
+                     (n.properties::JSONB -&gt;&gt; 'artikkel')::VARCHAR(20)              AS artikkel,
+                     coalesce((n.properties::JSONB -&gt;&gt; 'kas_inf3')::BOOLEAN, FALSE) AS kas_inf3,
+                     (n.properties::JSONB -&gt;&gt; 'valid')::DATE                        AS valid
+              FROM libs.nomenklatuur n
+              WHERE n.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , $2::integer as userid, 'NOMENCLATURE' as doc_type_id,
             ''::varchar(20) as  kood,
             0::integer as rekvid,
@@ -39,21 +55,47 @@
             null::text as properties,
             'EUR' as valuuta, 1 as kuurs,
             '20'::varchar(20) as vat,
+            false as kas_inf3,
             null::varchar(20) as konto,
             null::varchar(20) as projekt,
             null::varchar(20) as tunnus,
             null::varchar(20) as tegev,
             null::varchar(20) as allikas,
             null::varchar(20) as rahavoog,
-            null::varchar(20) as artikkel</sqlAsNew>
+            null::varchar(20) as artikkel,
+            null::date as valid</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               fnc_check_libs($2::JSON, $3::date, $1::INTEGER))
+                           AS x (error_message TEXT)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_libs</alias>
+  </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               get_nom_kasutus($2::INTEGER, $3::date,
+                                               $1::INTEGER)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from com_nomenclature 
-            where (rekvid = $1 or rekvid is null)
-            order by kood</sql>
+    <sql>SELECT *
+                   FROM com_nomenclature
+                   WHERE (rekvid = $1 OR rekvid IS NULL)
+                       ORDER BY kood</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -61,7 +103,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_nomenclature($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_nomenclature($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -87,5 +130,12 @@
     <sql />
     <alias />
   </generateJournal>
-  <print></print>
+  <print>
+    <view>noms_register</view>
+    <params>id</params>
+  </print>
+  <print>
+    <view>noms_register</view>
+    <params>sqlWhere</params>
+  </print>
 </VFPData>

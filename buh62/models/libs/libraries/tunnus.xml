@@ -1,43 +1,65 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select l.*, $2::integer as userId
-            from cur_tunnus l
-            where (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT l.*, $2::INTEGER AS userId
+                    FROM cur_tunnus l
+                    WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curTunnus</alias>
   </grid>
   <select>
-    <sql>select 
-                l.id, 
-                l.kood::varchar(20) as kood, 
-                l.nimetus::varchar(254) as nimetus, 
-                l.library::varchar(20), l.muud,
-                $2::integer as userid, 
-                'TUNNUS' as doc_type_id
-                from libs.library l 
-                where l.library = 'TUNNUS' and l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.kood::VARCHAR(20)                     AS kood,
+                     l.nimetus::VARCHAR(254)                 AS nimetus,
+                     l.library::VARCHAR(20),
+                     l.muud,
+                     $2::INTEGER                             AS userid,
+                     l.rekvid                                AS rekvid,
+                     'TUNNUS'                                AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+              FROM libs.library l
+              WHERE l.library = 'TUNNUS'
+                AND l.id = $1</sql>
     <sqlAsNew>select  
                     $1::integer as id , 
                     $2::integer as userid, 
                     'TUNNUS' as doc_type_id,
-                    null::varchar(20) as  kood,
-                    null::integer as rekvid,
-                    null::varchar(254) as nimetus,
+                    ''::varchar(20) as  kood,
+                    0::integer as rekvid,
+                    ''::varchar(254) as nimetus,
                     'TUNNUS'::varchar(20) as library,
+                    null::date as valid,                    
                     null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_tunnus_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from (
-        select 0 as id, ''::varchar(20) as kood, ''::varchar(254) as nimetus 
-        union 
-        select id, trim(kood) as kood, trim(nimetus) as name 
-        from cur_tunnus 
-        where rekvid = $1
-        ) qry  
-        order by kood</sql>
+    <sql>SELECT *
+                   FROM (
+                            SELECT 0                AS id,
+                                   ''::VARCHAR(20)  AS kood,
+                                   ''::VARCHAR(254) AS nimetus,
+                                   NULL::DATE       AS valid
+                            UNION
+                            SELECT id,
+                                   trim(kood)    AS kood,
+                                   trim(nimetus) AS name,
+                                   l.valid::DATE
+                            FROM cur_tunnus l
+                            WHERE rekvid = $1
+                        ) qry
+                   ORDER BY kood</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -45,7 +67,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -71,5 +94,12 @@
     <sql />
     <alias />
   </generateJournal>
-  <print></print>
+  <print>
+    <view>tunnus</view>
+    <params>id</params>
+  </print>
+  <print>
+    <view>tunnus</view>
+    <params>sqlWhere</params>
+  </print>
 </VFPData>

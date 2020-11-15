@@ -1,24 +1,28 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select * from cur_ametid a
-            where (a.rekvId = $1 or a.rekvid is null)</sql>
+    <sql>SELECT *
+                    FROM cur_ametid a
+                    WHERE (a.rekvId = $1 OR a.rekvid IS NULL)</sql>
     <alias>curAmetid</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, 
-                l.kood::varchar(20) as kood, 
-                l.nimetus::varchar(254) as nimetus, 
-                l.muud, 
-                l.status, 
-                l.library::varchar(20) as library,
-                $2::integer as userid, 'AMET' as doc_type_id,
-                (l.properties:: JSONB -&gt;&gt; 'osakondid') :: INTEGER AS osakondId,
-                (l.properties:: JSONB -&gt;&gt; 'kogus') :: numeric(18,2) AS kogus,
-                (l.properties:: JSONB -&gt;&gt; 'palgamaar') ::integer AS palgamaar,
-                (l.properties:: JSONB -&gt;&gt; 'tunnusid') ::integer AS tunnusId
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood::VARCHAR(20)                                  AS kood,
+                     l.nimetus::VARCHAR(254)                              AS nimetus,
+                     l.muud,
+                     l.status,
+                     l.library::VARCHAR(20)                               AS library,
+                     $2::INTEGER                                          AS userid,
+                     'AMET'                                               AS doc_type_id,
+                     (l.properties:: JSONB -&gt;&gt; 'osakondid') :: INTEGER    AS osakondId,
+                     (l.properties:: JSONB -&gt;&gt; 'kogus') :: NUMERIC(18, 2) AS kogus,
+                     (l.properties:: JSONB -&gt;&gt; 'palgamaar') ::INTEGER     AS palgamaar,
+                     (l.properties:: JSONB -&gt;&gt; 'tunnusid') ::INTEGER      AS tunnusId,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE              AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'AMET' as doc_type_id,
@@ -31,42 +35,66 @@
             null::numeric(18,2) as kogus,
             null::integer as palgamaar,
             null::integer as tunnusId,
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT
-              tmpl.id,
-              tmpl.parentid,
-              tmpl.libid,
-              tmpl.summa,
-              tmpl.percent_,
-              tmpl.tulumaks,
-              tmpl.tulumaar,
-              tmpl.tunnus,
-              tmpl.amet,
-              tmpl.kood :: VARCHAR(20),
-              tmpl.nimetus :: VARCHAR(254),
-              tmpl.liik,
-              tmpl.tund,
-              tmpl.maks,
-              tmpl.asutusest,
-              tmpl.tululiik,
-              tmpl.liik_ :: VARCHAR(20),
-              tmpl.tund_ :: VARCHAR(20),
-              tmpl.maks_ :: VARCHAR(20),
-              $2::integer as userid
-            from palk.cur_palk_tmpl tmpl
-            where parentid = $1</sql>
+    <sql>SELECT tmpl.id,
+                         tmpl.parentid,
+                         tmpl.libid,
+                         tmpl.summa,
+                         tmpl.percent_,
+                         tmpl.tulumaks,
+                         tmpl.tulumaar,
+                         tmpl.tunnus,
+                         tmpl.amet,
+                         tmpl.kood :: VARCHAR(20),
+                         tmpl.nimetus :: VARCHAR(254),
+                         tmpl.liik,
+                         tmpl.tund,
+                         tmpl.maks,
+                         tmpl.asutusest,
+                         tmpl.tululiik,
+                         tmpl.liik_ :: VARCHAR(20),
+                         tmpl.tund_ :: VARCHAR(20),
+                         tmpl.maks_ :: VARCHAR(20),
+                         $2::INTEGER AS userid
+                  FROM palk.cur_palk_tmpl tmpl
+                  WHERE parentid = $1</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               fnc_check_libs($2::JSON, $3::date, $1::INTEGER))
+                           AS x (error_message TEXT)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_libs</alias>
+  </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               get_amet_kasutus($2::INTEGER, $3::DATE,
+                                                $1::INTEGER)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from com_ametid l
-        where  l.rekvId = $1</sql>
+    <sql>SELECT *
+                   FROM com_ametid l
+                   WHERE l.rekvId = $1</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -74,7 +102,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

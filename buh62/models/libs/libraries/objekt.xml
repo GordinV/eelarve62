@@ -1,31 +1,39 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select $2::integer as userId,
-             o.*
-            FROM cur_objekt o 
-            WHERE o.rekvid = $1::integer</sql>
+    <sql>SELECT $2::INTEGER AS userId,
+                           o.*
+                    FROM cur_objekt o
+                    WHERE o.rekvid = $1::INTEGER</sql>
     <alias>curObjekt</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library, 
-                $2::integer as userid, 'OBJEKT' as doc_type_id,
-                (l.properties::jsonb-&gt;&gt;'parentid')::integer as parentid,
-                (l.properties::jsonb-&gt;&gt;'asutusid')::integer as asutusid,
-                (l.properties::jsonb-&gt;&gt;'nait02')::numeric as nait02,
-                (l.properties::jsonb-&gt;&gt;'nait03')::numeric as nait03,
-                (l.properties::jsonb-&gt;&gt;'nait04')::numeric as nait04,
-                (l.properties::jsonb-&gt;&gt;'nait05')::numeric as nait05,
-                (l.properties::jsonb-&gt;&gt;'nait06')::numeric as nait06,
-                (l.properties::jsonb-&gt;&gt;'nait07')::numeric as nait07,
-                (l.properties::jsonb-&gt;&gt;'nait08')::numeric as nait08,
-                (l.properties::jsonb-&gt;&gt;'nait09')::numeric as nait09,
-                (l.properties::jsonb-&gt;&gt;'nait10')::numeric as nait10,
-                (l.properties::jsonb-&gt;&gt;'nait11')::numeric as nait11,
-                (l.properties::jsonb-&gt;&gt;'nait14')::numeric as nait14,
-                (l.properties::jsonb-&gt;&gt;'nait15')::numeric as nait15
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.muud,
+                     l.status,
+                     l.library,
+                     $2::INTEGER                                   AS userid,
+                     'OBJEKT'                                      AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'parentid')::INTEGER AS parentid,
+                     (l.properties::JSONB -&gt;&gt; 'asutusid')::INTEGER AS asutusid,
+                     (l.properties::JSONB -&gt;&gt; 'nait02')::NUMERIC   AS nait02,
+                     (l.properties::JSONB -&gt;&gt; 'nait03')::NUMERIC   AS nait03,
+                     (l.properties::JSONB -&gt;&gt; 'nait04')::NUMERIC   AS nait04,
+                     (l.properties::JSONB -&gt;&gt; 'nait05')::NUMERIC   AS nait05,
+                     (l.properties::JSONB -&gt;&gt; 'nait06')::NUMERIC   AS nait06,
+                     (l.properties::JSONB -&gt;&gt; 'nait07')::NUMERIC   AS nait07,
+                     (l.properties::JSONB -&gt;&gt; 'nait08')::NUMERIC   AS nait08,
+                     (l.properties::JSONB -&gt;&gt; 'nait09')::NUMERIC   AS nait09,
+                     (l.properties::JSONB -&gt;&gt; 'nait10')::NUMERIC   AS nait10,
+                     (l.properties::JSONB -&gt;&gt; 'nait11')::NUMERIC   AS nait11,
+                     (l.properties::JSONB -&gt;&gt; 'nait14')::NUMERIC   AS nait14,
+                     (l.properties::JSONB -&gt;&gt; 'nait15')::NUMERIC   AS nait15,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE       AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'OBJEKT' as doc_type_id,
@@ -48,14 +56,28 @@
             0::numeric as nait14,
             0::numeric as nait15,
             0::integer as status,
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_objekt_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from com_objekt l 
-        where (l.rekvId = $1 or l.rekvid is null) order by kood</sql>
+    <sql>SELECT *
+                   FROM com_objekt l
+                   WHERE (l.rekvId = $1 OR l.rekvid IS NULL)
+                   ORDER BY kood</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -63,7 +85,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

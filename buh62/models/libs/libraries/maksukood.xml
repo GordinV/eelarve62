@@ -1,8 +1,8 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT $1::INTEGER AS rekv_id,
-                           $2::INTEGER AS userId,
+    <sql>SELECT $1::INTEGER                            AS rekv_id,
+                           $2::INTEGER                            AS userId,
                            l.id,
                            l.kood,
                            l.nimetus,
@@ -10,10 +10,11 @@
                            l.tun2,
                            l.tun3,
                            l.tun4,
-                           l.tun5
+                           l.tun5,
+                           (l.properties::JSON -&gt;&gt; 'valid')::DATE AS valid
                     FROM libs.library l
-                        WHERE l.library = 'MAKSUKOOD'
-                             AND l.status &lt;&gt; 3</sql>
+                    WHERE l.library = 'MAKSUKOOD'
+                      AND l.status &lt;&gt; 3</sql>
     <alias>curMaksukood</alias>
   </grid>
   <select>
@@ -26,9 +27,12 @@
                      l.muud,
                      l.tun1,
                      l.tun2,
-                     l.tun3.l.tun4.l.tun5
+                     l.tun3,
+                     l.tun4,
+                     l.tun5,
+                     (l.properties::JSON -&gt;&gt; 'valid')::DATE AS valid
               FROM libs.library l
-                  WHERE l.id = $1</sql>
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'MAKSUKOOD' as doc_type_id,
@@ -42,11 +46,22 @@
             0 as tun3,
             0 as tun4,
             0 as tun5,
-            
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_tululiik_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT $1::INTEGER AS rekv_id, *

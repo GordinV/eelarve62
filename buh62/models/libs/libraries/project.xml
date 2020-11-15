@@ -1,34 +1,59 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, kood, nimetus,  $2::integer as userId
-            from libs.library l
-            where l.library = 'PROJ'
-            and l.status &lt;&gt; 3
-            and (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT id,
+                           kood,
+                           nimetus,
+                           $2::INTEGER                           AS userId,
+                           (properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+                    FROM libs.library l
+                    WHERE l.library = 'PROJ'
+                      AND l.status &lt;&gt; 3
+                      AND (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curProjektid</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library, 
-                $2::integer as userid, 'PROJECT' as doc_type_id
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.muud,
+                     l.status,
+                     l.library,
+                     $2::INTEGER                             AS userid,
+                     'PROJECT'                               AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'PROJECT' as doc_type_id,
-            null::text as  kood,
-            null::integer as rekvid,
-            null::text as nimetus,
+            ''::text as  kood,
+            0::integer as rekvid,
+            ''::text as nimetus,
             'PROJ'::text as library,
             0::integer as status,
+            null::date as valid,            
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT $1 AS rekv_id, *
+                  FROM jsonb_to_recordset(
+                               get_proj_kasutus($2::INTEGER, $3::DATE)
+                           ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_lib_usage</alias>
+  </select>
   <selectAsLibs>
-    <sql>select * from com_projekt l
-        where  (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT *
+                   FROM com_projekt l
+                   WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -36,7 +61,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -62,4 +88,5 @@
     <sql />
     <alias />
   </generateJournal>
+  <print></print>
 </VFPData>

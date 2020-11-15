@@ -1,45 +1,43 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                      d.id,
-                      d.selg::varchar(254)    AS SELG,
-                      d.parentid,
-                      l.nimetus::varchar(254) AS nimetus, 
-                      l.kood AS dok,
-                      coalesce((d.details -&gt;&gt; 'konto')::VARCHAR(20), '')::VARCHAR(20)    AS konto,
-                      coalesce((d.details -&gt;&gt; 'kbmkonto')::VARCHAR(20), '')::VARCHAR(20) AS kbmkonto
+    <sql>SELECT d.id,
+                           d.selg::VARCHAR(254)                                               AS SELG,
+                           d.parentid,
+                           l.nimetus::VARCHAR(254)                                            AS nimetus,
+                           l.kood                                                             AS dok,
+                           coalesce((d.details -&gt;&gt; 'konto')::VARCHAR(20), '')::VARCHAR(20)    AS konto,
+                           coalesce((d.details -&gt;&gt; 'kbmkonto')::VARCHAR(20), '')::VARCHAR(20) AS kbmkonto
                     FROM libs.library l
-                      INNER JOIN libs.dokprop d ON l.id = d.parentId
+                             INNER JOIN libs.dokprop d ON l.id = d.parentId
                     WHERE l.library = 'DOK'
-                          AND d.status &lt;&gt; 3
-                          AND d.rekvId = $1
-                    ORDER by trim(selg)
+                      AND d.status &lt;&gt; 3
+                      AND d.rekvId = $1
+                    ORDER BY trim(selg)
         </sql>
     <alias>curDokprop</alias>
   </grid>
   <select>
-    <sql>SELECT
-              d.id,
-              d.selg,
-              l.id as parentid,
-              l.nimetus                                          AS dok,
-              d.rekvid,
-              $2 :: INTEGER                                       AS userid,
-              coalesce((d.details :: JSONB -&gt;&gt; 'konto'),'') :: VARCHAR(20)    AS konto,
-              coalesce((d.details :: JSONB -&gt;&gt; 'kbmkonto'),'') :: VARCHAR(20) AS kbmkonto,
-              coalesce((d.details :: JSONB -&gt;&gt; 'kood1'),'') :: VARCHAR(20)    AS kood1,
-              coalesce((d.details :: JSONB -&gt;&gt; 'kood2'),'') :: VARCHAR(20)    AS kood2,
-              coalesce((d.details :: JSONB -&gt;&gt; 'kood3'),'') :: VARCHAR(20)    AS kood3,
-              coalesce((d.details :: JSONB -&gt;&gt; 'kood5'),'') :: VARCHAR(20)    AS kood5,
-              coalesce(d.proc_,'')::varchar(20) as proc_,
-              d.registr,
-              d.vaatalaus,
-              d.muud,
-              coalesce(d.asutusid,0) as asutusid
-            FROM libs.library l
-              LEFT OUTER JOIN libs.dokprop d ON l.id = d.parentId
-            WHERE d.id = $1</sql>
+    <sql>SELECT d.id,
+                     d.selg,
+                     l.id                                                             AS parentid,
+                     l.nimetus                                                        AS dok,
+                     d.rekvid,
+                     $2 :: INTEGER                                                    AS userid,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS konto,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'kbmkonto'), '') :: VARCHAR(20) AS kbmkonto,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'kood1'), '') :: VARCHAR(20)    AS kood1,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'kood2'), '') :: VARCHAR(20)    AS kood2,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'kood3'), '') :: VARCHAR(20)    AS kood3,
+                     coalesce((d.details :: JSONB -&gt;&gt; 'kood5'), '') :: VARCHAR(20)    AS kood5,
+                     coalesce(d.proc_, '')::VARCHAR(20)                               AS proc_,
+                     d.registr,
+                     d.vaatalaus,
+                     d.muud,
+                     coalesce(d.asutusid, 0)                                          AS asutusid
+              FROM libs.library l
+                       LEFT OUTER JOIN libs.dokprop d ON l.id = d.parentId
+              WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
               $1::integer as id,
               null::text as selg,
@@ -63,10 +61,31 @@
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               fnc_check_libs($2::JSON, $3::DATE, $1::INTEGER))
+                           AS x (error_message TEXT)
+                  WHERE error_message IS NOT NULL
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>validate_libs</alias>
+  </select>
   <selectAsLibs>
-    <sql>SELECT id, nimetus::varchar(254), dok::varchar(20), kood, kbmkonto, kood1, kood2, kood3, kood5, asutusid, rekvid
-                        FROM com_dokprop l
-                        WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
+    <sql>SELECT id,
+                          nimetus::VARCHAR(254),
+                          dok::VARCHAR(20),
+                          kood,
+                          kbmkonto,
+                          kood1,
+                          kood2,
+                          kood3,
+                          kood5,
+                          asutusid,
+                          rekvid
+                   FROM com_dokprop l
+                   WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -74,7 +93,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_dokprop($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_dokprop($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
