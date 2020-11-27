@@ -1,33 +1,32 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select t.*, $2::integer as userId
-            from palk.cur_palk_taabel t
-            where (t.rekvid = $1 or rekvid is null)</sql>
+    <sql>SELECT t.*, $2::INTEGER AS userId
+                    FROM palk.cur_palk_taabel t
+                        WHERE (t.rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>curTaabel1</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  $2 :: INTEGER            AS userid,
-                 'PALK_TAABEL' AS doc_type_id,
-                  p.id,
-                  p.lepingid,
-                  p.kuu,
-                  p.aasta,
-                  p.kokku,
-                  p.too,
-                  p.paev,
-                  p.ohtu,
-                  p.oo,
-                  p.tahtpaev,
-                  p.puhapaev,
-                  p.uleajatoo,
-                  p.status,
-                  p.muud,
-                  t.parentid
-                FROM palk.palk_taabel1 p
-                inner join palk.tooleping t on t.id = p.lepingid
-                WHERE p.id = $1</sql>
+    <sql>SELECT $2 :: INTEGER AS userid,
+                     'PALK_TAABEL' AS doc_type_id,
+                     p.id,
+                     p.lepingid,
+                     p.kuu,
+                     p.aasta,
+                     p.kokku,
+                     p.too,
+                     p.paev,
+                     p.ohtu,
+                     p.oo,
+                     p.tahtpaev,
+                     p.puhapaev,
+                     p.uleajatoo,
+                     p.status,
+                     p.muud,
+                     t.parentid
+              FROM palk.palk_taabel1 p
+                       INNER JOIN palk.tooleping t ON t.id = p.lepingid
+                  WHERE p.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -60,7 +59,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_palk_taabel($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM palk.sp_delete_palk_taabel($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -71,7 +71,17 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from palk.gen_taabel1($1::integer, $2::json)</sql>
+    <sql>SELECT *
+                  FROM jsonb_to_recordset(
+                               (
+                                   SELECT qry.data
+                                   FROM (
+                                            SELECT *
+                                            FROM palk.gen_taabel1($1::INTEGER, $2::JSON)
+                                        ) qry
+                               )
+                           ) AS x (error_message TEXT, error_code INTEGER, result INTEGER)
+        </sql>
     <alias>genTaabel</alias>
   </executeCommand>
   <register>
