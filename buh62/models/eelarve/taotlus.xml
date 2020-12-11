@@ -1,140 +1,146 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT       
-                      id,
-                      rekvid,
-                      koostajaid,
-                      aktseptid,
-                      kpv,
-                      number,
-                      aasta,
-                      kuu,
-                      status as status,
-                      allkiri,
-                      kood1,
-                      kood2,
-                      kood3,
-                      kood4,
-                      kood5,
-                      tunnus,
-                      summa,
-                      summa_kassa,
-                      parentid,
-                      regkood,
-                      nimetus::varchar(254),
-                      ametnik::varchar(254)
-                        FROM cur_taotlused t
-                        WHERE t.rekvId IN (SELECT rekv_id
-                            FROM get_asutuse_struktuur($1::integer))
-                            and docs.usersRigths(t.id::integer, 'select', $2::integer)</sql>
+    <sql>SELECT id,
+                           rekvid,
+                           koostajaid,
+                           aktseptid,
+                           kpv,
+                           number,
+                           aasta,
+                           kuu,
+                           status AS status,
+                           allkiri,
+                           kood1,
+                           kood2,
+                           kood3,
+                           kood4,
+                           kood5,
+                           tunnus,
+                           summa,
+                           summa_kassa,
+                           parentid,
+                           regkood,
+                           nimetus::VARCHAR(254),
+                           ametnik::VARCHAR(254)
+                    FROM cur_taotlused t
+                    WHERE t.rekvId IN (SELECT rekv_id
+                                       FROM get_asutuse_struktuur($1::INTEGER))
+                      AND docs.usersRigths(t.id::INTEGER, 'select', $2::INTEGER)</sql>
     <alias>curTaotlus</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  d.id,
-                  $2 :: INTEGER                                        AS userid,
-                  to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT     AS created,
-                  to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT  AS lastupdate,
-                  d.bpm,
-                  trim(l.nimetus)                                     AS doc,
-                  trim(l.kood)                                        AS doc_type_id,
-                  d.status                                            AS status,
-                  t.status                                            AS taotlus_status,
-                  t.rekvid,
-                  t.koostajaId,
-                  t.ametnikId,
-                  t.aktseptid,
-                  t.kpv,
-                  t.number,
-                  t.aasta,
-                  t.kuu,
-                  t.status as taotlus_status,
-                  t.allkiri,
-                  t.muud,
-                  coalesce(t.tunnus,0)::integer as tunnus,
-                  coalesce(koostaja.ametnik, '') :: VARCHAR(120)      AS koostaja,
-                  coalesce(esitaja.ametnik, '') :: VARCHAR(120)       AS esitaja,
-                  coalesce(aktsepteerija.ametnik, '') :: VARCHAR(120) AS aktseptja,
-                  (select sum(summa) from eelarve.taotlus1 t1  where t1.parentid = t.id)::numeric(12,2) as summa,
-                  (select sum(summa_kassa) from eelarve.taotlus1 t1  where t1.parentid = t.id)::numeric(12,2) as summa_kassa,
-                  (to_json($2::integer)::jsonb &lt;@ (d.rigths -&gt;&gt;'EelKoostaja')::jsonb)::boolean as is_koostaja,
-                  (to_json($2::integer)::jsonb &lt;@ (d.rigths -&gt;&gt;'EelAktsepterja')::jsonb)::boolean as is_aktsepterja,
-                  (to_json($2::integer)::jsonb &lt;@ (d.rigths -&gt;&gt;'EelAllkirjastaja')::jsonb)::boolean as is_allkirjastaja,
-                  (to_json($2::integer)::jsonb &lt;@ (d.rigths -&gt;&gt;'Eelesitaja')::jsonb)::boolean as is_esitaja
-                FROM docs.doc d
-                  INNER JOIN libs.library l ON l.id = d.doc_type_id
-                  INNER JOIN eelarve.taotlus t ON t.parentId = d.id
-                  LEFT OUTER JOIN ou.userid koostaja ON t.koostajaid = koostaja.id
-                  LEFT OUTER JOIN ou.userid esitaja ON t.ametnikid = esitaja.id
-                  LEFT OUTER JOIN ou.userid aktsepteerija ON t.aktseptid = aktsepteerija.id
-                  LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
-                WHERE d.id = $1</sql>
-    <sqlAsNew>SELECT
-                      false as is_koostaja,
-                      false as is_aktsepterja,
-                      false as is_allkirjastaja,
-                      false as is_esitaja,
-                      $1 :: INTEGER                                               AS id,
-                      $2 :: INTEGER                                               AS userid,
-                      to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT               AS created,
-                      to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT               AS lastupdate,
-                      NULL                                                        AS bpm,
-                      trim(l.nimetus)                                             AS doc,
-                      trim(l.kood)                                                AS doc_type_id,
-                      0::integer                                                           AS status,
-                      0                                                           AS taotlus_status,
-                      0 as taotlus_status,
-                      docs.sp_get_number(u.rekvId, 'TAOTLUS', year(date()), NULL)::varchar(20) AS number,
-                      NULL :: INTEGER                                             AS rekvId,
-                      $2 :: INTEGER                                               AS koostajaId,
-                      u.ametnik :: VARCHAR(120)                                   AS koostaja,
-                      NULL :: INTEGER                                             AS ametnikId,
-                      NULL :: INTEGER                                             AS aktseptid,
-                      now() :: DATE                                               AS kpv,
-                      date_part('year', now())                                    AS aasta,
-                      0 :: INTEGER                                                AS kuu,
-                      NULL :: INTEGER                                             AS allkiri,
-                      NULL :: TEXT                                                AS muud,
-                      0 :: INTEGER                                             AS tunnus,
-                      NULL :: VARCHAR(120)                                        AS esitaja,
-                      null::varchar(120) as aktseptja,
-                      0::numeric(12,2) as summa
-                    FROM libs.library l, libs.library s, ou.userid u
-                    WHERE l.library = 'DOK' AND l.kood = 'TAOTLUS'
-                          AND u.id = $2 :: INTEGER
-                          AND s.library = 'STATUS' AND s.kood = '0'</sqlAsNew>
+    <sql>SELECT d.id,
+                     $2 :: INTEGER                                                                               AS userid,
+                     to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                                             AS created,
+                     to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT                                          AS lastupdate,
+                     d.bpm,
+                     trim(l.nimetus)                                                                             AS doc,
+                     trim(l.kood)                                                                                AS doc_type_id,
+                     d.status                                                                                    AS status,
+                     t.status                                                                                    AS taotlus_status,
+                     t.rekvid,
+                     t.koostajaId,
+                     t.ametnikId,
+                     t.aktseptid,
+                     t.kpv,
+                     t.number,
+                     t.aasta,
+                     t.kuu,
+                     t.status                                                                                    AS taotlus_status,
+                     t.allkiri,
+                     t.muud,
+                     coalesce(t.tunnus, 0)::INTEGER                                                              AS tunnus,
+                     coalesce(koostaja.ametnik, '') :: VARCHAR(120)                                              AS koostaja,
+                     coalesce(esitaja.ametnik, '') :: VARCHAR(120)                                               AS esitaja,
+                     coalesce(aktsepteerija.ametnik, '') :: VARCHAR(120)                                         AS aktseptja,
+                     (SELECT sum(summa)
+                      FROM eelarve.taotlus1 t1
+                      WHERE t1.parentid = t.id)::NUMERIC(12, 2)                                                  AS summa,
+                     (SELECT sum(summa_kassa)
+                      FROM eelarve.taotlus1 t1
+                      WHERE t1.parentid = t.id)::NUMERIC(12, 2)                                                  AS summa_kassa,
+                     (to_json($2::INTEGER)::JSONB &lt;@ (d.rigths -&gt;&gt; 'EelKoostaja')::JSONB)::BOOLEAN               AS is_koostaja,
+                     (to_json($2::INTEGER)::JSONB &lt;@
+                      (d.rigths -&gt;&gt; 'EelAktsepterja')::JSONB)::BOOLEAN                                           AS is_aktsepterja,
+                     (to_json($2::INTEGER)::JSONB &lt;@
+                      (d.rigths -&gt;&gt; 'EelAllkirjastaja')::JSONB)::BOOLEAN                                         AS is_allkirjastaja,
+                     (to_json($2::INTEGER)::JSONB &lt;@ (d.rigths -&gt;&gt; 'Eelesitaja')::JSONB)::BOOLEAN                AS is_esitaja
+              FROM docs.doc d
+                       INNER JOIN libs.library l ON l.id = d.doc_type_id
+                       INNER JOIN eelarve.taotlus t ON t.parentId = d.id
+                       LEFT OUTER JOIN ou.userid koostaja ON t.koostajaid = koostaja.id
+                       LEFT OUTER JOIN ou.userid esitaja ON t.ametnikid = esitaja.id
+                       LEFT OUTER JOIN ou.userid aktsepteerija ON t.aktseptid = aktsepteerija.id
+                       LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
+              WHERE d.id = $1</sql>
+    <sqlAsNew>SELECT FALSE                                                                    AS is_koostaja,
+                          FALSE                                                                    AS is_aktsepterja,
+                          FALSE                                                                    AS is_allkirjastaja,
+                          FALSE                                                                    AS is_esitaja,
+                          $1 :: INTEGER                                                            AS id,
+                          $2 :: INTEGER                                                            AS userid,
+                          to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                            AS created,
+                          to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                            AS lastupdate,
+                          NULL                                                                     AS bpm,
+                          trim(l.nimetus)                                                          AS doc,
+                          trim(l.kood)                                                             AS doc_type_id,
+                          0::INTEGER                                                               AS status,
+                          0                                                                        AS taotlus_status,
+                          0                                                                        AS taotlus_status,
+                          docs.sp_get_number(u.rekvId, 'TAOTLUS', year(date()), NULL)::VARCHAR(20) AS number,
+                          NULL :: INTEGER                                                          AS rekvId,
+                          $2 :: INTEGER                                                            AS koostajaId,
+                          u.ametnik :: VARCHAR(120)                                                AS koostaja,
+                          NULL :: INTEGER                                                          AS ametnikId,
+                          NULL :: INTEGER                                                          AS aktseptid,
+                          now() :: DATE                                                            AS kpv,
+                          date_part('year', now())                                                 AS aasta,
+                          0 :: INTEGER                                                             AS kuu,
+                          NULL :: INTEGER                                                          AS allkiri,
+                          NULL :: TEXT                                                             AS muud,
+                          0 :: INTEGER                                                             AS tunnus,
+                          NULL :: VARCHAR(120)                                                     AS esitaja,
+                          NULL::VARCHAR(120)                                                       AS aktseptja,
+                          0::NUMERIC(12, 2)                                                        AS summa
+                   FROM libs.library l,
+                        libs.library s,
+                        ou.userid u
+                   WHERE l.library = 'DOK'
+                     AND l.kood = 'TAOTLUS'
+                     AND u.id = $2 :: INTEGER
+                     AND s.library = 'STATUS'
+                     AND s.kood = '0'</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT
-                  $2 :: INTEGER                                    AS userid,
-                  a.is_kulud,
-                  t1.id,
-                  t1.parentid,
-                  t1.eelprojid,
-                  t1.eelarveid,
-                  t1.kood1,
-                  t1.kood2,
-                  t1.kood3,
-                  t1.kood4,
-                  t1.kood5,
-                  t1.proj,
-                  t1.tunnus,
-                  t1.summa,
-                  t1.summa_kassa,
-                  t1.selg,
-                  t1.status,
-                  t1.markused,
-                  t1.muud,
-                  coalesce(left(t1.selg, 254), '') :: VARCHAR(254) AS selgrea
-                FROM eelarve.taotlus1 t1
-                  INNER JOIN eelarve.taotlus t ON t.id = t1.parentid
-                  LEFT OUTER JOIN com_artikkel a ON a.kood = t1.kood5
-                WHERE t.parentid = $1
-                ORDER BY kood1, kood2, kood5</sql>
+    <sql>SELECT $2 :: INTEGER                                    AS userid,
+                     a.is_kulud,
+                     t1.id,
+                     t1.parentid,
+                     t1.eelprojid,
+                     t1.eelarveid,
+                     t1.kood1,
+                     t1.kood2,
+                     t1.kood3,
+                     t1.kood4,
+                     t1.kood5,
+                     t1.proj,
+                     t1.tunnus,
+                     t1.summa,
+                     t1.summa_kassa,
+                     t1.selg,
+                     t1.status,
+                     t1.markused,
+                     t1.muud,
+                     coalesce(left(t1.selg, 254), '') :: VARCHAR(254) AS selgrea
+              FROM eelarve.taotlus1 t1
+                       INNER JOIN eelarve.taotlus t ON t.id = t1.parentid
+                       LEFT OUTER JOIN com_artikkel a ON a.kood = t1.kood5
+              WHERE t.parentid = $1
+              ORDER BY kood1, kood2, kood5</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>
@@ -154,7 +160,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from eelarve.sp_delete_taotlus($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM eelarve.sp_delete_taotlus($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -165,7 +172,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from sp_execute_task($1::integer, $2::JSON, $3::TEXT )</sql>
+    <sql>SELECT error_code, result, error_message
+                  FROM sp_execute_task($1::INTEGER, $2::JSON, $3::TEXT)</sql>
     <alias>executeTask</alias>
   </executeCommand>
   <register>
@@ -181,4 +189,28 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                                                                                                                        email,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS earve,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS kustutatud
+                  FROM (
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
+                           FROM docs.doc d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry where (ajalugu -&gt;&gt; 'user') is not null</sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>

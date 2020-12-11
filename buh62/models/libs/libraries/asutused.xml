@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT a.*, $2::INTEGER AS userId
+    <sql>SELECT a.*, $2::INTEGER AS userId, a.kehtivus AS valid
                     FROM cur_asutused a
                     WHERE libs.check_asutus(a.id::INTEGER, $1::INTEGER)</sql>
     <alias>curAsutused</alias>
@@ -13,6 +13,7 @@
                      (properties -&gt;&gt; 'pank')::VARCHAR(20)            AS pank,
                      (properties -&gt;&gt; 'kmkr')::VARCHAR(20)            AS kmkr,
                      (properties -&gt;&gt; 'kehtivus')::DATE               AS kehtivus,
+                     (properties -&gt;&gt; 'kehtivus')::DATE               AS valid,
                      (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT AS aa
               FROM libs.asutus
               WHERE id = $1</sql>
@@ -56,6 +57,7 @@
     <query />
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <select>
     <sql>SELECT rekl.get_luba_number($1,
@@ -63,6 +65,7 @@
     <query />
     <multiple>false</multiple>
     <alias>rekl_number</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <select>
     <sql>SELECT *
@@ -75,9 +78,10 @@
     <query />
     <multiple>true</multiple>
     <alias>validate_lib_usage</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
-    <sql>SELECT *
+    <sql>SELECT *, kehtivus AS valid
                    FROM com_asutused a
                    WHERE libs.check_asutus(a.id::INTEGER, $1::INTEGER)
                      AND (kehtivus IS NULL OR kehtivus &gt;= date())
@@ -124,4 +128,25 @@
     <view>asutus_register</view>
     <params>sqlWhere</params>
   </print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS kustutatud
+
+                  FROM (
+                           SELECT jsonb_array_elements('[]'::jsonb || d.ajalugu::jsonb) AS ajalugu, d.id
+                           FROM libs.asutus d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry where (ajalugu -&gt;&gt; 'user') is not null</sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>

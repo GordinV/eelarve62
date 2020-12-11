@@ -3,7 +3,7 @@
   <grid>
     <sql>SELECT t.*, $2::INTEGER AS userId
                     FROM palk.cur_palk_taabel t
-                        WHERE (t.rekvid = $1 OR rekvid IS NULL)</sql>
+                    WHERE (t.rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>curTaabel1</alias>
   </grid>
   <select>
@@ -26,7 +26,7 @@
                      t.parentid
               FROM palk.palk_taabel1 p
                        INNER JOIN palk.tooleping t ON t.id = p.lepingid
-                  WHERE p.id = $1</sql>
+              WHERE p.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -97,4 +97,30 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
+                         (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                       AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                                                                                                                        email,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS earve,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS kustutatud
+                  FROM (
+                           SELECT jsonb_array_elements('[]'::JSONB || d.ajalugu) AS ajalugu, d.id
+                           FROM palk.palk_taabel1 d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry
+                  WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL
+        </sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>

@@ -1,46 +1,45 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select a.*, $2::integer as userId
-            from palk.cur_palk_kaart a
-            where (rekvid = $1 or rekvid is null)</sql>
+    <sql>SELECT a.*, $2::INTEGER AS userId
+                    FROM palk.cur_palk_kaart a
+                    WHERE (rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>curPalkKaart</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  $2 :: INTEGER            AS userid,
-                 'PALK_KAART' AS doc_type_id,
-                  pk.id,
-                  pk.parentid,
-                  pk.lepingid,
-                  pk.libid,
-                  pk.summa,
-                  pk.percent_,
-                  pk.tulumaks,
-                  pk.tulumaar,
-                  pk.status,
-                  pk.muud,
-                  pk.alimentid,
-                  pk.tunnus::varchar(20)                                AS tunnus,
-                  pk.minsots,
-                  osakond.kood                                          AS osakond,
-                  osakond.id                                            AS osakondId,
-                  amet.kood                                             AS amet,
-                  l.kood,
-                  l.nimetus,
-                  (l.properties :: JSONB -&gt;&gt; 'liik') :: INTEGER         AS liik,
-                  (l.properties :: JSONB -&gt;&gt; 'tund') :: INTEGER         AS tund,
-                  (l.properties :: JSONB -&gt;&gt; 'maks') :: INTEGER         AS maks,
-                  (l.properties :: JSONB -&gt;&gt; 'asutusest') :: INTEGER    AS asutusest,
-                  (l.properties :: JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20) AS tululiik,
-                  'EUR' :: VARCHAR                                      AS valuuta,
-                  1 :: NUMERIC                                          AS kuurs
-                FROM libs.library l
-                  INNER JOIN palk.palk_kaart pk ON pk.libId = l.id
-                  INNER JOIN palk.tooleping t ON pk.lepingId = t.id
-                  INNER JOIN libs.library amet ON amet.id = t.ametid
-                  INNER JOIN libs.library osakond ON osakond.id = t.osakondid
-                WHERE pk.id = $1</sql>
+    <sql>SELECT $2 :: INTEGER                                         AS userid,
+                     'PALK_KAART'                                          AS doc_type_id,
+                     pk.id,
+                     pk.parentid,
+                     pk.lepingid,
+                     pk.libid,
+                     pk.summa,
+                     pk.percent_,
+                     pk.tulumaks,
+                     pk.tulumaar,
+                     pk.status,
+                     pk.muud,
+                     pk.alimentid,
+                     pk.tunnus::VARCHAR(20)                                AS tunnus,
+                     pk.minsots,
+                     osakond.kood                                          AS osakond,
+                     osakond.id                                            AS osakondId,
+                     amet.kood                                             AS amet,
+                     l.kood,
+                     l.nimetus,
+                     (l.properties :: JSONB -&gt;&gt; 'liik') :: INTEGER         AS liik,
+                     (l.properties :: JSONB -&gt;&gt; 'tund') :: INTEGER         AS tund,
+                     (l.properties :: JSONB -&gt;&gt; 'maks') :: INTEGER         AS maks,
+                     (l.properties :: JSONB -&gt;&gt; 'asutusest') :: INTEGER    AS asutusest,
+                     (l.properties :: JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20) AS tululiik,
+                     'EUR' :: VARCHAR                                      AS valuuta,
+                     1 :: NUMERIC                                          AS kuurs
+              FROM libs.library l
+                       INNER JOIN palk.palk_kaart pk ON pk.libId = l.id
+                       INNER JOIN palk.tooleping t ON pk.lepingId = t.id
+                       INNER JOIN libs.library amet ON amet.id = t.ametid
+                       INNER JOIN libs.library osakond ON osakond.id = t.osakondid
+              WHERE pk.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -64,8 +63,9 @@
     <alias>row</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from palk.com_palk_kaart a 
-        where (rekvid = $1 or rekvid is null)</sql>
+    <sql>SELECT *
+                   FROM palk.com_palk_kaart a
+                   WHERE (rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -73,7 +73,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_palk_kaart($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM palk.sp_delete_palk_kaart($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -84,7 +85,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from palk.change_kaart_status($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                  FROM palk.change_kaart_status($1::INTEGER, $2::INTEGER)</sql>
     <alias>changeStatus</alias>
   </executeCommand>
   <register>
@@ -100,4 +102,30 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
+                         (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                                                                                                                        email,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS earve,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)                                                                   AS kustutatud
+                  FROM (
+                           SELECT jsonb_array_elements('[]'::jsonb || d.ajalugu) AS ajalugu, d.id
+                           FROM palk.palk_kaart d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry
+                  WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL
+        </sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>
