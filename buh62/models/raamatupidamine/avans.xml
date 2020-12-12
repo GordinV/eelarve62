@@ -154,7 +154,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select result, error_message from docs.fnc_avansijaak(?tnId::integer)</sql>
+    <sql>select result, error_message from docs.fnc_avansijaak($1::integer)</sql>
     <alias>fncAvansiJaak</alias>
   </executeCommand>
   <register>
