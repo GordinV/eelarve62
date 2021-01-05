@@ -71,7 +71,7 @@
                          INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
                   WHERE j.parentid = $1 
                     and j1.summa &lt;&gt; 0
-                    order by j1.id</sql>
+                    order by j1.id desc</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>
