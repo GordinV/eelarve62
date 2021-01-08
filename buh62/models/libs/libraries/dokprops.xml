@@ -83,7 +83,8 @@
                           kood3,
                           kood5,
                           asutusid,
-                          rekvid
+                          rekvid,
+                          valid
                    FROM com_dokprop l
                    WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
@@ -98,7 +99,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>selg,dok,parentid</validate>
+    <validate>selg,parentid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
@@ -121,4 +122,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
