@@ -1,9 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT qry.rekv_id,
-                           qry.rekv_nimi,
-                           qry.konto,
+    <sql>SELECT qry.konto,
                            l.nimetus,
                            (CASE
                                 WHEN l.tyyp IN (0, 1, 3)
@@ -64,4 +62,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
