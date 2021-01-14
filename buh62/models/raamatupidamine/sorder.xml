@@ -27,7 +27,7 @@
                          k.alus,
                          k.muud,
                          k.nimi,
-                         k.aadress,
+                         coalesce(k.aadress, '')                                        AS aadress,
                          k.tyyp,
                          asutus.regkood,
                          trim(asutus.nimetus)                                           AS asutus,
