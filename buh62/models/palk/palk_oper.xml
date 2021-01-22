@@ -3,8 +3,8 @@
   <grid>
     <sql>SELECT d.*
                     FROM palk.cur_palkoper d
-                        WHERE d.rekvId = $1
-                             AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
+                    WHERE d.rekvId = $1
+                      AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curPalkOper</alias>
   </grid>
   <select>
@@ -41,6 +41,7 @@
                          p.tka,
                          p.period,
                          p.pohjus,
+                         (p.properties -&gt;&gt; 'pohjus_selg')::VARCHAR(254)                    AS pohjus_selg,
                          coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS korr_konto,
                          dp.selg :: VARCHAR(120)                                           AS dokprop,
                          (CASE WHEN empty(dp.registr::INTEGER) THEN 0 ELSE 1 END)::INTEGER AS kas_lausend,
@@ -62,7 +63,7 @@
                            LEFT OUTER JOIN docs.doc dj ON p.journalid = dj.id
                            LEFT OUTER JOIN docs.journal j ON j.parentid = dj.id
                            LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
-                      WHERE d.id = $1</sql>
+                  WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
                           $1 :: INTEGER                                 AS id,
                           $2 :: INTEGER                                 AS userid,
@@ -97,6 +98,7 @@
                           0 :: NUMERIC(12, 2)                           AS tka,
                           NULL :: DATE                                  AS period,
                           NULL :: TEXT                                  AS pohjus,
+                          NULL::varchar(254) AS pohjus_selg,
                           NULL :: INTEGER                               AS journalid,
                           null :: VARCHAR(20)                           AS korr_konto,
                           null :: VARCHAR(120)                          AS dokprop,                          
@@ -118,7 +120,7 @@
                            LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
                            LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
                            INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                      WHERE d.id = $1</sql>
+                  WHERE d.id = $1</sql>
     <query />
     <multiple>true</multiple>
     <alias>relations</alias>
@@ -186,7 +188,7 @@
                          coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
-                           SELECT jsonb_array_elements( history) AS ajalugu, d.id, d.rekvid
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
                            FROM docs.doc d,
                                 ou.userid u
                            WHERE d.id = $1
