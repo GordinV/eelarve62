@@ -48,7 +48,7 @@
                       0 :: INTEGER        AS lepingid,
                       0 :: INTEGER        AS libid,
                       0 :: NUMERIC(14, 4) AS summa,
-                      0 :: INTEGER        AS percent_,
+                      1 :: INTEGER        AS percent_,
                       0 :: INTEGER        AS tulumaks,
                       0 :: NUMERIC        AS tulumaar,
                       1 :: INTEGER        AS status,
