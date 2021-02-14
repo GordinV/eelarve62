@@ -13,7 +13,7 @@
                       a.regkood,
                       a.nimetus as asutus,
                       a.tp
-                    FROM docs.kaibeasutusandmik($1::text, $2::integer, $3::date, $4::date, $5::integer, $6::text) qry
+                    FROM docs.kaibeasutusandmik($1::text, $2::integer, $3::date, $4::date, $5::integer, $6::text, $7::integer) qry
                       INNER JOIN com_asutused a on a.id = qry.asutus_id  
                       INNER JOIN com_kontoplaan l ON l.kood = qry.konto
                       WHERE (qry.alg_saldo &lt;&gt; 0 or qry.deebet &lt;&gt; 0 or qry.kreedit &lt;&gt; 0)
