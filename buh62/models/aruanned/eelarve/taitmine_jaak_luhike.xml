@@ -6,10 +6,10 @@
                    tegev,
                    artikkel,
                    a.nimetus,
-                   eelarve,
-                   eelarve_kassa,
-                   taitmine,
-                   taitmine_kassa,
+                     sum(eelarve) as eelarve,
+                     sum(eelarve_kassa) as eelarve_kassa,
+                     sum(taitmine) as taitmine,
+                     sum(taitmine_kassa) as taitmine_kassa,
                    r.nimetus AS asutus
             FROM eelarve.eelarve_taitmine_jaak($1::DATE, $2::INTEGER, $3::INTEGER) qryReport
                      LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
@@ -23,6 +23,7 @@
                                      , 'Kond' AS nimetus) r
                                 ON r.id = qryReport.rekv_id
                      LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
+                      group by rekv_id, tegev, artikkel, a.nimetus, r.nimetus
         )
         SELECT rekv_id,
                ''                  AS tegev,
