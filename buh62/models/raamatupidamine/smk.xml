@@ -104,17 +104,14 @@
                          trim(a.aadress)    AS aadress,
                          k.parentid         AS parent_id,
                          k1.*,
-                         'EUR'::VARCHAR(20) AS valuuta,
-                         1::NUMERIC(12, 4)  AS kuurs,
-                         jid.number         AS lausnr
+                         coalesce(l.number,0) AS lausnr,
+                         coalesce(l.lausend,'') as lausend
                   FROM docs.mk1 AS k1
                            INNER JOIN docs.mk k ON k.id = k1.parentId
                            INNER JOIN libs.nomenklatuur n ON n.id = k1.nomid
                            INNER JOIN libs.asutus a ON a.id = k1.asutusid
                            INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                           LEFT OUTER JOIN docs.doc d ON k1.journalid = d.id
-                           LEFT OUTER JOIN docs.journal j ON j.parentid = d.id
-                           LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+                           LEFT OUTER JOIN qry_lausend_text l ON l.id = k1.journalid
                   WHERE k.parentid = $1</sql>
     <query />
     <multiple>true</multiple>
@@ -189,7 +186,7 @@
                          coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
-                           SELECT jsonb_array_elements( history) AS ajalugu, d.id, d.rekvid
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
                            FROM docs.doc d,
                                 ou.userid u
                            WHERE d.id = $1
