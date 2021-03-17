@@ -80,6 +80,13 @@
     <alias>validate_lib_usage</alias>
     <not_initial_load>true</not_initial_load>
   </select>
+  <select>
+    <sql>select * from docs.dokumendid($1)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>dokumenidid</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
   <selectAsLibs>
     <sql>SELECT *, kehtivus AS valid
                    FROM com_asutused a
