@@ -57,7 +57,7 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select palk.sp_calc_taabel1($1) as tunnid</sql>
+    <sql>select palk.get_taabel($1::jsonb) as tunnid, palk.get_holidays($1::jsonb) as tahtpaevad</sql>
     <alias>calcTaabel</alias>
   </executeCommand>
   <register>
