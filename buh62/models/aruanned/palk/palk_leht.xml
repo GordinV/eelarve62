@@ -1,7 +1,10 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT qry.*
+    <sql>SELECT qry.*, 
+                        sum(deebet) over(PARTITION BY leping_id) as deebet_kokku,
+                        sum(kreedit) over(PARTITION BY leping_id) as kreedit_kokku,
+                        sum(sotsmaks) over(PARTITION BY leping_id) as sotsmaks_kokku       
                     FROM palk.palk_leht($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER, $5::INTEGER) qry</sql>
     <alias>palk_leht</alias>
   </grid>
@@ -41,7 +44,16 @@
     <sql />
     <alias />
   </generateJournal>
-  <print></print>
+  <print>
+    <view>palk_leht</view>
+    <params>id</params>
+    <register>UPDATE docs.doc
+                       SET history = history ||
+                                     (SELECT row_to_json(row)
+                                      FROM (SELECT now()                                                AS print,
+                                                   (SELECT kasutaja FROM ou.userid WHERE id = $2)::TEXT AS user) row)::JSONB
+                       WHERE id = $1</register>
+  </print>
   <getLog>
     <sql>SELECT l.id,
                          u.kasutaja                     AS kasutaja,
@@ -50,11 +62,12 @@
                          ''::VARCHAR(20)                AS muudatud,
                          (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'print') then to_char(l.timestamp, 'DD.MM.YYYY HH.MM.SS') else '' end)::VARCHAR(20) as  prinditud,
                          (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'email') then to_char(l.timestamp, 'DD.MM.YYYY HH.MM.SS') else '' end)::VARCHAR(20) as  email,
-                         'Status:' || (l.propertis-&gt;&gt;'status')::text as muud       
+                         (l.propertis-&gt;&gt;'mail_info')::text as muud       
                   FROM ou.logs l
                            INNER JOIN ou.userid u ON l.user_id = u.id
                   WHERE coalesce((l.propertis -&gt;&gt; 'isik_id')::INTEGER, 0) = $1::INTEGER
                     AND l.rekvid = u.rekvid
+                    ORDER BY l.id DESC 
         </sql>
     <alias>getLogs</alias>
   </getLog>
