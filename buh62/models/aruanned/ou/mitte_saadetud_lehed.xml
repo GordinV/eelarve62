@@ -1,0 +1,74 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT DISTINCT t.rekvid,
+                                    t.id,
+                                    r.parentid,
+                                    r.regkood,
+                                    r.nimetus AS asutus,
+                                    r.muud    AS asutus_tais,
+                                    t.nimetus AS nimi,
+                                    t.email
+                    FROM palk.cur_tootajad t
+                             INNER JOIN ou.rekv r ON r.id = t.rekvid
+                    WHERE (lopp IS NULL OR lopp &gt;= $1::DATE)
+                      AND (t.email IS NOT NULL AND NOT empty(t.email) AND t.email LIKE '%@%')
+                      AND t.rekvid IN (SELECT rekv_id
+                                       FROM get_asutuse_struktuur($2))
+                      AND t.rekvid = (CASE
+                                          WHEN $3::INTEGER IS NULL OR empty($3::INTEGER)
+                                              THEN $2::INTEGER
+                                          ELSE t.rekvid END)
+                      AND t.id NOT IN (
+                        SELECT (propertis -&gt;&gt; 'isik_id')::INTEGER
+                        FROM ou.logs
+                        WHERE doc_id = 213041
+                          AND propertis -&gt;&gt; 'event' = 'email'
+                          AND month((timestamp)::DATE) = month($1::DATE)
+                          AND year(timestamp::DATE) = year($1::DATE)
+                    )
+                    ORDER BY r.parentid, t.rekvid, t.id</sql>
+    <alias>saadetud_palk_leht</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
