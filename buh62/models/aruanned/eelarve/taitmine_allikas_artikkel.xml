@@ -16,7 +16,11 @@
                                          UNION ALL
                                          SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus) r
                                         ON r.id = qryReport.rekv_id
-                             LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id                    </sql>
+                             LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
+                    WHERE (qryReport.idx &lt;= (CASE WHEN $4 = 63 AND $5 = 1 THEN 100 ELSE 0 END) OR
+                           qryReport.idx &gt;= CASE WHEN $4 = 63 AND $5 = 1 THEN 200 ELSE 0 END)
+
+        </sql>
     <alias>kulud_report</alias>
   </grid>
   <select></select>
