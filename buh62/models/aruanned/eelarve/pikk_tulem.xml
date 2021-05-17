@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT CASE WHEN konto IN ('39999','9999', '99999') THEN '' ELSE konto END AS konto,
+    <sql> SELECT CASE WHEN konto IN ('39999','9999', '99999','9999999') THEN '' ELSE konto END AS konto,
                             nimetus,
                             summa,
                             rekv_id
