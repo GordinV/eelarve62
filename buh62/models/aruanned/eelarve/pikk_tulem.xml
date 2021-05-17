@@ -1,7 +1,12 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT * from eelarve.pikk_tulem($1::date,  $2::integer, $3::integer)</sql>
+    <sql> SELECT CASE WHEN konto IN ('39999','9999', '99999') THEN '' ELSE konto END AS konto,
+                            nimetus,
+                            summa,
+                            rekv_id
+                     FROM eelarve.pikk_tulem($1::DATE, $2::INTEGER, $3::INTEGER)
+                     ORDER BY idx, konto</sql>
     <alias>pikk_tulem</alias>
   </grid>
   <select></select>
@@ -25,7 +30,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from eelarve.sp_koosta_saldoandmik($1::integer, $2::json)</sql>
+    <sql>SELECT error_code, result, error_message
+                  FROM eelarve.sp_koosta_saldoandmik($1::INTEGER, $2::JSON)</sql>
     <alias>koosta_saldoandmik</alias>
   </executeCommand>
   <register>
@@ -41,4 +47,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
