@@ -9,7 +9,38 @@
                            coalesce(p.nimetus, '')::VARCHAR(254) AS parasutus
                     FROM eelarve.eelarve_taitmine_allikas_artikkel($1::INTEGER, $2::DATE, $3::DATE, $4::INTEGER,
                                                                    $5::INTEGER) qryReport
-                             LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
+                             LEFT OUTER JOIN (
+                        SELECT id, kood, nimetus, rekvid, is_kulud, valid
+                        FROM com_artikkel
+                        UNION ALL
+                        SELECT 152586458                   AS id,
+                               '2586(A80)'                 AS kood,
+                               'Kohustuste tasumine kokku' AS nimetus,
+                               999999                      AS rekvid,
+                               TRUE                        AS is_kulud,
+                               NULL::DATE                  AS valid
+                        UNION ALL
+                        SELECT 152586458                        AS id,
+                               '2585(A80)'                      AS kood,
+                               'Kohustuse võtmine (Allikas 80)' AS nimetus,
+                               999999                           AS rekvid,
+                               FALSE                            AS is_kulud,
+                               NULL::DATE                       AS valid
+                        UNION ALL
+                        SELECT 152586456       AS id,
+                               '15,2586,4,5,6' AS kood,
+                               'Kulud'         AS nimetus,
+                               999999          AS rekvid,
+                               TRUE            AS is_kulud,
+                               NULL::DATE      AS valid
+                        UNION ALL
+                        SELECT 3655000                                   AS id,
+                               '15, 3, 655'                              AS kood,
+                               'Tulud (siirded eelarvesse, tagastamine)' AS nimetus,
+                               999999                                    AS rekvid,
+                               FALSE                                     AS is_kulud,
+                               NULL::DATE                                AS valid
+                    ) a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
                                          FROM ou.rekv
                                          WHERE parentid &lt; 999
