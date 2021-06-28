@@ -2,13 +2,134 @@
 <VFPData>
   <grid>
     <sql>SELECT *
-                FROM eelarve.eelarve_andmik_lisa_1_5($1::date, $2::integer, $3::integer)
-                where (not empty(tegev) or not empty(artikkel))
-                and not (tegev in ('01800', '09800') and EMPTY(saldoandmik))
-                order by tegev, artikkel</sql>
+                    FROM eelarve.eelarve_andmik_lisa_1_5($1::DATE, $2::INTEGER,
+                                                         $3::INTEGER) where (not EMPTY(tegev) OR NOT empty(artikkel))
+                        AND NOT (tegev IN (
+                         '01800',
+                         '09800') AND EMPTY(saldoandmik))
+                    ORDER BY tegev, artikkel</sql>
     <alias>eelarve_andmik_lisa_1_5_report</alias>
   </grid>
-  <select></select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_pohitegevuse_tulud($1::TEXT, $2::JSON, $3::JSON)
+                  WHERE (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0) 
+                    or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_pohitegevuse_tulud</alias>
+  </select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_30($1::TEXT, $2::JSON, $3::JSON)
+                where (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0)
+                or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_30</alias>
+  </select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_3000($1::TEXT, $2::JSON, $3::JSON)
+                where (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0)
+                or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_3000</alias>
+  </select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_3030($1::TEXT, $2::JSON, $3::JSON)
+                where (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0)
+                or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_3030</alias>
+  </select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_3044($1::TEXT, $2::JSON, $3::JSON)
+                where (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0)
+                or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_3044</alias>
+  </select>
+  <select>
+    <sql>SELECT eelarve::CHAR(20),
+                         eelarve_taps::CHAR(20),
+                         eelarve_kassa::CHAR(20),
+                         eelarve_kassa_taps::CHAR(20),
+                         saldoandmik::CHAR(20),
+                         kassa::CHAR(20),
+                         selg::TEXT
+                  FROM eelarve.lisa1_lisa5_kontrol_art($1::TEXT, $2::JSON, $3::JSON)
+                where (eelarve &lt;&gt; 0
+                    AND eelarve_taps &lt;&gt; 0
+                    AND eelarve_kassa &lt;&gt; 0
+                    AND eelarve_kassa_taps &lt;&gt; 0
+                    AND saldoandmik &lt;&gt; 0
+                    AND kassa &lt;&gt; 0)
+                or coalesce(selg,'') = 'test'</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kontrol_art</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
@@ -45,4 +166,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
