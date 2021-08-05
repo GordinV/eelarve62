@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT idx, konto, nimetus, summa
+    <sql> SELECT idx, konto, nimetus, summa, eelmise_summa
                      FROM eelarve.bilanss($1::DATE, $2::INTEGER, $3::INTEGER)
                      WHERE summa IS NOT NULL
                      ORDER BY idx, konto</sql>
