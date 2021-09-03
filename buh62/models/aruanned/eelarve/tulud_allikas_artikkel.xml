@@ -20,7 +20,7 @@
                            coalesce(p.nimetus, '')::VARCHAR(254) AS parasutus,
                            idx
                     FROM eelarve.tulude_taitmine_allikas_artikkel($1::INTEGER, $2::DATE, $3::DATE, $4::INTEGER,
-                                                                  $5::INTEGER) qryReport
+                                                                  $5::INTEGER, $6::JSONB) qryReport
                              LEFT OUTER JOIN (
                         SELECT id, kood, nimetus, rekvid, is_kulud, valid
                         FROM com_artikkel
