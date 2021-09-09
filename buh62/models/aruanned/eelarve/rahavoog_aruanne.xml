@@ -1,7 +1,19 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT * from eelarve.rahavoog_aruanne($1::date,  $2::integer, $3::integer)</sql>
+    <sql> SELECT rekv_id,
+                            idx,
+                            summa,
+                            eelmise_summa,
+                            konto,
+                            grupp,
+                            all_grupp,
+                            CASE
+                                WHEN empty(ltrim(rtrim(nimetus))) AND empty(ltrim(rtrim(all_grupp)))
+                                    THEN ltrim(rtrim(grupp))
+                                WHEN empty(ltrim(rtrim(nimetus))) THEN ltrim(rtrim(all_grupp))
+                                ELSE ltrim(rtrim(nimetus)) END:: VARCHAR(254) AS nimetus
+                     FROM eelarve.rahavoog_aruanne($1::DATE, $2::INTEGER, $3::INTEGER)</sql>
     <alias>rahavoog_aruanne</alias>
   </grid>
   <select></select>
@@ -25,7 +37,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from eelarve.sp_koosta_saldoandmik($1::integer, $2::json)</sql>
+    <sql>SELECT error_code, result, error_message
+                  FROM eelarve.sp_koosta_saldoandmik($1::INTEGER, $2::JSON)</sql>
     <alias>koosta_saldoandmik</alias>
   </executeCommand>
   <register>
@@ -41,4 +54,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
