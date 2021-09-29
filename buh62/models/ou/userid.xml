@@ -34,6 +34,8 @@
                          coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE) :: INTEGER    AS is_rekl_maksuhaldur,
                          coalesce((u.roles -&gt;&gt; 'is_ladu_kasutaja') :: BOOLEAN, FALSE) :: INTEGER       AS is_ladu_kasutaja,
                          coalesce((u.roles -&gt;&gt; 'is_arvestaja') :: BOOLEAN, FALSE) :: INTEGER           AS is_arvestaja,
+                         coalesce((u.roles -&gt;&gt; 'is_palga_kasutaja') :: BOOLEAN, FALSE) :: INTEGER      AS is_palga_kasutaja,
+                         coalesce((u.roles -&gt;&gt; 'is_pohivara_kasutaja') :: BOOLEAN, FALSE) :: INTEGER   AS is_pohivara_kasutaja,
                          (u.properties -&gt;&gt; 'email') :: VARCHAR(254)                                    AS email,
                          (u.properties -&gt;&gt; 'port') :: TEXT                                             AS port,
                          (u.properties -&gt;&gt; 'user') :: TEXT                                             AS user,
@@ -64,6 +66,8 @@
                       0 :: INTEGER     AS is_ladu_kasutaja,
                       0 :: INTEGER     AS is_kasutaja,
                       0:: integer as is_arvestaja,
+                      0:: integer as is_palga_kasutaja,
+                      0:: integer as is_pohivara_kasutaja,
                       '' :: VARCHAR(254) AS email</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -81,14 +85,14 @@
     <alias>com_user_rekv</alias>
   </select>
   <select>
-    <sql>SELECT r.nimetus AS asutus, u.*
+    <sql>SELECT r.nimetus AS asutus, u.*, $2 AS rekvid
                   FROM ou.userid u
                            INNER JOIN ou.rekv r ON r.id = u.rekvid
                   WHERE ($1 = 0
                       OR u.id = $1)
                     AND r.status &lt;&gt; 3
                   ORDER BY u.last_login DESC
-                         , u.id DESC;</sql>
+                          , u.id DESC;</sql>
     <query />
     <multiple>true</multiple>
     <alias>get_all_users</alias>
@@ -99,6 +103,7 @@
     <query />
     <multiple>true</multiple>
     <alias>get_last_login</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
     <sql>SELECT *
@@ -139,4 +144,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
