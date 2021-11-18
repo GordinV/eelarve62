@@ -18,6 +18,7 @@
                       INNER JOIN cur_pv_oper po ON p.id = po.pv_kaart_id
                       INNER JOIN libs.library g ON g.id = (p.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER
                     WHERE p.library = 'POHIVARA'
+                      AND p.status &lt;&gt; 3
                       and p.rekvid = $3
                       and po.kpv &gt;= $1
                       and po.kpv &lt;= $2</sql>
