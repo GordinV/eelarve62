@@ -2,16 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c6761f97-5b60-4cdf-9972-4d05b6740938" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/buh62/models/aruanned/eelarve/voetud_kohustused.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/buh62/queries/eelproj/voetud_kohustused_report1.FXP" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/aruanne.CDX" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/aruanne.CDX" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/aruanne.dbf" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/aruanne.dbf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/eelarve/curprinter.dbf" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/eelarve/curprinter.dbf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/models/palk/palk_oper.xml" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/models/palk/palk_oper.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/models/palk/puudumine.xml" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/models/palk/puudumine.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/tolk.CDX" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/tolk.CDX" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/buh62/tolk.DBF" beforeDir="false" afterPath="$PROJECT_DIR$/buh62/tolk.DBF" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -51,7 +42,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -64,36 +54,11 @@
               <item name="eelarve62" type="462c0819:PsiDirectoryNode" />
               <item name="buh62" type="462c0819:PsiDirectoryNode" />
             </path>
-            <path>
-              <item name="eelarve62" type="b2602c69:ProjectViewProjectNode" />
-              <item name="eelarve62" type="462c0819:PsiDirectoryNode" />
-              <item name="buh62" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="eelarve62" type="b2602c69:ProjectViewProjectNode" />
-              <item name="eelarve62" type="462c0819:PsiDirectoryNode" />
-              <item name="buh62" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-              <item name="aruanned" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="eelarve62" type="b2602c69:ProjectViewProjectNode" />
-              <item name="eelarve62" type="462c0819:PsiDirectoryNode" />
-              <item name="buh62" type="462c0819:PsiDirectoryNode" />
-              <item name="reports" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="eelarve62" type="b2602c69:ProjectViewProjectNode" />
-              <item name="eelarve62" type="462c0819:PsiDirectoryNode" />
-              <item name="buh62" type="462c0819:PsiDirectoryNode" />
-              <item name="reports" type="462c0819:PsiDirectoryNode" />
-              <item name="eelproj" type="462c0819:PsiDirectoryNode" />
-            </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -102,7 +67,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="enableYiiStorm" value="true" />
     <property name="langName" value="en" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../buh70" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="C:/Program Files/nodejs6/node" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="database.main" />
@@ -134,17 +99,18 @@
       <updated>1635949615662</updated>
       <workItem from="1635949616872" duration="801000" />
       <workItem from="1635967947884" duration="17000" />
-      <workItem from="1637608499877" duration="253000" />
+      <workItem from="1637608499877" duration="844000" />
+      <workItem from="1637652436632" duration="311000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="1071000" />
+    <option name="totallyTimeSpent" value="1973000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1376" height="744" extended-state="6" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.2575988" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.26139817" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
