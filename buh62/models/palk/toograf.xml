@@ -1,26 +1,25 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select t.*, $2::integer as userId
-            from palk.cur_toografik t
-            where (t.rekvid = $1 or rekvid is null)</sql>
+    <sql>SELECT t.*, $2::INTEGER AS userId
+                    FROM palk.cur_toografik t
+                    WHERE (t.rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>curToograf</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  $2 :: INTEGER            AS userid,
-                 'TOOGRAF' AS doc_type_id,
-                  p.id,
-                  p.lepingid,
-                  p.kuu,
-                  p.aasta,
-                  p.tund,
-                  p.status,
-                  p.muud,
-                  t.parentid
-                FROM palk.toograf p
-                inner join palk.tooleping t on t.id = p.lepingid
-                WHERE p.id = $1</sql>
+    <sql>SELECT $2 :: INTEGER AS userid,
+                     'TOOGRAF'     AS doc_type_id,
+                     p.id,
+                     p.lepingid,
+                     p.kuu,
+                     p.aasta,
+                     p.tund,
+                     p.status,
+                     p.muud,
+                     t.parentid
+              FROM palk.toograf p
+                       INNER JOIN palk.tooleping t ON t.id = p.lepingid
+              WHERE p.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -46,7 +45,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_toograafik($1, $2)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM palk.sp_delete_toograafik($1, $2)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -57,7 +57,10 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select palk.get_taabel($1::jsonb) as tunnid, palk.get_holidays($1::jsonb) as tahtpaevad</sql>
+    <sql>SELECT t.result as tunnid,
+                         t.tahtpaeva_tunnid,
+                         palk.get_holidays($1::JSONB) AS tahtpaevad
+                  FROM palk.get_taabel2($1::JSONB) t</sql>
     <alias>calcTaabel</alias>
   </executeCommand>
   <register>
@@ -74,27 +77,29 @@
   </generateJournal>
   <print></print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
-                         (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
-                                                                                                                        email,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS kustutatud
+    <sql>SELECT ROW_NUMBER() OVER ()                  AS id,
+                         (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS koostatud,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS muudatud,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS prinditud,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS
+                                                                  email,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS earve,
+                         coalesce(to_char((qry.ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)             AS kustutatud
                   FROM (
-                           SELECT jsonb_array_elements('[]'::jsonb || d.ajalugu) AS ajalugu, d.id
+                           SELECT jsonb_array_elements('[]'::JSONB || d.ajalugu) AS ajalugu, d.id
                            FROM palk.toograf d,
                                 ou.userid u
                            WHERE d.id = $1
                              AND u.id = $2
-                       ) qry where (qry.ajalugu -&gt;&gt; 'user') is not null</sql>
+                       ) qry
+                  WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
 </VFPData>

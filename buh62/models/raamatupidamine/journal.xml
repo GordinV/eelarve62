@@ -96,18 +96,21 @@
     <query />
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <select>
     <sql>select docs.sp_kooperi_journal($1::integer, $2::integer) as result</sql>
     <query />
     <multiple>false</multiple>
     <alias>kooperi_journal</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <select>
     <sql>select docs.sp_lausendikontrol($1::JSONB) as result</sql>
     <query />
     <multiple>false</multiple>
     <alias>validate_journal</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
     <sql></sql>
@@ -152,17 +155,17 @@
   <getLog>
     <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
                          (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
                                                                                                                         email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
                            SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
