@@ -4,18 +4,20 @@
     <sql>SELECT qryReport.rekv_id,
                            qryReport.idx,
                            artikkel,
-                           sum(aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
-                           sum(aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
-                           sum(aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
-                           sum(aasta_3_eelnou)                  AS aasta_3_eelnou,
-                           sum(aasta_3_prognoos)                AS aasta_3_prognoos,
+                           sum(aasta_1_tekke_taitmine)                        AS aasta_1_tekke_taitmine,
+                           sum(aasta_2_tekke_taitmine)                        AS aasta_2_tekke_taitmine,
+                           sum(aasta_2_oodatav_taitmine)                      AS aasta_2_oodatav_taitmine,
+                           sum(aasta_3_eelnou)                                AS aasta_3_eelnou,
+                           sum(aasta_3_prognoos)                              AS aasta_3_prognoos,
+                           sum(eelarve_tekkepohine_kinnitatud)                AS eelarve_tekkepohine_kinnitatud,
+                           sum(eelarve_tekkepohine_tapsustatud)               AS eelarve_tekkepohine_tapsustatud,
                            a.nimetus,
                            r.regkood::VARCHAR(20),
-                           coalesce(r.nimetus,'')::VARCHAR(254)              AS asutus,
+                           coalesce(r.nimetus, '')::VARCHAR(254)              AS asutus,
                            CASE
                                WHEN p.id = r.id THEN ''
                                WHEN r.id = 999999 THEN ''
-                               ELSE coalesce(p.nimetus,'') END::VARCHAR(254) AS parent_asutus
+                               ELSE coalesce(p.nimetus, '') END::VARCHAR(254) AS parent_asutus
                     FROM eelarve.tulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER) qryReport
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
                                          FROM ou.rekv

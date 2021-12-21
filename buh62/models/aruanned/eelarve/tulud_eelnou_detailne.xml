@@ -23,7 +23,7 @@
                         AND t.library = 'TEGEV' AND a.status &lt; 3
 
                     ORDER BY r.id DESC, r.parentid, qryReport.rekv_id, qryReport.idx,
-                             qryReport.artikkel, tegev, tunnus</sql>
+                             qryReport.tegev, qryReport.artikkel, qryReport.tunnus</sql>
     <alias>tulud_eelnou</alias>
   </grid>
   <select></select>
