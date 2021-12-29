@@ -99,7 +99,7 @@
     <not_initial_load>true</not_initial_load>
   </select>
   <select>
-    <sql>select docs.sp_kooperi_journal($1::integer, $2::integer) as result</sql>
+    <sql>select docs.sp_kooperi_journal($1::integer, $2::integer, $3::date) as result</sql>
     <query />
     <multiple>false</multiple>
     <alias>kooperi_journal</alias>
