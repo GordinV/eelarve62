@@ -1,0 +1,64 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT qry.rekv_id,
+                           qry.asutus_id,
+                           qry.konto,
+                           qry.tunnus,
+                           qry.tegev,
+                           l.nimetus,
+                           qry.saldo,
+                           a.regkood,
+                           a.nimetus                                 AS asutus,
+                           a.tp,
+                           a.aadress,
+                           sum(saldo) OVER ( PARTITION BY asutus_id) AS kond_saldo
+                    FROM docs.kontosaldoandmik_tunnus_tt($1::TEXT, $2::INTEGER, $3::DATE, $4::INTEGER) qry
+                             INNER JOIN libs.asutus a ON a.id = qry.asutus_id
+                             INNER JOIN com_kontoplaan l ON l.kood = qry.konto
+                    WHERE qry.saldo &lt;&gt; 0
+                    ORDER BY qry.konto, a.nimetus</sql>
+    <alias>kontosaldoandmik_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
