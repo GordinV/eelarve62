@@ -25,6 +25,11 @@
                                          UNION ALL
                                          SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
                                          WHERE $3::INTEGER = 1
+                                         UNION ALL
+                                         SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
+                                         FROM ou.rekv r
+                                         WHERE r.id = $2
+                                           AND $3::INTEGER = 1
                     ) r
                                         ON r.id = qryReport.rekv_id
                              LEFT OUTER JOIN ou.rekv p ON p.id = r.parentid
@@ -33,7 +38,7 @@
                                             AND a.library = 'TULUDEALLIKAD' AND a.status &lt; 3
                     GROUP BY r.id, r.parentid, r.regkood, r.nimetus, p.id, p.nimetus, qryReport.rekv_id, qryReport.idx,
                              qryReport.artikkel, a.nimetus
-                    ORDER BY CASE WHEN r.id = 999999 THEN 0 ELSE 1 END, r.parentid, r.nimetus, qryReport.idx,
+                    ORDER BY CASE WHEN r.id &gt; 999 THEN 0 WHEN r.id = $2 THEN 1 ELSE r.id END, r.parentid, r.nimetus, qryReport.idx,
                              qryReport.artikkel</sql>
     <alias>tulud_eelnou</alias>
   </grid>
