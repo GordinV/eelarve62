@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="UTF-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -13,6 +13,7 @@
                    sum(qry.eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
                    sum(qry.eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
             FROM eelarve.kulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER, $4::JSONB) qry
+            where artikkel &lt;&gt; ''
             GROUP BY qry.rekv_id, qry.idx, qry.artikkel
         ),        
         preReport AS (
