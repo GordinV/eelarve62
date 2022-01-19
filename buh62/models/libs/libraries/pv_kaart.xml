@@ -1,60 +1,99 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT *
-                    FROM cur_pohivara l
-                    WHERE l.rekvId = $1</sql>
+    <sql>SELECT l.id,
+                           l.kood,
+                           l.nimetus,
+                           l.rekvid,
+                           coalesce(a.nimetus, '') :: VARCHAR(254)                                               AS vastisik,
+                           (l.properties :: JSONB -&gt;&gt; 'vastisikid') :: INTEGER                                   AS vastisikid,
+                           (l.properties :: JSONB -&gt;&gt; 'algkulum') :: NUMERIC(12, 2)                              AS algkulum,
+                           (l.properties :: JSONB -&gt;&gt; 'kulum') :: NUMERIC(12, 2)                                 AS kulum,
+                           (l.properties :: JSONB -&gt;&gt; 'soetmaks') :: NUMERIC(12, 2)                              AS soetmaks,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'parhind') :: NUMERIC(12, 2),
+                                    (l.properties :: JSONB -&gt;&gt; 'soetmaks') :: NUMERIC(12, 2))                    AS parhind,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'kulum_kokku') :: NUMERIC(12, 2),
+                                    0) :: NUMERIC(12, 2)                                                         AS kulum_kokku,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'jaak') :: NUMERIC(12, 2), 0) :: NUMERIC(12, 2)   AS jaak,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'soetkpv') :: DATE,
+                                    date(1900, 01, 01))                                                          AS soetkpv,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)                      AS konto,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'tunnus'), '') :: VARCHAR(20)                     AS tunnus,
+                           (l.properties :: JSONB -&gt;&gt; 'mahakantud') :: DATE                                      AS mahakantud,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'rentnik'), '') :: VARCHAR(120)                   AS rentnik,
+                           (l.properties :: JSONB -&gt;&gt; 'liik') :: VARCHAR(120)                                    AS liik,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'selg'), '') :: VARCHAR(120)                      AS selgitus,
+                           (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER                                    AS parent_id,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'pindala') :: NUMERIC(12, 4), 0):: NUMERIC(12, 4) AS pindala,
+                           grupp.id                                                                              AS gruppid,
+                           grupp.nimetus                                                                         AS grupp,
+                           coalesce(p.kood, '')                                                                  AS parent_kood,
+                           coalesce(p.nimetus, '')                                                               AS parent_nimetus,
+                           coalesce((l.properties :: JSONB -&gt;&gt; 'aadress'), ''):: VARCHAR(254)                    AS aadress,
+                           l.status,
+                           $2::INTEGER                                                                                    AS user_id
+                    FROM libs.library l
+                             JOIN libs.library grupp ON (l.properties :: JSONB -&gt; 'gruppid') = to_jsonb(grupp.id)
+                             LEFT JOIN libs.asutus a ON (l.properties :: JSONB -&gt; 'vastisikid') = to_jsonb(a.id)
+                             LEFT JOIN libs.library p ON (l.properties :: JSONB -&gt; 'parent_id') = to_jsonb(p.id)
+                    WHERE l.status &lt;&gt; 3
+                      AND l.rekvId = $1::INTEGER
+                      AND ($3::TEXT IS NULL OR coalesce((l.properties :: JSONB -&gt;&gt; 'selg'), '') ILIKE '%' || ltrim(rtrim($3)) || '%' ::TEXT)
+        </sql>
     <alias>curPohivara</alias>
   </grid>
   <select>
     <sql>SELECT l.id,
                      l.rekvid,
-                     (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER                                         AS parent_id,
-                     (SELECT kood FROM libs.library WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(20)    AS parent_kood,
+                     (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER                                    AS parent_id,
+                     (SELECT kood
+                      FROM libs.library
+                      WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(20)          AS parent_kood,
                      (SELECT nimetus
                       FROM libs.library
-                      WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(254)                                  AS parent_nimetus,
+                      WHERE id = (l.properties :: JSONB -&gt;&gt; 'parent_id') :: INTEGER)::VARCHAR(254)         AS parent_nimetus,
                      l.kood,
                      l.nimetus,
                      l.muud,
                      l.status,
                      l.library,
-                     $2 :: INTEGER                                                                              AS userid,
-                     'POHIVARA'                                                                                 AS doc_type_id,
-                     (l.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER                                           AS gruppid,
-                     (l.properties :: JSONB -&gt;&gt; 'konto') :: VARCHAR(20)                                         AS konto,
-                     coalesce((l.properties :: JSONB -&gt;&gt; 'soetkpv') :: DATE, now() :: DATE)                     AS soetkpv,
-                     (l.properties :: JSONB -&gt;&gt; 'kulum') :: NUMERIC(12, 4)                                      AS kulum,
-                     (l.properties :: JSONB -&gt;&gt; 'algkulum') :: NUMERIC(12, 4)                                   AS algkulum,
-                     coalesce(jaak.kulum,0) :: NUMERIC(12, 4)                                                   AS kulum_kokku,
-                     (l.properties :: JSONB -&gt;&gt; 'soetmaks') :: NUMERIC(12, 2)                                   AS soetmaks,
-                     (jaak.soetmaks) :: NUMERIC(12, 2)                                                          AS parhind,
-                     (jaak.jaak) :: NUMERIC(12, 2)                                                              AS jaak,
-                     (l.properties :: JSONB -&gt;&gt; 'vastisikid') :: INTEGER                                        AS vastIsikId,
-                     (l.properties :: JSONB -&gt;&gt; 'selg') :: TEXT                                                 AS selg,
-                     (l.properties :: JSONB -&gt;&gt; 'rentnik') :: TEXT                                              AS rentnik,
-                     (l.properties :: JSONB -&gt;&gt; 'liik') :: TEXT                                                 AS liik,
-                     (l.properties :: JSONB -&gt;&gt; 'mahakantud') :: DATE                                           AS mahakantud,
-                     coalesce((l.properties :: JSONB -&gt;&gt; 'pindala') :: NUMERIC(12, 4),0):: NUMERIC(12, 4)       AS pindala,
-                     (l.properties :: JSONB -&gt;&gt; 'kinnitus_osa') ::NUMERIC(12, 4)                                AS kinnitus_osa,
-                     (l.properties :: JSONB -&gt;&gt; 'kadastri_uksus') ::VARCHAR(254)                                AS kadastri_uksus,
-                     (l.properties :: JSONB -&gt;&gt; 'motteline_osa') ::VARCHAR(254)                                 AS motteline_osa,
-                     (l.properties :: JSONB -&gt;&gt; 'ehituse_objekt') ::VARCHAR(254)                                AS ehituse_objekt,
-                     (l.properties :: JSONB -&gt;&gt; 'aadress') ::text                                               AS aadress,
-                     jaak.turu_vaartsus:: NUMERIC(12, 4)                                                        AS turu_vaartsus,
-                     jaak.eluiga :: NUMERIC(12, 2)                                                              AS eluiga,
-                     'EUR' :: VARCHAR(20)                                                                       AS valuuta,
-                     1 :: NUMERIC(12, 2)                                                                        AS kuurs,
-                     g.kood                                                                                     AS grupp,
-                     a.nimetus                                                                                  AS vastisik,
+                     $2 :: INTEGER                                                                         AS userid,
+                     'POHIVARA'                                                                            AS doc_type_id,
+                     (l.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER                                      AS gruppid,
+                     (l.properties :: JSONB -&gt;&gt; 'konto') :: VARCHAR(20)                                    AS konto,
+                     (l.properties :: JSONB -&gt;&gt; 'korr_konto') :: VARCHAR(20)                               AS korr_konto,
+                     coalesce((l.properties :: JSONB -&gt;&gt; 'soetkpv') :: DATE, now() :: DATE)                AS soetkpv,
+                     (l.properties :: JSONB -&gt;&gt; 'kulum') :: NUMERIC(12, 4)                                 AS kulum,
+                     (l.properties :: JSONB -&gt;&gt; 'algkulum') :: NUMERIC(12, 4)                              AS algkulum,
+                     coalesce(jaak.kulum, 0) :: NUMERIC(12, 4)                                             AS kulum_kokku,
+                     (l.properties :: JSONB -&gt;&gt; 'soetmaks') :: NUMERIC(12, 2)                              AS soetmaks,
+                     (jaak.soetmaks) :: NUMERIC(12, 2)                                                     AS parhind,
+                     (jaak.jaak) :: NUMERIC(12, 2)                                                         AS jaak,
+                     (l.properties :: JSONB -&gt;&gt; 'vastisikid') :: INTEGER                                   AS vastIsikId,
+                     (l.properties :: JSONB -&gt;&gt; 'selg') :: TEXT                                            AS selg,
+                     (l.properties :: JSONB -&gt;&gt; 'rentnik') :: TEXT                                         AS rentnik,
+                     (l.properties :: JSONB -&gt;&gt; 'liik') :: TEXT                                            AS liik,
+                     (l.properties :: JSONB -&gt;&gt; 'mahakantud') :: DATE                                      AS mahakantud,
+                     coalesce((l.properties :: JSONB -&gt;&gt; 'pindala') :: NUMERIC(12, 4), 0):: NUMERIC(12, 4) AS pindala,
+                     (l.properties :: JSONB -&gt;&gt; 'kinnitus_osa') ::NUMERIC(12, 4)                           AS kinnitus_osa,
+                     (l.properties :: JSONB -&gt;&gt; 'kadastri_uksus') ::VARCHAR(254)                           AS kadastri_uksus,
+                     (l.properties :: JSONB -&gt;&gt; 'motteline_osa') ::VARCHAR(254)                            AS motteline_osa,
+                     (l.properties :: JSONB -&gt;&gt; 'ehituse_objekt') ::VARCHAR(254)                           AS ehituse_objekt,
+                     (l.properties :: JSONB -&gt;&gt; 'aadress') ::TEXT                                          AS aadress,
+                     jaak.turu_vaartsus:: NUMERIC(12, 4)                                                   AS turu_vaartsus,
+                     jaak.eluiga :: NUMERIC(12, 2)                                                         AS eluiga,
+                     'EUR' :: VARCHAR(20)                                                                  AS valuuta,
+                     1 :: NUMERIC(12, 2)                                                                   AS kuurs,
+                     g.kood                                                                                AS grupp,
+                     a.nimetus                                                                             AS vastisik,
                      (SELECT sum(summa)
                       FROM docs.pv_oper po
                       WHERE po.pv_kaart_id = l.id
-                        AND liik = 2)                                                                           AS arv_kulum
+                        AND liik = 2)                                                                      AS arv_kulum
               FROM libs.library l
-                    INNER JOIN libs.get_pv_kaart_jaak(l.id) jaak on jaak.id = l.id
-                     LEFT OUTER JOIN libs.library g ON g.id = (l.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER
-                     LEFT OUTER JOIN libs.asutus a ON a.id = (l.properties :: JSONB -&gt;&gt; 'vastisikid') :: INTEGER
+                       INNER JOIN libs.get_pv_kaart_jaak(l.id) jaak ON jaak.id = l.id
+                       LEFT OUTER JOIN libs.library g ON g.id = (l.properties :: JSONB -&gt;&gt; 'gruppid') :: INTEGER
+                       LEFT OUTER JOIN libs.asutus a ON a.id = (l.properties :: JSONB -&gt;&gt; 'vastisikid') :: INTEGER
               WHERE l.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER               AS id,
@@ -71,6 +110,7 @@
                       NULL :: TEXT               AS muud,
                       NULL :: INTEGER            AS gruppid,
                       NULL :: VARCHAR(20)        AS konto,
+                      NULL :: VARCHAR(20)        AS korr_konto,
                       now() :: DATE              AS soetkpv,
                       0 :: NUMERIC(12, 4)        AS kulum,
                       0 :: NUMERIC(12, 2)        AS algkulum,
@@ -109,15 +149,16 @@
     <alias>details</alias>
   </select>
   <select>
-    <sql>select $2::integer as user_id, $1 as pv_id, po.* 
-                from cur_pohivara po
-                where parent_id is not null and parent_id = $1</sql>
+    <sql>SELECT $2::INTEGER AS user_id, $1 AS pv_id, po.*
+                  FROM cur_pohivara po
+                  WHERE parent_id IS NOT NULL
+                    AND parent_id = $1</sql>
     <multiple>true</multiple>
     <alias>seotatud_kaardid</alias>
   </select>
   <select>
     <sql>SELECT $2 :: INTEGER AS userid, po.*
-              FROM libs.get_pv_kaart_jaak($1::integer) po</sql>
+                  FROM libs.get_pv_kaart_jaak($1::INTEGER) po</sql>
     <multiple>false</multiple>
     <alias>pv_jaak</alias>
   </select>
@@ -161,4 +202,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>

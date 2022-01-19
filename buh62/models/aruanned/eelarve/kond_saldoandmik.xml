@@ -1,7 +1,7 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql> SELECT * from eelarve.kond_saldoandmik_aruanne($1::date,  $2::integer, $3::integer)</sql>
+    <sql> SELECT * from eelarve.kond_saldoandmik_aruanne($1::date,  $2::integer, $3::integer, $4::boolean)</sql>
     <alias>kond_saldoandmik_report</alias>
   </grid>
   <select></select>

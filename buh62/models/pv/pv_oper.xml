@@ -1,61 +1,61 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select * 
-            from cur_pv_oper l
-            where (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT *
+                    FROM cur_pv_oper l
+                    WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curPVoper</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  d.id,
-                  $2 :: INTEGER                                                  AS userid,
-                  to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                AS created,
-                  to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT             AS lastupdate,
-                  d.bpm,
-                  trim(l.nimetus)                                                AS doc,
-                  trim(l.kood)                                                   AS doc_type_id,
-                  trim(s.nimetus)                                                AS status,
-                  d.status                                                       AS doc_status,
-                  asutus.regkood,
-                  trim(asutus.nimetus) :: VARCHAR(254)                           AS asutus,
-                  po.doklausid,
-                  po.pv_kaart_id,
-                  po.nomid,
-                  po.liik,
-                  po.kpv,
-                  po.summa,
-                  po.kood1,
-                  po.kood2,
-                  po.kood3,
-                  po.kood4,
-                  po.kood5,
-                  po.konto,
-                  po.tp,
-                  po.asutusid,
-                  po.tunnus,
-                  po.proj,
-                  po.journalid,
-                  po.muud,
-                  n.kood,
-                  n.nimetus,
-                  coalesce(v.valuuta, 'EUR')                                     AS valuuta,
-                  coalesce(v.kuurs, 1) :: NUMERIC(12, 4)                         AS kuurs,
-                  coalesce(jid.number, 0) :: INTEGER                             AS laus_nr,
-                  coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS korrkonto,
-                  dp.selg :: VARCHAR(120)                                        AS dokprop
-                FROM docs.doc d
-                  INNER JOIN libs.library l ON l.id = d.doc_type_id
-                  INNER JOIN docs.pv_oper po ON po.parentId = d.id
-                  INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                  INNER JOIN libs.nomenklatuur n ON n.id = po.nomid
-                  LEFT OUTER JOIN libs.asutus AS asutus ON asutus.id = po.asutusId
-                  LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
-                  LEFT OUTER JOIN libs.dokprop dp ON dp.id = po.doklausid
-                  LEFT OUTER JOIN docs.journal j ON j.parentid = po.journalid
-                  LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
-                  LEFT OUTER JOIN docs.dokvaluuta1 v ON (v.dokid = po.id AND v.dokliik = array_position((enum_range(NULL :: DOK_VALUUTA)), 'pv_oper'))
-                WHERE d.id = $1</sql>
+    <sql>SELECT d.id,
+                     $2 :: INTEGER                                                  AS userid,
+                     to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                AS created,
+                     to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT             AS lastupdate,
+                     d.bpm,
+                     trim(l.nimetus)                                                AS doc,
+                     trim(l.kood)                                                   AS doc_type_id,
+                     trim(s.nimetus)                                                AS status,
+                     d.status                                                       AS doc_status,
+                     asutus.regkood,
+                     trim(asutus.nimetus) :: VARCHAR(254)                           AS asutus,
+                     po.doklausid,
+                     po.pv_kaart_id,
+                     po.nomid,
+                     po.liik,
+                     po.kpv,
+                     po.summa,
+                     po.kood1,
+                     po.kood2,
+                     po.kood3,
+                     po.kood4,
+                     po.kood5,
+                     po.konto,
+                     po.tp,
+                     po.asutusid,
+                     po.tunnus,
+                     po.proj,
+                     po.journalid,
+                     po.muud,
+                     n.kood,
+                     n.nimetus,
+                     coalesce(v.valuuta, 'EUR')                                     AS valuuta,
+                     coalesce(v.kuurs, 1) :: NUMERIC(12, 4)                         AS kuurs,
+                     coalesce(jid.number, 0) :: INTEGER                             AS laus_nr,
+                     coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS korrkonto,
+                     dp.selg :: VARCHAR(120)                                        AS dokprop
+              FROM docs.doc d
+                       INNER JOIN libs.library l ON l.id = d.doc_type_id
+                       INNER JOIN docs.pv_oper po ON po.parentId = d.id
+                       INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                       LEFT OUTER JOIN libs.nomenklatuur n ON n.id = po.nomid
+                       LEFT OUTER JOIN libs.asutus AS asutus ON asutus.id = po.asutusId
+                       LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
+                       LEFT OUTER JOIN libs.dokprop dp ON dp.id = po.doklausid
+                       LEFT OUTER JOIN docs.journal j ON j.parentid = po.journalid
+                       LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+                       LEFT OUTER JOIN docs.dokvaluuta1 v ON (v.dokid = po.id AND v.dokliik =
+                                                                                  array_position((enum_range(NULL :: DOK_VALUUTA)), 'pv_oper'))
+              WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
                   $1 :: INTEGER        AS id,
                   $2 :: INTEGER        AS userid,
@@ -98,14 +98,16 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql> select * from docs.sp_pv_kulum_umber_arvestamine($1::INTEGER, $2::INTEGER)</sql>
+    <sql> SELECT *
+                   FROM docs.sp_pv_kulum_umber_arvestamine($1::INTEGER, $2::INTEGER)</sql>
     <query />
     <multiple>false</multiple>
     <alias>kulum_umber_arvestamine</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from cur_pohivara    l
-        where  (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>SELECT *
+                   FROM cur_pohivara l
+                   WHERE (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -113,7 +115,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from docs.sp_delete_pv_oper($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM docs.sp_delete_pv_oper($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -124,7 +127,8 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>SELECT result, selgitus, summa from docs.sp_calc_kulum(?tnId::INTEGER, current_date::date)</sql>
+    <sql>SELECT result, selgitus, summa
+                  FROM docs.sp_calc_kulum(?tnId::INTEGER, current_date::DATE)</sql>
     <alias>arvestaKulum</alias>
   </executeCommand>
   <register>
@@ -136,32 +140,33 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>select error_code, result, error_message from docs.gen_lausend_pv_oper($2::INTEGER, $1::INTEGER)</sql>
+    <sql>SELECT error_code, result, error_message FROM docs.gen_lausend_pv_oper($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
   <getLog>
     <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
                          (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
                                                                                                                         email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
-                           SELECT jsonb_array_elements( history) AS ajalugu, d.id, d.rekvid
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
                            FROM docs.doc d,
                                 ou.userid u
                            WHERE d.id = $1
                              AND u.id = $2
-                       ) qry WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
+                       ) qry
+                  WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
 </VFPData>
