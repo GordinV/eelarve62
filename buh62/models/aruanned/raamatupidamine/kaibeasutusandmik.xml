@@ -1,23 +1,23 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                      qry.rekv_id,
-                      qry.asutus_id,
-                      qry.konto,
-                      l.nimetus,
-                      qry.alg_saldo,
-                      qry.deebet,
-                      qry.kreedit,
-                      (qry.alg_saldo + qry.deebet - qry.kreedit) as lopp_saldo,
-                      a.regkood,
-                      a.nimetus as asutus,
-                      a.tp
-                    FROM docs.kaibeasutusandmik($1::text, $2::integer, $3::date, $4::date, $5::integer, $6::text, $7::integer) qry
-                      INNER JOIN com_asutused a on a.id = qry.asutus_id  
-                      INNER JOIN com_kontoplaan l ON l.kood = qry.konto
-                      WHERE (qry.alg_saldo &lt;&gt; 0 or qry.deebet &lt;&gt; 0 or qry.kreedit &lt;&gt; 0)
-                      ORDER BY a.nimetus, qry.konto</sql>
+    <sql>SELECT qry.rekv_id,
+                           qry.asutus_id,
+                           qry.konto,
+                           l.nimetus,
+                           qry.alg_saldo,
+                           qry.deebet,
+                           qry.kreedit,
+                           (qry.alg_saldo + qry.deebet - qry.kreedit) AS lopp_saldo,
+                           coalesce(a.regkood, ''):: VARCHAR(20)      AS regkood,
+                           coalesce(a.nimetus, '')::VARCHAR(254)      AS asutus,
+                           coalesce(a.tp, '')::VARCHAR(20)            AS tp
+                    FROM docs.kaibeasutusandmik($1::TEXT, $2::INTEGER, $3::DATE, $4::DATE, $5::INTEGER, $6::TEXT,
+                                                $7::INTEGER) qry
+                             LEFT OUTER JOIN com_asutused a ON a.id = qry.asutus_id
+                             INNER JOIN com_kontoplaan l ON l.kood = qry.konto
+                    WHERE (qry.alg_saldo &lt;&gt; 0 OR qry.deebet &lt;&gt; 0 OR qry.kreedit &lt;&gt; 0)
+                    ORDER BY a.nimetus, qry.konto</sql>
     <alias>kaibeasutusandmik_report</alias>
   </grid>
   <select></select>
