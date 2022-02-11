@@ -1,8 +1,12 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT ltrim(rtrim(r.nimetus))::VARCHAR(254)               AS asutus,
-                           coalesce(ltrim(rtrim(p.nimetus)), '')::VARCHAR(254) AS parent_asutus,
+    <sql>SELECT
+                        CASE WHEN r.parentid NOT IN (0, 63) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS asutus,
+                        CASE
+                            WHEN r.parentid IN (0, 63) THEN coalesce(ltrim(rtrim(r.nimetus)), '')
+                            WHEN r.parentid not IN (0, 63) THEN coalesce(ltrim(rtrim(p.nimetus)), '')
+                            ELSE '' END::VARCHAR(254)                                                               AS parent_asutus,
                            coalesce(qryReport.tunnus, '')::VARCHAR(20)         AS tunnus,
                            coalesce(qryReport.tegev, '')::VARCHAR(20)          AS tegev,
                            coalesce(t.nimetus, '')::VARCHAR(254)               AS tegev_nimetus,
