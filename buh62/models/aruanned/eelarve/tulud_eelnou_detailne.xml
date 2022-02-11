@@ -3,10 +3,10 @@
   <grid>
     <sql>SELECT ltrim(rtrim(r.nimetus))::VARCHAR(254)               AS asutus,
                            coalesce(ltrim(rtrim(p.nimetus)), '')::VARCHAR(254) AS parent_asutus,
-                           qryReport.tunnus,
-                           qryReport.tegev,
+                           coalesce(qryReport.tunnus, '')::VARCHAR(20)         AS tunnus,
+                           coalesce(qryReport.tegev, '')::VARCHAR(20)          AS tegev,
                            coalesce(t.nimetus, '')::VARCHAR(254)               AS tegev_nimetus,
-                           qryReport.allikas,
+                           coalesce(qryReport.allikas, '')::VARCHAR(20)        AS allikas,
                            coalesce(qryReport.artikkel, '')::VARCHAR(20)       AS artikkel,
                            coalesce(a.nimetus, '')::VARCHAR(254)               AS nimetus,
                            qryReport.aasta_1_tekke_taitmine,
@@ -14,7 +14,7 @@
                            qryReport.eelarve_tekkepohine_tapsustatud,
                            qryReport.aasta_2_tekke_taitmine,
                            qryReport.aasta_3_eelnou,
-                           qryReport.aasta_3_prognoos,
+                           NULL::NUMERIC(14, 2)                                AS aasta_3_prognoos,
                            qryReport.selg                                      AS selg
                     FROM eelarve.tulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER) qryReport
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
@@ -31,8 +31,10 @@
                     ) r
                                         ON r.id = qryReport.rekv_id
                              LEFT OUTER JOIN (
-                                    select * from ou.rekv where parentid &lt; 999 and id &lt;&gt; 63 
-                                 ) p ON r.parentid = p.id
+                        SELECT *
+                        FROM ou.rekv
+                        WHERE parentid &lt; 999 AND id &lt;&gt; 63
+                    ) p ON r.parentid = p.id
                              LEFT OUTER JOIN (SELECT id, kood, nimetus
                                               FROM libs.library a
                                               WHERE library = 'TULUDEALLIKAD'
@@ -50,7 +52,8 @@
 
 
                     ORDER BY CASE WHEN r.id &gt; 999 THEN 0 WHEN r.id = $2 THEN 1 ELSE r.id END, r.parentid,
-                             qryReport.rekv_id, qryReport.tegev, qryReport.allikas, qryReport.tunnus, qryReport.artikkel</sql>
+                             qryReport.rekv_id, qryReport.tegev, qryReport.allikas, qryReport.tunnus,
+                             qryReport.artikkel</sql>
     <alias>tulud_eelnou</alias>
   </grid>
   <select></select>
