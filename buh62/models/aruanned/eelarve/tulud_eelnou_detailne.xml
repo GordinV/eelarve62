@@ -18,7 +18,7 @@
                            qryReport.eelarve_tekkepohine_tapsustatud,
                            qryReport.aasta_2_tekke_taitmine,
                            qryReport.aasta_3_eelnou,
-                           NULL::NUMERIC(14, 2)                                AS aasta_3_prognoos,
+                           qryReport.aasta_3_prognoos,
                            qryReport.selg                                      AS selg
                     FROM eelarve.tulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER) qryReport
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
