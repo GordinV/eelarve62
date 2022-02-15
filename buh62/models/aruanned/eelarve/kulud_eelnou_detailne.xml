@@ -35,11 +35,11 @@
                      GROUP BY qry.rekv_id, left(qry.tegev, 2)
                  )
             
-            SELECT (ltrim(rtrim(CASE
-                                    WHEN p.id = r.id THEN ''
-                                    WHEN r.id = 999999 THEN ''
-                                    ELSE coalesce(p.nimetus, '') END)) || ' ' ||
-                    ltrim(rtrim(r.nimetus)))::VARCHAR(254)       AS asutus,
+            SELECT    CASE WHEN r.parentid NOT IN (0, 63) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS asutus,
+                        CASE
+                            WHEN r.parentid IN (0, 63) THEN coalesce(ltrim(rtrim(r.nimetus)), '')
+                            WHEN r.parentid not IN (0, 63) THEN coalesce(ltrim(rtrim(p.nimetus)), '')
+                            ELSE '' END::VARCHAR(254)                                                               AS parent_asutus,
                    qryReport.tunnus,
                    qryReport.tegev,
                    coalesce(t.nimetus, '')::VARCHAR(254)         AS tegev_nimetus,
@@ -49,29 +49,34 @@
                    qryReport.eelarve_tekkepohine_kinnitatud,
                    qryReport.eelarve_tekkepohine_tapsustatud,
                    qryReport.aasta_2_tekke_taitmine,
+                   0::numeric(12,2) as aasta_3_oodatav,
                    qryReport.aasta_3_eelnou,
                    qryReport.aasta_3_prognoos,
-                   qryReport.selg                                AS selg
+                   coalesce(qryReport.selg,' ')                                AS selg
             FROM (SELECT *
                   FROM report
                   UNION ALL
                   SELECT *
                   FROM TegevKond
                  ) qryReport
-                     INNER JOIN (SELECT id, parentid, regkood, nimetus
-                                 FROM ou.rekv
-                                 WHERE parentid &lt; 999
-                                 UNION ALL
-                                 SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
-                                 WHERE $3::INTEGER = 1
-                                 UNION ALL
-                                 SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
-                                 FROM ou.rekv r
-                                 WHERE r.id = $2
-                                   AND $3::INTEGER = 1
-            ) r
-                                ON r.id = qryReport.rekv_id
-                     LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
+                             INNER JOIN (SELECT id, parentid, regkood, nimetus
+                                         FROM ou.rekv
+                                         WHERE parentid &lt; 999
+                                         UNION ALL
+                                         SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
+                                         WHERE $3::INTEGER = 1
+                                         UNION ALL
+                                         SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
+                                         FROM ou.rekv r
+                                         WHERE r.id = $2
+                                           AND $3::INTEGER = 1
+                    ) r
+                                        ON r.id = qryReport.rekv_id
+                             LEFT OUTER JOIN (
+                        SELECT *
+                        FROM ou.rekv
+                        WHERE parentid &lt; 999 AND id &lt;&gt; 63
+                    ) p ON r.parentid = p.id
                      LEFT OUTER JOIN (SELECT id, kood, nimetus
                                       FROM libs.library a
                                       WHERE library = 'TULUDEALLIKAD'
