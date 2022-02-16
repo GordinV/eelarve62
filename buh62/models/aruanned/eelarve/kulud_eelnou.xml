@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -185,12 +185,12 @@
                eelarve_tekkepohine_kinnitatud                     AS eelarve_tekkepohine_kinnitatud,
                eelarve_tekkepohine_tapsustatud                    AS eelarve_tekkepohine_tapsustatud,
                coalesce(a.nimetus, qryReport.artikkel)            AS nimetus,
-               r.regkood::VARCHAR(20),
-               coalesce(r.nimetus, '')::VARCHAR(254)              AS asutus,
-               CASE
-                   WHEN p.id = r.id THEN ''
-                   WHEN r.id = 999999 THEN ''
-                   ELSE coalesce(p.nimetus, '') END::VARCHAR(254) AS parent_asutus
+                CASE WHEN r.parentid NOT IN (0, 63) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS asutus,
+                        CASE
+                            WHEN r.parentid IN (0, 63) THEN coalesce(ltrim(rtrim(r.nimetus)), '')
+                            WHEN r.parentid not IN (0, 63) THEN coalesce(ltrim(rtrim(p.nimetus)), '')
+                            ELSE '' END::VARCHAR(254)                                                               AS parent_asutus
+                   
         FROM (
              SELECT *
              FROM preReport
