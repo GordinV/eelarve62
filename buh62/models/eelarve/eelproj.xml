@@ -47,7 +47,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>aasta,rekvid,kinnitaja</validate>
+    <validate>aasta,rekvid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
