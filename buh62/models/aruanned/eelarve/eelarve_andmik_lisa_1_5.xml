@@ -4,9 +4,7 @@
     <sql>SELECT *
                     FROM eelarve.eelarve_andmik_lisa_1_5($1::DATE, $2::INTEGER,
                                                          $3::INTEGER) where (not EMPTY(tegev) OR NOT empty(artikkel))
-                        AND NOT (tegev IN (
-                         '01800',
-                         '09800') AND EMPTY(saldoandmik))
+                        AND EMPTY(saldoandmik)
                     ORDER BY tegev, artikkel</sql>
     <alias>eelarve_andmik_lisa_1_5_report</alias>
   </grid>
@@ -18,14 +16,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_pohitegevuse_tulud($1::TEXT, $2::JSON, $3::JSON)
-                  WHERE (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0) 
-                    or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_pohitegevuse_tulud($1::TEXT, $2::JSON, $3::JSON) WHERE (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_pohitegevuse_tulud</alias>
@@ -38,14 +44,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_30($1::TEXT, $2::JSON, $3::JSON)
-                where (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0)
-                or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_30($1::TEXT, $2::JSON, $3::JSON) where (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_30</alias>
@@ -58,14 +72,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_3000($1::TEXT, $2::JSON, $3::JSON)
-                where (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0)
-                or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_3000($1::TEXT, $2::JSON, $3::JSON) where (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_3000</alias>
@@ -78,14 +100,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_3030($1::TEXT, $2::JSON, $3::JSON)
-                where (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0)
-                or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_3030($1::TEXT, $2::JSON, $3::JSON) where (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_3030</alias>
@@ -98,14 +128,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_3044($1::TEXT, $2::JSON, $3::JSON)
-                where (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0)
-                or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_3044($1::TEXT, $2::JSON, $3::JSON) where (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_3044</alias>
@@ -118,14 +156,22 @@
                          saldoandmik::CHAR(20),
                          kassa::CHAR(20),
                          selg::TEXT
-                  FROM eelarve.lisa1_lisa5_kontrol_art($1::TEXT, $2::JSON, $3::JSON)
-                where (eelarve &lt;&gt; 0
-                    AND eelarve_taps &lt;&gt; 0
-                    AND eelarve_kassa &lt;&gt; 0
-                    AND eelarve_kassa_taps &lt;&gt; 0
-                    AND saldoandmik &lt;&gt; 0
-                    AND kassa &lt;&gt; 0)
-                or coalesce(selg,'') = 'test'</sql>
+                  FROM eelarve.lisa1_lisa5_kontrol_art($1::TEXT, $2::JSON, $3::JSON) where (eelarve &lt;&gt; 0
+                      AND eelarve_taps &lt;&gt; 0
+                      AND eelarve_kassa &lt;&gt; 0
+                      AND eelarve_kassa_taps &lt;&gt; 0
+                      AND saldoandmik &lt;&gt; 0
+                      AND kassa &lt;&gt; 0
+                  )
+                  OR
+                  COALESCE
+                  (
+                  selg
+                  ,
+                  ''
+                  )
+                  =
+                  'test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_art</alias>
