@@ -3,8 +3,10 @@
   <grid>
     <sql>SELECT *
                     FROM eelarve.eelarve_andmik_lisa_1_5($1::DATE, $2::INTEGER,
-                                                         $3::INTEGER) where (not EMPTY(tegev) OR NOT empty(artikkel))
-                        AND EMPTY(saldoandmik)
+                                                         $3::INTEGER)
+                    WHERE NOT EMPTY(tegev)
+                       OR NOT empty(artikkel)
+                       OR NOT EMPTY(saldoandmik)
                     ORDER BY tegev, artikkel</sql>
     <alias>eelarve_andmik_lisa_1_5_report</alias>
   </grid>
