@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -191,31 +191,109 @@
                             WHEN r.parentid not IN (0, 63) THEN coalesce(ltrim(rtrim(p.nimetus)), '')
                             ELSE '' END::VARCHAR(254)                                                               AS parent_asutus
                    
-        FROM (
-             SELECT *
-             FROM preReport
-             UNION ALL
-             SELECT *
-             FROM kokkuvotted
-         ) qryReport
-                 INNER JOIN (SELECT id, parentid, regkood, nimetus
-                             FROM ou.rekv
-                             WHERE parentid &lt; 999
+        FROM (                            WITH report AS (
+                             SELECT *
+                             FROM preReport
                              UNION ALL
-                             SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
-                             WHERE $3::INTEGER = 1
-                             UNION ALL
-                             SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
-                             FROM ou.rekv r
-                             WHERE r.id = $2
-                               AND $3::INTEGER = 1
-        ) r
+                             SELECT *
+                             FROM kokkuvotted)
+                         SELECT *
+                         FROM report
+                         UNION ALL
+                         SELECT 1190                                   AS rekv_id,
+                                r.idx,
+                                r.artikkel,
+                                sum(r.aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
+                                sum(r.aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
+                                sum(r.aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
+                                sum(r.aasta_3_eelnou)                  AS aasta_3_eelnou,
+                                sum(r.aasta_3_prognoos)                AS aasta_3_prognoos,
+                                sum(r.eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
+                                sum(r.eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
+                         FROM report r
+                         WHERE r.rekv_id IN (SELECT id FROM ou.rekv WHERE id = 119 OR parentid = 119)
+                         GROUP BY r.idx, r.artikkel
+                         UNION ALL
+                         SELECT 300                                    AS rekv_id,
+                                r.idx,
+                                r.artikkel,
+                                sum(r.aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
+                                sum(r.aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
+                                sum(r.aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
+                                sum(r.aasta_3_eelnou)                  AS aasta_3_eelnou,
+                                sum(r.aasta_3_prognoos)                AS aasta_3_prognoos,
+                                sum(r.eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
+                                sum(r.eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
+                         FROM report r
+                         WHERE r.rekv_id IN (SELECT id FROM ou.rekv WHERE id = 3 OR parentid = 3)
+                         GROUP BY r.idx, r.artikkel
+                         UNION ALL
+                         SELECT 640                                    AS rekv_id,
+                                r.idx,
+                                r.artikkel,
+                                sum(r.aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
+                                sum(r.aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
+                                sum(r.aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
+                                sum(r.aasta_3_eelnou)                  AS aasta_3_eelnou,
+                                sum(r.aasta_3_prognoos)                AS aasta_3_prognoos,
+                                sum(r.eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
+                                sum(r.eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
+                         FROM report r
+                         WHERE r.rekv_id IN (SELECT id FROM ou.rekv WHERE id = 64 OR parentid = 64)
+                         GROUP BY r.idx, r.artikkel
+                    ) qryReport
+                 INNER JOIN                      (SELECT id, (CASE WHEN id = 119 THEN 1190 ELSE parentid END) AS parentid, regkood, nimetus
+                     FROM ou.rekv
+                     WHERE parentid &lt; 999
+                     UNION ALL
+                     SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
+                     WHERE $3::INTEGER = 1
+                     UNION ALL
+                     SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
+                     FROM ou.rekv r
+                     WHERE r.id = 63
+                       AND $3::INTEGER = 1
+                     UNION ALL
+                     SELECT 1190 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     FROM ou.rekv r
+                     WHERE r.id = 119
+                       AND $3::INTEGER = 1
+                     UNION ALL
+                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     FROM ou.rekv r
+                     WHERE r.id = 3
+                       AND $3::INTEGER = 1
+                     UNION ALL
+                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     FROM ou.rekv r
+                     WHERE r.id = 3
+                       AND $3::INTEGER = 1
+                     UNION ALL
+                     SELECT 640 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     FROM ou.rekv r
+                     WHERE r.id = 64
+                       AND $3::INTEGER = 1 
+                                ) r
                             ON r.id = qryReport.rekv_id
                  LEFT OUTER JOIN ou.rekv p ON p.id = r.parentid
                   LEFT OUTER JOIN libs.library a
                             ON a.kood = qryReport.artikkel
                                 AND a.library = 'TULUDEALLIKAD' AND a.status &lt; 3
-        ORDER BY CASE WHEN r.id &gt; 999 THEN 0 WHEN r.id = $2 THEN 1 ELSE r.id END, r.parentid, r.nimetus, qryReport.idx,
+        ORDER BY  CASE
+             WHEN r.id &gt; 9999 THEN 0
+             WHEN r.id = 63 THEN 10
+             WHEN r.id = 1190 THEN 100
+             WHEN r.id = 119 THEN 110
+             WHEN r.parentid = 119 THEN 120
+             WHEN r.id = 300 THEN 130
+             WHEN r.id = 3 or r.parentid = 3 THEN 140
+             WHEN r.id = 640 THEN 150
+             WHEN r.id = 64 THEN 160
+             WHEN r.parentid = 64 THEN 170
+
+             WHEN r.parentid = 63 THEN 200
+             WHEN r.parentid = 119 THEN 300
+             ELSE 900 END * 1000, r.nimetus, qryReport.idx,
                  qryReport.artikkel</sql>
     <alias>kulud_eelnou</alias>
   </grid>
