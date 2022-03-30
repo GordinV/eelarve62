@@ -185,11 +185,8 @@
                eelarve_tekkepohine_kinnitatud                     AS eelarve_tekkepohine_kinnitatud,
                eelarve_tekkepohine_tapsustatud                    AS eelarve_tekkepohine_tapsustatud,
                coalesce(a.nimetus, qryReport.artikkel)            AS nimetus,
-                CASE WHEN r.parentid NOT IN (0, 63) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS asutus,
-                        CASE
-                            WHEN r.parentid IN (0, 63) THEN coalesce(ltrim(rtrim(r.nimetus)), '')
-                            WHEN r.parentid not IN (0, 63) THEN coalesce(ltrim(rtrim(p.nimetus)), '')
-                            ELSE '' END::VARCHAR(254)                                                               AS parent_asutus
+               CASE WHEN r.parentid IN (119, 3, 64) THEN ltrim(rtrim(coalesce(p.nimetus,''))) ELSE r.nimetus END ::VARCHAR(254) AS asutus,
+               CASE WHEN r.parentid IN (119, 3, 64) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS hallava_asutus
                    
         FROM (                            WITH report AS (
                              SELECT *

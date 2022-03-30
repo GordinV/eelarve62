@@ -171,11 +171,8 @@
                    sum(eelarve_tekkepohine_tapsustatud)               AS eelarve_tekkepohine_tapsustatud,
                    coalesce(a.nimetus, qryReport.artikkel)            AS nimetus,
                    r.regkood::VARCHAR(20),
-                   coalesce(r.nimetus, '')::VARCHAR(254)              AS asutus,
-                   CASE
-                       WHEN p.id = r.id THEN ''
-                       WHEN r.id in (999999, 1190, 300, 640 ) THEN ''
-                       ELSE coalesce(p.nimetus, '') END::VARCHAR(254) AS parent_asutus
+                   CASE WHEN r.parentid IN (119, 3, 64) THEN ltrim(rtrim(coalesce(p.nimetus,''))) ELSE r.nimetus END ::VARCHAR(254) AS asutus,
+                   CASE WHEN r.parentid IN (119, 3, 64) THEN ltrim(rtrim(r.nimetus)) ELSE '' END ::VARCHAR(254) AS hallava_asutus
             FROM (         
                             WITH report AS (
                              SELECT *
