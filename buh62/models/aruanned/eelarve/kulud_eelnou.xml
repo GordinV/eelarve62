@@ -243,7 +243,7 @@
                      FROM ou.rekv
                      WHERE parentid &lt; 999
                      UNION ALL
-                     SELECT 999999, 0, '' AS regkood, 'Kond' AS nimetus
+                     SELECT 999999, 0, '' AS regkood, 'Koond' AS nimetus
                      WHERE $3::INTEGER = 1
                      UNION ALL
                      SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
@@ -251,22 +251,22 @@
                      WHERE r.id = 63
                        AND $3::INTEGER = 1
                      UNION ALL
-                     SELECT 1190 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     SELECT 1190 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' koond'
                      FROM ou.rekv r
                      WHERE r.id = 119
                        AND $3::INTEGER = 1
                      UNION ALL
-                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' koond'
                      FROM ou.rekv r
                      WHERE r.id = 3
                        AND $3::INTEGER = 1
                      UNION ALL
-                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     SELECT 300 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' koond'
                      FROM ou.rekv r
                      WHERE r.id = 3
                        AND $3::INTEGER = 1
                      UNION ALL
-                     SELECT 640 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' kond'
+                     SELECT 640 AS id, 63 AS parentid, r.regkood, ltrim(rtrim(r.nimetus)) || ' koond'
                      FROM ou.rekv r
                      WHERE r.id = 64
                        AND $3::INTEGER = 1 
