@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="UTF-8" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -103,7 +103,7 @@
                   UNION ALL
                   SELECT qry.rekv_id,
                          590                                  AS idx,
-                         upper('Finanseerimistegevus')               AS artikkel,
+                         upper('Finantseerimistegevus')               AS artikkel,
                          sum(aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
                          sum(aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
                          sum(aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
