@@ -132,6 +132,20 @@
               ),
                 kokkuvotted AS (
                   SELECT qry.rekv_id,
+                         70                                   AS idx,
+                         upper('SISSETULEKUD KOKKU')           AS artikkel,
+                         sum(aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
+                         sum(aasta_2_tekke_taitmine)          AS aasta_2_tekke_taitmine,
+                         sum(aasta_2_oodatav_taitmine)        AS aasta_2_oodatav_taitmine,
+                         sum(aasta_3_eelnou)                  AS aasta_3_eelnou,
+                         sum(aasta_3_prognoos)                AS aasta_3_prognoos,
+                         sum(eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
+                         sum(eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
+                  FROM prereport qry
+                  WHERE idx IN (90, 190, 290, 390,   490,  590, 690)
+                  GROUP BY qry.rekv_id, qry.idx, qry.artikkel
+                  UNION ALL
+                  SELECT qry.rekv_id,
                          80                                   AS idx,
                          upper('Põhitegevuse tulud kokku')           AS artikkel,
                          sum(aasta_1_tekke_taitmine)          AS aasta_1_tekke_taitmine,
