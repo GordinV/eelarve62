@@ -29,6 +29,7 @@
                          coalesce((u.roles -&gt;&gt; 'is_eel_allkirjastaja') :: BOOLEAN, FALSE) :: INTEGER   AS is_eel_allkirjastaja,
                          coalesce((u.roles -&gt;&gt; 'is_eel_esitaja') :: BOOLEAN, FALSE) :: INTEGER         AS is_eel_esitaja,
                          coalesce((u.roles -&gt;&gt; 'is_eel_aktsepterja') :: BOOLEAN, FALSE) :: INTEGER     AS is_eel_aktsepterja,
+                         coalesce((u.roles -&gt;&gt; 'is_eel_admin') :: BOOLEAN, FALSE) :: INTEGER           AS is_eel_admin,
                          coalesce((u.roles -&gt;&gt; 'is_asutuste_korraldaja') :: BOOLEAN, FALSE) :: INTEGER AS is_asutuste_korraldaja,
                          coalesce((u.roles -&gt;&gt; 'is_rekl_administraator') :: BOOLEAN, FALSE) :: INTEGER AS is_rekl_administraator,
                          coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE) :: INTEGER    AS is_rekl_maksuhaldur,
@@ -60,6 +61,7 @@
                       0 :: INTEGER     AS is_eel_allkirjastaja,
                       0 :: INTEGER     AS is_eel_esitaja,
                       0 :: INTEGER     AS is_eel_aktsepterja,
+                      0 :: INTEGER     AS is_eel_admin,
                       0 :: INTEGER     AS is_asutuste_korraldaja,
                       0 :: INTEGER     AS is_rekl_administrator,
                       0 :: INTEGER     AS is_rekl_maksuhaldur,
@@ -85,7 +87,9 @@
     <alias>com_user_rekv</alias>
   </select>
   <select>
-    <sql>SELECT r.nimetus AS asutus, u.*, $2 AS rekvid
+    <sql>SELECT r.nimetus AS asutus,
+                         u.*
+--                , $2 AS rekvid
                   FROM ou.userid u
                            INNER JOIN ou.rekv r ON r.id = u.rekvid
                   WHERE ($1 = 0
@@ -105,6 +109,31 @@
     <alias>get_last_login</alias>
     <not_initial_load>true</not_initial_load>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM ou.get_user_by_uuid($1::TEXT)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>get_user_by_uuid</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>SELECT *
+                  FROM ou.store_user_uuid($1::JSONB)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>store_user_uuid</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>DELETE
+                  FROM ou.session_uuid
+                  WHERE uuid = $1::TEXT</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>delete_user_uuid</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM ou.cur_userid
@@ -121,7 +150,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>regkood,nimetus</validate>
+    <validate>kasutaja,email</validate>
   </requiredFields>
   <executeSql>
     <sql />
