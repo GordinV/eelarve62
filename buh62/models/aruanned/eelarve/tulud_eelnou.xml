@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -245,7 +245,7 @@
                      WHERE parentid &lt; 999
                      UNION ALL
                      SELECT 999999, 0, '' AS regkood, 'Koond' AS nimetus
-                     WHERE $3::INTEGER = 1
+                     WHERE $3::INTEGER = 1 
                      UNION ALL
                      SELECT 0 AS id, 0 AS parentid, r.regkood, r.nimetus
                      FROM ou.rekv r
