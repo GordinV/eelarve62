@@ -170,7 +170,7 @@
                          sum(eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
                          sum(eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
                   FROM prereport qry
-                  WHERE artikkel IN ('3034','3044','3045','3047','3220','3221','3222','3224','3229','3232','3233','3237','3238','3880','3823','3818','3888','381','655')
+                  WHERE artikkel IN ('3034','3044','3045','3047','3220','3221','3222','3224','3229','3232','3233','3237','3238','3880','3823','3818','3888','381','655','320','1532')
                   GROUP BY qry.rekv_id, qry.idx, qry.artikkel
               )              
             SELECT qryReport.rekv_id,
