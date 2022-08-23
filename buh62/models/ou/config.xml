@@ -1,37 +1,42 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                      $2 AS user_id,
-                      c.*
+    <sql>SELECT $2 AS user_id,
+                           c.*
                     FROM ou.config c
-                          where c.rekvid IN (SELECT rekv_id
-                                       FROM get_asutuse_struktuur($1::integer))</sql>
+                    WHERE c.rekvid IN (SELECT rekv_id
+                                       FROM get_asutuse_struktuur($1::INTEGER))</sql>
     <alias>curConfig</alias>
   </grid>
   <select>
-    <sql>SELECT
-                'CONFIG'     AS doc_type_id,
-                $2::INTEGER AS userid,
-                c.id,
-                c.rekvid,
-                coalesce(c.number,'')::VARCHAR(20) as number,
-                coalesce((u.properties-&gt;&gt;'keel')::integer,2)::integer as keel,
-                coalesce((u.properties-&gt;&gt;'port')::varchar(100))::varchar(100) as port,
-                coalesce((u.properties-&gt;&gt;'smtp')::varchar(100))::varchar(100) as smtp,
-                coalesce((u.properties-&gt;&gt;'user')::varchar(100))::varchar(100) as user,
-                coalesce((u.properties-&gt;&gt;'pass')::varchar(100))::varchar(100) as pass,
-                coalesce((u.properties-&gt;&gt;'email')::varchar(254))::varchar(254) as email,
-                coalesce((c.properties-&gt;&gt;'earved')::varchar(254))::varchar(254) as earved,
-                c.tahtpaev
-              FROM ou.config c, ou.userid u
-              WHERE c.rekvid = $1 and u.id = $2</sql>
+    <sql>SELECT 'CONFIG'                                                          AS doc_type_id,
+                     $2::INTEGER                                                       AS userid,
+                     c.id                                                              AS docId,
+                     c.rekvid                                                          AS id,
+                     c.rekvid,
+                     coalesce(c.number, '')::VARCHAR(20)                               AS number,
+                     coalesce((c.properties -&gt;&gt; 'limiit')::NUMERIC, 0)::NUMERIC(12, 2) AS limiit,
+                     coalesce((u.properties -&gt;&gt; 'keel')::INTEGER, 2)::INTEGER          AS keel,
+                     coalesce((u.properties -&gt;&gt; 'port')::VARCHAR(100))::VARCHAR(100)   AS port,
+                     coalesce((u.properties -&gt;&gt; 'smtp')::VARCHAR(100))::VARCHAR(100)   AS smtp,
+                     coalesce((u.properties -&gt;&gt; 'user')::VARCHAR(100))::VARCHAR(100)   AS user,
+                     coalesce((u.properties -&gt;&gt; 'pass')::VARCHAR(100))::VARCHAR(100)   AS pass,
+                     coalesce((u.properties -&gt;&gt; 'email')::VARCHAR(254))::VARCHAR(254)  AS email,
+                     coalesce((c.properties -&gt;&gt; 'earved')::VARCHAR(254))::VARCHAR(254) AS earved,
+                     c.tahtpaev,
+                     coalesce((c.properties -&gt;&gt; 'pdf')::VARCHAR(254))::VARCHAR(254)    AS pdf
+
+              FROM ou.config c,
+                   ou.userid u
+              WHERE c.rekvid = $1
+                AND u.id = $2</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER         AS id,
                       $2 :: INTEGER         AS userid,
                       'CONFIG'              AS doc_type_id,
                       0 :: INTEGER          AS rekvid,
                       '' :: VARCHAR(20)   AS number,
+                      0::numeric(12,2) as limiit,
                       1 :: integer          AS keel,
                       ''::varchar(254) as port,
                       ''::varchar(254) as smtp,
@@ -39,7 +44,8 @@
                       ''::varchar(254) as pass,
                       ''::varchar(254) as email,
                       ''::varchar(254) as earved,
-                      5::integer as tahtpaev</sqlAsNew>
+                      5::integer as tahtpaev,
+                      ''::::VARCHAR(254) as pdf</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
@@ -80,4 +86,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
