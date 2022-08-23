@@ -9,7 +9,7 @@
                            number,
                            aasta,
                            kuu,
-                           t.status    AS status,
+                           t.status AS status,
                            allkiri,
                            kood1,
                            kood2,
@@ -46,6 +46,7 @@
                      t.ametnikId,
                      t.aktseptid,
                      t.kpv,
+                     to_char(t.kpv, 'DD.MM.YYYY')::TEXT                                            AS kpv_print,
                      t.number,
                      t.aasta,
                      t.kuu,
@@ -67,10 +68,13 @@
                       (d.rigths -&gt;&gt; 'EelAktsepterja')::JSONB)::BOOLEAN                             AS is_aktsepterja,
                      (to_json($2::INTEGER)::JSONB &lt;@
                       (d.rigths -&gt;&gt; 'EelAllkirjastaja')::JSONB)::BOOLEAN                           AS is_allkirjastaja,
-                     (to_json($2::INTEGER)::JSONB &lt;@ (d.rigths -&gt;&gt; 'Eelesitaja')::JSONB)::BOOLEAN  AS is_esitaja
+                     (to_json($2::INTEGER)::JSONB &lt;@ (d.rigths -&gt;&gt; 'Eelesitaja')::JSONB)::BOOLEAN  AS is_esitaja,
+                     r.regkood,
+                     r.nimetus                                                                     AS asutus
               FROM docs.doc d
                        INNER JOIN libs.library l ON l.id = d.doc_type_id
                        INNER JOIN eelarve.taotlus t ON t.parentId = d.id
+                       INNER JOIN ou.rekv r ON r.id = t.rekvid
                        LEFT OUTER JOIN ou.userid koostaja ON t.koostajaid = koostaja.id
                        LEFT OUTER JOIN ou.userid esitaja ON t.ametnikid = esitaja.id
                        LEFT OUTER JOIN ou.userid aktsepteerija ON t.aktseptid = aktsepteerija.id
@@ -184,7 +188,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>koostajaId,aasta,kpv</validate>
+    <validate>koostajaId,aasta,kpv,number,muud</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
@@ -207,7 +211,11 @@
     <sql />
     <alias />
   </generateJournal>
-  <print></print>
+  <print>
+    <view>taotlus</view>
+    <params>id</params>
+    <register></register>
+  </print>
   <getLog>
     <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
                          (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
