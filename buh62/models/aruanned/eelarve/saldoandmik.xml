@@ -17,7 +17,9 @@
                                         j1.deebet                                                       AS konto,
                                         CASE
                                             WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
-                                                 coalesce(j1.kood3, '') = '01' THEN ''
+                                                 (coalesce(j1.kood3, '') = '01' OR
+                                                  (left(j1.deebet, 6) = '201010' AND
+                                                   coalesce(ltrim(rtrim(j1.kood3)), '') = '')) THEN ''
                                             ELSE coalesce(j1.lisa_d, '') END::TEXT                      AS tp,
                                         coalesce(j1.kood1, '') :: VARCHAR(20)                           AS tegev,
                                         coalesce(j1.kood2, '') :: VARCHAR(20)                           AS allikas,
@@ -45,16 +47,23 @@
                                  UNION ALL
                                  SELECT coalesce(a.kpv, j.kpv),
                                         j.rekvid,
-                                        j1.kreedit                           AS konto,
-                                        j1.lisa_k:: VARCHAR(20)              AS tp,
-                                        j1.kood1 :: VARCHAR(20)              AS tegev,
-                                        j1.kood2 :: VARCHAR(20)              AS allikas,
+                                        j1.kreedit                                               AS konto,
+                                        CASE
+                                            WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
+                                                 (coalesce(j1.kood3, '') = '01' OR
+                                                  (left(j1.kreedit, 6) = '201010' AND
+                                                   coalesce(ltrim(rtrim(j1.kood3)), '') = ''))
+                                                THEN ''
+
+                                            ELSE coalesce(j1.lisa_k, '') END::TEXT:: VARCHAR(20) AS tp,
+                                        j1.kood1 :: VARCHAR(20)                                  AS tegev,
+                                        j1.kood2 :: VARCHAR(20)                                  AS allikas,
                                         CASE
                                             WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1)
                                                 THEN '00'
-                                            ELSE j1.kood3 :: VARCHAR(20) END AS rahavoog,
-                                        0 :: NUMERIC                         AS deebet,
-                                        sum(j1.summa)                        AS kreedit
+                                            ELSE j1.kood3 :: VARCHAR(20) END                     AS rahavoog,
+                                        0 :: NUMERIC                                             AS deebet,
+                                        sum(j1.summa)                                            AS kreedit
                                  FROM docs.doc d
                                           INNER JOIN docs.journal j
                                                      ON j.parentid = D.id
