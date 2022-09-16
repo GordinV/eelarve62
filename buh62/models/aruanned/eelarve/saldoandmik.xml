@@ -50,7 +50,8 @@
                                         j1.kreedit                                               AS konto,
                                         CASE
                                             WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
-                                                 (coalesce(j1.kood3, '') = '01' OR
+                                                 ((coalesce(j1.kood3, '') = '01' AND
+                                                   left(j1.kreedit, 6) NOT IN ('100100')) OR
                                                   (left(j1.kreedit, 6) = '201010' AND
                                                    coalesce(ltrim(rtrim(j1.kood3)), '') = ''))
                                                 THEN ''
