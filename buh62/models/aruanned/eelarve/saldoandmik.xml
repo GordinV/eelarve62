@@ -15,18 +15,14 @@
                                  SELECT coalesce(a.kpv, j.kpv)                                          AS kpv,
                                         j.rekvid,
                                         j1.deebet                                                       AS konto,
-                                        CASE
-                                            WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
-                                                 (coalesce(j1.kood3, '') = '01' OR
-                                                  (left(j1.deebet, 6) = '201010' AND
-                                                   coalesce(ltrim(rtrim(j1.kood3)), '') = '')) THEN ''
-                                            ELSE coalesce(j1.lisa_d, '') END::TEXT                      AS tp,
+                                        coalesce(j1.lisa_d, '')::VARCHAR(20)                            AS tp,
                                         coalesce(j1.kood1, '') :: VARCHAR(20)                           AS tegev,
                                         coalesce(j1.kood2, '') :: VARCHAR(20)                           AS allikas,
                                         coalesce(CASE
                                                      WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1)
                                                          THEN '00'
-                                                     ELSE j1.kood3 :: VARCHAR(20) END, '')::VARCHAR(20) AS rahavoog,
+                                                     ELSE j1.kood3 :: VARCHAR(20) END, '')::VARCHAR(20) AS
+                                                                                                           rahavoog,
                                         sum(j1.summa)                                                   AS deebet,
                                         0 :: NUMERIC                                                    AS kreedit
                                  FROM docs.doc d
@@ -35,36 +31,32 @@
                                           LEFT OUTER JOIN docs.alg_saldo a ON a.journal_id = d.id
                                  WHERE d.rekvid IN (SELECT rekv_id
                                                     FROM get_asutuse_struktuur($2::INTEGER))
-                                   AND d.rekvid = CASE WHEN $3::INTEGER IS NULL THEN $2::INTEGER ELSE d.rekvid END
+                                   AND d.rekvid =
+                                       CASE WHEN $3::INTEGER IS NULL THEN $2::INTEGER ELSE d.rekvid END
                                    AND j.kpv &lt;= $1::DATE
                                    AND (($4::JSONB -&gt;&gt; 'tunnus') IS NULL OR
-                                        coalesce(j1.tunnus, '') ILIKE coalesce(($4::JSONB -&gt;&gt; 'tunnus'), '') || '%')
+                                        coalesce(j1.tunnus, '') ILIKE
+                                        coalesce(($4::JSONB -&gt;&gt; 'tunnus'), '') || '%')
                                    AND (($4::JSONB -&gt;&gt; 'proj') IS NULL OR
-                                        coalesce(j1.proj, '') ILIKE coalesce(($4::JSONB -&gt;&gt; 'proj'), '') || '%')
+                                        coalesce(j1.proj, '') ILIKE
+                                        coalesce(($4::JSONB -&gt;&gt; 'proj'), '') || '%')
                                    AND d.status &lt;&gt; 3
-                                 GROUP BY coalesce(a.kpv, j.kpv), j.kpv, j.rekvid, j1.deebet, j1.lisa_d, j1.kood1,
+                                 GROUP BY coalesce(a.kpv, j.kpv), j.kpv, j.rekvid, j1.deebet, j1.lisa_d,
+                                          j1.kood1,
                                           j1.kood2, j1.kood3
                                  UNION ALL
                                  SELECT coalesce(a.kpv, j.kpv),
                                         j.rekvid,
-                                        j1.kreedit                                               AS konto,
-                                        CASE
-                                            WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
-                                                 ((coalesce(j1.kood3, '') = '01' AND
-                                                   left(j1.kreedit, 6) NOT IN ('100100')) OR
-                                                  (left(j1.kreedit, 6) = '201010' AND
-                                                   coalesce(ltrim(rtrim(j1.kood3)), '') = ''))
-                                                THEN ''
-
-                                            ELSE coalesce(j1.lisa_k, '') END::TEXT:: VARCHAR(20) AS tp,
-                                        j1.kood1 :: VARCHAR(20)                                  AS tegev,
-                                        j1.kood2 :: VARCHAR(20)                                  AS allikas,
+                                        j1.kreedit                            AS konto,
+                                        coalesce(j1.lisa_k, ''):: VARCHAR(20) AS tp,
+                                        j1.kood1 :: VARCHAR(20)               AS tegev,
+                                        j1.kood2 :: VARCHAR(20)               AS allikas,
                                         CASE
                                             WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1)
                                                 THEN '00'
-                                            ELSE j1.kood3 :: VARCHAR(20) END                     AS rahavoog,
-                                        0 :: NUMERIC                                             AS deebet,
-                                        sum(j1.summa)                                            AS kreedit
+                                            ELSE j1.kood3 :: VARCHAR(20) END  AS rahavoog,
+                                        0 :: NUMERIC                          AS deebet,
+                                        sum(j1.summa)                         AS kreedit
                                  FROM docs.doc d
                                           INNER JOIN docs.journal j
                                                      ON j.parentid = D.id
@@ -75,14 +67,18 @@
                                           LEFT OUTER JOIN docs.alg_saldo a ON a.journal_id = d.id
                                  WHERE d.rekvid IN (SELECT rekv_id
                                                     FROM get_asutuse_struktuur($2::INTEGER))
-                                   AND d.rekvid = CASE WHEN $3::INTEGER IS NULL THEN $2::INTEGER ELSE d.rekvid END
+                                   AND d.rekvid =
+                                       CASE WHEN $3::INTEGER IS NULL THEN $2::INTEGER ELSE d.rekvid END
                                    AND j.kpv &lt;= $1::DATE
                                    AND (($4::JSONB -&gt;&gt; 'tunnus') IS NULL OR
-                                        coalesce(j1.tunnus, '') ILIKE coalesce(($4::JSONB -&gt;&gt; 'tunnus'), '') || '%')
+                                        coalesce(j1.tunnus, '') ILIKE
+                                        coalesce(($4::JSONB -&gt;&gt; 'tunnus'), '') || '%')
                                    AND (($4::JSONB -&gt;&gt; 'proj') IS NULL OR
-                                        coalesce(j1.proj, '') ILIKE coalesce(($4::JSONB -&gt;&gt; 'proj'), '') || '%')
+                                        coalesce(j1.proj, '') ILIKE
+                                        coalesce(($4::JSONB -&gt;&gt; 'proj'), '') || '%')
                                    AND d.status &lt;&gt; 3
-                                 GROUP BY coalesce(a.kpv, j.kpv), j.kpv, j.rekvid, j1.kreedit, j1.lisa_k, j1.kood1,
+                                 GROUP BY coalesce(a.kpv, j.kpv), j.kpv, j.rekvid, j1.kreedit,
+                                          j1.lisa_k, j1.kood1,
                                           j1.kood2, j1.kood3
                              ),
                                   qryKontod AS (
@@ -112,82 +108,112 @@
                                                 ELSE 000000000.00 END)::NUMERIC(14, 2) AS kreedit,
                                     qry.tyyp::INTEGER
                              FROM (
-                                      SELECT qry.rekvid                  AS rekv_id,
-                                             left(konto, 6)::TEXT        AS konto,
+                                      SELECT qry.rekvid                 AS rekv_id,
+                                             LEFT(konto, 6)::TEXT       AS konto,
                                              (CASE
-                                                  WHEN l.is_tp AND (ltrim(rtrim(coalesce(l.muud, ''))) &lt;&gt; '*' OR
-                                                                    ltrim(rtrim(qry.rahavoog)) IN ('01', '00', '21', '17'))
+                                                  WHEN l.is_tp AND (ltrim(rtrim(COALESCE(l.muud, ''))) &lt;&gt;
+                                                                    '*' OR
+                                                                    ltrim(rtrim(qry.rahavoog)) IN (
+                                                                                                   '01',
+                                                                                                   '00',
+                                                                                                   '21',
+                                                                                                   '17'))
                                                       THEN tp
                                                   WHEN l.is_tp
                                                       THEN tp
-                                                  ELSE '' END)::CHAR(20) AS tp,
+                                                  ELSE
+                                                      '' END)::CHAR(20) AS tp,
                                              (CASE
                                                   WHEN is_tegev AND
-                                                       ltrim(rtrim(coalesce(l.muud, ''))) = '*' AND
-                                                       ltrim(rtrim(coalesce(qry.rahavoog, ''))) = '00'
+                                                       ltrim(rtrim(COALESCE(l.muud,
+                                                                            ''))) =
+                                                       '*' AND
+                                                       ltrim(rtrim(COALESCE(qry.rahavoog,
+                                                                            ''))) =
+                                                       '00'
                                                       THEN
                                                       ''
 
                                                   WHEN l.is_tegev
                                                       THEN tegev
-                                                  ELSE '' END)::TEXT     AS tegev,
+                                                  ELSE
+                                                      '' END)::TEXT     AS tegev,
                                              (CASE
                                                   WHEN l.is_allikas
                                                       THEN allikas
-                                                  ELSE '' END)::TEXT     AS allikas,
+                                                  ELSE
+                                                      '' END)::TEXT     AS allikas,
                                              (CASE
                                                   WHEN l.is_rahavoog
                                                       THEN rahavoog
-                                                  ELSE '' END)::TEXT     AS rahavoog,
+                                                  ELSE
+                                                      '' END)::TEXT     AS rahavoog,
                                              CASE
                                                  WHEN l.tyyp IS NULL OR l.tyyp IN (0, 1, 3)
                                                      THEN (deebet) - (kreedit)
-                                                 ELSE 0 END              AS deebet,
+                                                 ELSE 0 END             AS deebet,
                                              CASE
                                                  WHEN l.tyyp IS NOT NULL AND l.tyyp IN (2, 4)
                                                      THEN (kreedit) - (deebet)
-                                                 ELSE 0 END              AS kreedit,
-                                             l.tyyp                      AS tyyp
+                                                 ELSE 0 END             AS kreedit,
+                                             l.tyyp                     AS tyyp
                                       FROM qrySaldoAndmik qry
                                                INNER JOIN qryKontod l ON ltrim(rtrim(l.kood)) = ltrim(rtrim(qry.konto))
-
-                                      WHERE konto NOT IN ('999999', '000000', '888888')
-                                        AND qry.kpv &lt; make_date(year($1::DATE), 1, 1)
+                                      WHERE konto NOT IN (
+                                                          '999999',
+                                                          '000000',
+                                                          '888888')
+                                        AND qry.kpv &lt; make_date(YEAR(
+                                                                        $1::DATE), 1, 1)
                                         AND l.tyyp &lt; 3
                                       UNION ALL
-                                      SELECT rekvid                      AS rekv_id,
-                                             left(konto, 6)::TEXT        AS konto,
+                                      SELECT rekvid                     AS rekv_id,
+                                             LEFT(konto, 6)::TEXT       AS konto,
                                              (CASE
-                                                  WHEN is_tp AND (ltrim(rtrim(coalesce(l.muud, ''))) &lt;&gt; '*' OR
-                                                                  ltrim(rtrim(qry.rahavoog)) IN ('01', '00', '21', '17'))
+                                                  WHEN is_tp AND (ltrim(rtrim(COALESCE(l.muud,
+                                                                                       ''))) &lt;&gt;
+                                                                  '*' OR
+                                                                  ltrim(rtrim(qry.rahavoog)) IN (
+                                                                                                 '01',
+                                                                                                 '00',
+                                                                                                 '21',
+                                                                                                 '17'))
                                                       THEN tp
-                                                  ELSE '' END)::CHAR(20) AS tp,
+                                                  ELSE
+                                                      '' END)::CHAR(20) AS tp,
                                              (CASE
                                                   WHEN is_tegev
                                                       THEN tegev
-                                                  ELSE '' END)::TEXT     AS tegev,
+                                                  ELSE
+                                                      '' END)::TEXT     AS tegev,
                                              (CASE
                                                   WHEN is_allikas
                                                       THEN allikas
-                                                  ELSE '' END)::TEXT     AS allikas,
+                                                  ELSE
+                                                      '' END)::TEXT     AS allikas,
                                              (CASE
                                                   WHEN is_rahavoog
                                                       THEN rahavoog
-                                                  ELSE '' END)::TEXT     AS rahavoog,
+                                                  ELSE
+                                                      '' END)::TEXT     AS rahavoog,
                                              CASE
                                                  WHEN l.tyyp IS NULL OR l.tyyp IN (0, 1, 3)
                                                      THEN (deebet) - (kreedit)
-                                                 ELSE 0 END              AS deebet,
+                                                 ELSE 0 END             AS deebet,
                                              CASE
                                                  WHEN l.tyyp IS NOT NULL AND l.tyyp IN (2, 4)
                                                      THEN (kreedit) - (deebet)
-                                                 ELSE 0 END              AS kreedit,
+                                                 ELSE 0 END             AS kreedit,
                                              l.tyyp
                                       FROM qrySaldoAndmik qry
                                                INNER JOIN qryKontod l ON
                                           ltrim(rtrim(l.kood)) = ltrim(rtrim(qry.konto))
-                                      WHERE konto NOT IN ('999999', '000000', '888888')
-                                        AND qry.kpv &gt;= make_date(year($1::DATE), 1, 1)
+                                      WHERE konto NOT IN (
+                                                          '999999',
+                                                          '000000',
+                                                          '888888')
+                                        AND qry.kpv &gt;= make_date(YEAR(
+                                                                         $1::DATE), 1, 1)
                                   ) qry
                              WHERE deebet &lt;&gt; 0
                                 OR kreedit &lt;&gt; 0
