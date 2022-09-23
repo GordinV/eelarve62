@@ -15,7 +15,10 @@
                                  SELECT coalesce(a.kpv, j.kpv)                                          AS kpv,
                                         j.rekvid,
                                         j1.deebet                                                       AS konto,
-                                        coalesce(j1.lisa_d, '')::VARCHAR(20)                            AS tp,
+                                        CASE
+                                            WHEN j.kpv &lt; make_date(year($1::DATE), 1, 1) AND
+                                                 coalesce(j1.kood3, '') = '01' AND left(j1.deebet, 2) = '15' THEN ''
+                                            ELSE coalesce(j1.lisa_d, '') END::TEXT                      AS tp,
                                         coalesce(j1.kood1, '') :: VARCHAR(20)                           AS tegev,
                                         coalesce(j1.kood2, '') :: VARCHAR(20)                           AS allikas,
                                         coalesce(CASE
