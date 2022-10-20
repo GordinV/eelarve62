@@ -13,7 +13,7 @@
                            coalesce(a.nimetus, '')::VARCHAR(254)      AS asutus,
                            coalesce(a.tp, '')::VARCHAR(20)            AS tp
                     FROM docs.kaibeasutusandmik($1::TEXT, $2::INTEGER, $3::DATE, $4::DATE, $5::INTEGER, $6::TEXT,
-                                                $7::INTEGER) qry
+                                                $7::INTEGER, $8::jsonb) qry
                              LEFT OUTER JOIN com_asutused a ON a.id = qry.asutus_id
                              INNER JOIN com_kontoplaan l ON l.kood = qry.konto
                     WHERE (qry.alg_saldo &lt;&gt; 0 OR qry.deebet &lt;&gt; 0 OR qry.kreedit &lt;&gt; 0)
