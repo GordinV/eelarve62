@@ -14,7 +14,8 @@
                      (properties -&gt;&gt; 'kmkr')::VARCHAR(20)            AS kmkr,
                      (properties -&gt;&gt; 'kehtivus')::DATE               AS kehtivus,
                      (properties -&gt;&gt; 'kehtivus')::DATE               AS valid,
-                     (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT AS aa
+                     (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT AS aa,
+                     (properties -&gt;&gt; 'palk_email'):: VARCHAR(254)    AS palk_email
               FROM libs.asutus
               WHERE id = $1</sql>
     <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
@@ -30,6 +31,7 @@
             ''::text as tp,
             0::integer as staatus,
             ''::varchar(20) as pank,
+            '' :: VARCHAR(254)    AS palk_email,            
             ''::varchar(20) as kmkr,
             ''::text as mark,
             ''::TEXT AS aa</sqlAsNew>
@@ -38,8 +40,13 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20) AS aa,
-                         $2 :: INTEGER                       AS userid
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20)       AS aa,
+                         $2 :: INTEGER                             AS userid,
+                         ((e.element -&gt;&gt; 'kas_palk') :: BOOLEAN)::INTEGER     AS kas_palk,
+                         ((e.element -&gt;&gt; 'kas_raama') :: BOOLEAN)::INTEGER    AS kas_raama,
+                         ((e.element -&gt;&gt; 'kas_oppetasu') :: BOOLEAN)::INTEGER AS kas_oppetasu,
+                         row_number() OVER ()                      AS id,
+                         libs.get_asutuse_aa(a.id, 'RAAMA'::TEXT)  AS default_aa
                   FROM libs.asutus a,
                        json_array_elements(CASE
                                                WHEN (a.properties -&gt;&gt; 'asutus_aa') IS NULL THEN '[]'::JSON
@@ -81,14 +88,15 @@
     <not_initial_load>true</not_initial_load>
   </select>
   <select>
-    <sql>select * from docs.dokumendid($1)</sql>
+    <sql>SELECT d.*
+                  FROM docs.dokumendid($1) d</sql>
     <query />
     <multiple>true</multiple>
     <alias>dokumenidid</alias>
     <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
-    <sql>SELECT *, kehtivus AS valid
+    <sql>SELECT *, kehtivus AS valid, regkood AS kood
                    FROM com_asutused a
                    WHERE libs.check_asutus(a.id::INTEGER, $1::INTEGER)
                      AND (kehtivus IS NULL OR kehtivus &gt;= date())
@@ -136,24 +144,25 @@
     <params>sqlWhere</params>
   </print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
-                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
+    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
                          coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS koostatud,
+                                  '')::VARCHAR(20)         AS koostatud,
                          coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS muudatud,
+                                  '')::VARCHAR(20)         AS muudatud,
                          coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS prinditud,
+                                  '')::VARCHAR(20)         AS prinditud,
                          coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
-                                  '')::VARCHAR(20)                                                                   AS kustutatud
+                                  '')::VARCHAR(20)         AS kustutatud
 
                   FROM (
-                           SELECT jsonb_array_elements('[]'::jsonb || d.ajalugu::jsonb) AS ajalugu, d.id
+                           SELECT jsonb_array_elements('[]'::JSONB || d.ajalugu::JSONB) AS ajalugu, d.id
                            FROM libs.asutus d,
                                 ou.userid u
                            WHERE d.id = $1
                              AND u.id = $2
-                       ) qry where (ajalugu -&gt;&gt; 'user') is not null</sql>
+                       ) qry
+                  WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
 </VFPData>

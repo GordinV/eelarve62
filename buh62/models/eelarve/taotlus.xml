@@ -19,6 +19,7 @@
                            tunnus,
                            summa,
                            summa_kassa,
+                           oodatav_taitmine,
                            parentid,
                            regkood,
                            nimetus::VARCHAR(254),
@@ -147,7 +148,7 @@
                        INNER JOIN eelarve.taotlus t ON t.id = t1.parentid
                        LEFT OUTER JOIN com_artikkel a ON a.kood = t1.kood5
               WHERE t.parentid = $1
-              ORDER BY kood1, kood2, kood5</sql>
+              ORDER BY kood1, kood2, kood5, tunnus, proj</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>
