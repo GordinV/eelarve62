@@ -6,7 +6,7 @@
                            koostajaid,
                            aktseptid,
                            kpv,
-                           number,
+                           number::integer,
                            aasta,
                            kuu,
                            t.status AS status,
