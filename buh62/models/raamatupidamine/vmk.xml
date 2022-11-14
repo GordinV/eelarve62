@@ -86,22 +86,65 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT $2 :: INTEGER                    AS userid,
-                         trim(n.kood)::VARCHAR(20)        AS kood,
-                         trim(n.nimetus)::VARCHAR(254)    AS nimetus,
-                         trim(a.nimetus)::VARCHAR(254)    AS asutus,
-                         trim(a.aadress)                  AS aadress,
-                         k.parentid                       AS parent_id,
-                         k1.*,
-                         coalesce(l.number,0) AS lausnr,
-                         coalesce(l.lausend,'') as lausend
-                  FROM docs.mk1 AS k1
-                           INNER JOIN docs.mk k ON k.id = k1.parentId
-                           INNER JOIN libs.nomenklatuur n ON n.id = k1.nomid
-                           INNER JOIN libs.asutus a ON a.id = k1.asutusid
-                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                           LEFT OUTER JOIN qry_lausend_text l ON l.id = k1.journalid
-                  WHERE k.parentid = $1</sql>
+    <sql>WITH doc AS (
+                SELECT trim(n.kood)::VARCHAR(20)     AS kood,
+                       trim(n.nimetus)::VARCHAR(254) AS nimetus,
+                       trim(a.nimetus)::VARCHAR(254) AS asutus,
+                       trim(a.aadress)               AS aadress,
+                       k.parentid                    AS parent_id,
+                       k1.*
+                FROM docs.mk1 AS k1
+                         INNER JOIN docs.mk k ON k.id = k1.parentId
+                         INNER JOIN libs.nomenklatuur n ON n.id = k1.nomid
+                         INNER JOIN libs.asutus a ON a.id = k1.asutusid
+                         INNER JOIN ou.userid u ON u.id = 70 :: INTEGER
+                WHERE k.parentid = $1
+            )
+            SELECT d.*,
+                   coalesce(l.number, 0)   AS lausnr,
+                   coalesce(l.lausend, '') AS lausend,
+                   $2 :: INTEGER                    AS userid                   
+            FROM doc d
+                     LEFT OUTER JOIN (SELECT id,
+                                             number,
+                                             kpv,
+                                             rekvid,
+                                             trim(array_agg(lausend)::TEXT, '{}&#34;') AS lausend
+                                      FROM (
+                                               SELECT j.id,
+                                                      j.number,
+                                                      j.kpv,
+                                                      j.rekvid,
+                                                      ('D ' || ltrim(rtrim(j.deebet)) || ' ' ||
+                                                       'K ' || ltrim(rtrim(j.kreedit)) || ' ' ||
+                                                       ltrim(rtrim(round(j.summa, 2)::TEXT)) || ' ' ||
+                                                       'TA ' || ltrim(rtrim(j.kood1::TEXT)) || ' ' ||
+                                                       'Allikas ' || ltrim(rtrim(j.kood2::TEXT)) || ' ' ||
+                                                       'RV ' || ltrim(rtrim(j.kood3::TEXT)) || ' ' ||
+                                                       'Art ' || ltrim(rtrim(j.kood5::TEXT)))::TEXT AS lausend
+                                               FROM (SELECT d.id,
+                                                            d.rekvid,
+                                                            j.kpv,
+                                                            j1.deebet,
+                                                            j1.kreedit,
+                                                            j1.summa,
+                                                            j1.kood1,
+                                                            j1.kood2,
+                                                            j1.kood3,
+                                                            j1.kood5,
+                                                            jid.number
+                                                     FROM docs.journal j
+                                                              INNER JOIN docs.doc D ON D.id = j.parentid
+                                                              INNER JOIN docs.journalid jid ON j.id = jid.journalid
+                                                              INNER JOIN docs.journal1 j1 ON j.id = j1.parentid
+                                                     WHERE D.status &lt;&gt; 3
+                                                       AND d.doc_type_id IN
+                                                           (SELECT id FROM libs.library WHERE library = 'DOK' AND kood = 'JOURNAL')
+                                                       AND d.id IN (SELECT journalid FROM doc)
+                                                    ) j
+                                           ) qry
+                                      GROUP BY id, number, kpv, rekvid
+            ) l ON l.id = d.journalid</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>
@@ -178,7 +221,7 @@
                          coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
-                           SELECT jsonb_array_elements( history) AS ajalugu, d.id, d.rekvid
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
                            FROM docs.doc d,
                                 ou.userid u
                            WHERE d.id = $1
