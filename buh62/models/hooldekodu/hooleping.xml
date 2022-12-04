@@ -1,0 +1,142 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT d.*
+                    FROM hooldekodu.cur_hooleping d
+                    WHERE d.rekvId = $1</sql>
+    <alias>curHooLeping</alias>
+  </grid>
+  <select>
+    <sql>SELECT hl.id,
+                         hl.number AS number,
+                         hl.rekvid,
+                         hl.isikid,
+                         hl.omavalitsusId,
+                         hl.hooldekoduid,
+                         hl.sugulane_id,
+                         hl.muud   AS muud,
+                         hl.algkpv,
+                         hl.loppkpv,
+                         hl.summa,
+                         hl.jaak,
+                         hl.kovjaak,
+                         hl.osa,
+                         hl.sugulane_osa,
+                         hl.status
+                  FROM hooldekodu.hooleping hl
+                           INNER JOIN libs.asutus a ON a.id = hl.hooldekoduid
+                  WHERE hl.id = $1</sql>
+    <sqlAsNew>SELECT $1 :: INTEGER                                                                AS id,
+                              docs.sp_get_number(u.rekvId, 'HOOLEPING', year(date()), NULL) :: VARCHAR(20) AS number,
+                              (SELECT rekvid FROM ou.userid WHERE id = $2 LIMIT 1)::INTEGER                AS rekvid,
+                              0::INTEGER                                                                   AS isikId,
+                              0 :: INTEGER                                                                 AS omavalitsusId,
+                              0::INTEGER                                                                   AS hooldekoduId,
+                              0::INTEGER                                                                   AS sugulane_id,
+                              '' :: TEXT                                                                   AS muud,
+                              (make_date(date_part('year', CURRENT_DATE)::INTEGER,
+                                         date_part('month', CURRENT_DATE) :: INTEGER, 1) -
+                               INTERVAL
+                                   '1 month') :: DATE                                                      AS algkpv,
+                              (make_date(date_part(
+                                                 'year', CURRENT_DATE)::INTEGER,
+                                         date_part(
+                                                 'month', CURRENT_DATE) :: INTEGER, 1) -
+                               INTERVAL
+                                   '1 day') :: DATE                                                        AS loppkpv,
+                              0 :: NUMERIC                                                                 AS summa,
+                              0 :: NUMERIC                                                                 AS jaak,
+                              0 :: NUMERIC                                                                 AS kovjaak,
+                              0 :: NUMERIC                                                                 AS sugulane_osa,
+                              0::INTEGER                                                                   AS osa,
+                              1                                                                            AS status
+                       FROM ou.userid u
+                       WHERE u.id = $2 :: INTEGER            </sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT ht.id,
+                         ht.lepingid,
+                         ht.nomid,
+                         nom.kood,
+                         nom.nimetus,
+                         ht.hind,
+                         ht.allikas,
+                         ht.tuluosa,
+                         ht.jaak,
+                         ht.muud,
+                         ht.muud::VARCHAR(254) AS selg,
+                         ht.kehtivus,
+                         $2                    AS user_id
+                  FROM hooldekodu.hooTeenused ht
+                           INNER JOIN libs.nomenklatuur nom ON nom.id = ht.nomid
+                  WHERE ht.lepingid IN (SELECT id FROM hooldekodu.hooleping WHERE ht.lepingid = $1)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <select>
+    <sql>SELECT rd.id, $2 :: INTEGER AS userid, trim(l.kood) AS doc_type, trim(l.nimetus) AS name
+                  FROM docs.doc d
+                           LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
+                           LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                  WHERE d.id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>relations</alias>
+  </select>
+  <selectAsLibs>
+    <sql>SELECT id,
+                          isikukood,
+                          nimi,
+                          rekvid,
+                          hooldekodu,
+                          algkpv,
+                          loppkpv
+                   FROM hooldekodu.com_asutus_hooldekodu hi
+                   WHERE hi.rekvid = $1
+                       ORDER BY nimi</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select hooldekodu.sp_salvesta_hooleping($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>SELECT error_code, result, error_message
+                FROM hooldekodu.sp_delete_hooleping($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>algkpv,loppkpv,hooldekoduid,summa,number</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>SELECT *
+                  FROM sp_execute_task($1 :: INTEGER, $2 :: JSON, $3 :: TEXT)</sql>
+    <alias>executeTask</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>

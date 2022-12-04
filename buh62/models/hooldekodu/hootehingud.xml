@@ -1,0 +1,104 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT a.*,
+                           $2::INTEGER AS userId
+                    FROM hooldekodu.cur_hootehingud a
+                    WHERE a.rekvid = $1</sql>
+    <alias>curHooTehingud</alias>
+  </grid>
+  <select>
+    <sql>SELECT h.id,
+                     h.isikid,
+                     h.ettemaksid,
+                     h.journalid,
+                     h.dokid,
+                     h.doktyyp,
+                     h.kpv,
+                     h.summa,
+                     h.allikas,
+                     h.tyyp,
+                     h.muud,
+                     h.rekvid,
+                     $2::INTEGER AS user_id
+              FROM hooldekodu.hootehingud h
+                       INNER JOIN libs.asutus a ON a.id = h.isikid
+              WHERE h.id = $1</sql>
+    <sqlAsNew>select $1::integer as id , $2::integer as userid, 
+            'HOOTEHINGUD' as doc_type_id,
+            0::integer AS isikid,
+            ''::varchar(254) as isik,
+            current_date::date  as kpv,
+            0 as ettemaksid ,
+            0 as journalid,
+            0 as dokid,
+            '' as doktyyp,
+            0 as summa,
+            '' as allikas,
+            '' as tyyp,
+            0 as rekvid,
+            null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select hooldekodu.sp_salvesta_hootehing($1::jsonb, $2::integer, $3::integer) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>SELECT error_code, result, error_message
+                FROM hooldekodu.sp_delete_hootehing($1::INTEGER, $2::INTEGER)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>hooldajaid,isikid</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS kustutatud
+
+                  FROM (
+                           SELECT jsonb_array_elements('[]'::JSONB || d.ajalugu::JSONB) AS ajalugu, d.id
+                           FROM libs.asutus d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry
+                  WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
+    <alias>getLogs</alias>
+  </getLog>
+</VFPData>

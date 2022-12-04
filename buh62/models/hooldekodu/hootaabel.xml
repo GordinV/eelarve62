@@ -1,0 +1,127 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT a.*,
+                           $2::INTEGER AS userId
+                    FROM hooldekodu.cur_hootaabel a
+                    WHERE a.rekvid = $1</sql>
+    <alias>curHooTaabel</alias>
+  </grid>
+  <select>
+    <sql>SELECT h.id,
+                     h.isikid,
+                     a.nimetus   AS isik,
+                     h.kpv,
+                     h.nomid,
+                     h.kogus,
+                     h.hind,
+                     h.soodustus,
+                     h.arvid,
+                     h.summa,
+                     h.muud,
+                     h.rekvid,
+                     $2::INTEGER AS user_id
+              FROM hooldekodu.hootaabel h
+                       INNER JOIN libs.asutus a ON a.id = h.isikid
+              WHERE h.id = $1</sql>
+    <sqlAsNew>SELECT $1::INTEGER                                          AS id,
+                          'HOOTEHINGUD'                                        AS doc_type_id,
+                          0::INTEGER                                           AS isikid,
+                          NULL::VARCHAR(20)                                    AS kood,
+                          ''::VARCHAR(254)                                     AS isik,
+                          current_date::DATE                                   AS kpv,
+                          0                                                    AS hind,
+                          0                                                    AS kogus,
+                          0                                                    AS soodustus,
+                          NULL::INTEGER                                        AS arvId,
+                          0                                                    AS summa,
+                          (SELECT rekvid FROM ou.userid WHERE id = $2 LIMIT 1) AS rekvid,
+                          NULL::TEXT                                           AS muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT ht.nomid,
+                     n.kood,
+                     0                                 AS kogus,
+                     n.hind                            AS hind,
+                     0                                 AS summa,
+                     0                                 AS soodustus,
+                     ht.lepingid,
+                     hl.isikid,                
+                     public.get_last_day(current_date) AS kpv
+              FROM hooldekodu.hooteenused ht
+                       INNER JOIN hooldekodu.hooleping hl ON ht.lepingid = hl.id
+                       INNER JOIN libs.nomenklatuur n ON n.id = ht.nomid
+              WHERE kehtivus IS NULL
+                 OR kehtivus &gt;= current_date
+                  AND lepingid IN (SELECT id
+                                   FROM hooldekodu.hooleping
+                                   WHERE rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2::INTEGER)
+                                     AND isikid = $1::INTEGER
+                                     AND loppkpv &gt;= $3::DATE)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>teenused</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select hooldekodu.sp_salvesta_hootaabel($1::jsonb, $2::integer, $3::integer) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>SELECT error_code, result, error_message
+                FROM hooldekodu.sp_delete_hootaabel($1::INTEGER, $2::INTEGER)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>isikid</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                                  '')::VARCHAR(20)         AS kustutatud
+
+                  FROM (
+                           SELECT jsonb_array_elements('[]'::JSONB || d.ajalugu::JSONB) AS ajalugu, d.id
+                           FROM libs.asutus d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry
+                  WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
+    <alias>getLogs</alias>
+  </getLog>
+</VFPData>

@@ -1,0 +1,397 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT id,
+                           number :: TEXT,
+                           rekvid,
+                           to_char(kpv, 'DD.MM.YYYY') :: TEXT   AS kpv,
+                           summa,
+                           to_char(tahtaeg, 'DD.MM.YYYY')::TEXT AS tahtaeg,
+                           jaak,
+                           lisa,
+                           to_char(tasud, 'DD.MM.YYYY')::TEXT   AS tasud,
+                           tasudok,
+                           userid,
+                           asutus :: TEXT                       AS asutus,
+                           vanem_isikukood::TEXT,
+                           asutusid,
+                           journalid,
+                           markused,
+                           lausnr,
+                           docs_ids,
+                           a.arve::TEXT                         AS aa,
+                           a.viitenr ::TEXT                     AS viitenr,
+                           a.isikukood,
+                           a.nimi,
+                           a.tyyp,
+                           $2::INTEGER                          AS userId,
+                           TRUE                                 AS select,
+                           kas_paberil::BOOLEAN                 AS kas_paberil,
+                           kas_email::BOOLEAN                   AS kas_email,
+                           kas_earved::BOOLEAN                  AS kas_earved,
+                           pank::TEXT,
+                           ebatoenaolised
+                    FROM lapsed.cur_laste_arved a
+                    WHERE a.rekvId = $1::INTEGER</sql>
+    <alias>curLasteArved</alias>
+  </grid>
+  <select>
+    <sql>SELECT d.id,
+                         $2 :: INTEGER                                         AS userid,
+                         d.bpm,
+                         d.status                                              AS doc_status,
+                         a.number::VARCHAR(20)                                 AS number,
+                         a.rekvId,
+                         a.liik,
+                         a.operid,
+                         a.kpv                                                 AS kpv,
+                         a.asutusid,
+                         a.arvId,
+                         a.lisa                                                AS lisa,
+                         a.tahtaeg                                             AS tahtaeg,
+                         a.kbmta,
+                         a.kbm,
+                         a.summa,
+                         a.tasud,
+                         a.tasudok                                             AS tasudok,
+                         a.muud,
+                         asutus.regkood,
+                         asutus.nimetus                                        AS asutus,
+                         asutus.aadress,
+                         asutus.email::TEXT                                    AS email,
+                         asutus.properties -&gt;&gt; 'kmkr'                          AS kmkr,
+                         asutus.properties::JSONB -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa' AS asutuse_aa,
+                         a.doklausid,
+                         a.journalid,
+                         a.objektid,
+                         coalesce(jid.number, 0) :: INTEGER                    AS laus_nr,
+                         (dp.details :: JSONB -&gt;&gt; 'konto')::VARCHAR(20)        AS konto,
+                         (dp.details :: JSONB -&gt;&gt; 'kbmkonto')::VARCHAR(20)     AS kbmkonto,
+                         left(dp.selg, 254) :: VARCHAR(254)                    AS dokprop,
+                         dp.vaatalaus                                          AS is_show_journal,
+                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)             AS koostaja,
+                         (a.properties -&gt;&gt; 'aa')::VARCHAR(20)                  AS aa,
+                         (a.properties -&gt;&gt; 'tyyp')::VARCHAR(20)                AS tyyp,
+                         (a.properties -&gt;&gt; 'viitenr')::VARCHAR(20)             AS viitenr,
+                         a.jaak::NUMERIC(12, 2)                                AS jaak,
+                         isik.id                                               AS isik_id,
+                         isik.nimetus                                          AS isik
+                  FROM docs.doc d
+                           INNER JOIN docs.arv a ON a.parentId = d.id
+                           INNER JOIN libs.asutus AS asutus ON asutus.id = a.asutusId
+                           INNER JOIN libs.asutus AS isik ON isik.id = (a.properties -&gt;&gt; 'isik_id')::INTEGER
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                           LEFT OUTER JOIN libs.dokprop dp ON dp.id = a.doklausid
+                           LEFT OUTER JOIN docs.journal j ON j.parentid = a.journalid
+                           LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+
+
+                  WHERE D.id = $1</sql>
+    <sqlAsNew>SELECT $1 :: INTEGER                                                          AS id,
+                              $2 :: INTEGER                                                          AS userid,
+                              to_char(now(), 'YYYY-MM-DD HH:MM:SS') :: TEXT                          AS created,
+                              to_char(now(), 'YYYY-MM-DD HH:MM:SS') :: TEXT                          AS lastupdate,
+                              NULL                                                                   AS bpm,
+                              0                                                                      AS doc_status,
+                              (SELECT arve
+                               FROM ou.aa aa
+                               WHERE aa.parentid = u.rekvid
+                                 AND NOT empty(default_::INTEGER)
+                                 AND NOT empty(kassa::INTEGER)
+                                 AND kassa = 1
+                               LIMIT 1)::VARCHAR(20)                                                 AS aa,
+
+                              docs.sp_get_number(u.rekvId, 'ARV', year(date()), NULL) :: VARCHAR(20) AS number,
+                              0.00::NUMERIC(12, 2)                                                   AS summa,
+                              NULL :: INTEGER                                                        AS rekvId,
+                              0                                                                      AS liik,
+                              NULL :: INTEGER                                                        AS operid,
+                              to_char(now() :: DATE, 'YYYY-MM-DD')::TEXT                             AS kpv,
+                              NULL :: INTEGER                                                        AS asutusid,
+                              NULL :: INTEGER                                                        AS arvId,
+                              '' :: VARCHAR(120)                                                     AS lisa,
+                              to_char((now() + INTERVAL '14 days') :: DATE, 'YYYY-MM-DD')::TEXT      AS tahtaeg,
+                              0 :: NUMERIC                                                           AS kbmta,
+                              0.00 :: NUMERIC                                                        AS kbm,
+                              0 :: NUMERIC(14, 2)                                                    AS summa,
+                              NULL :: DATE                                                           AS tasud,
+                              NULL :: VARCHAR(20)                                                    AS tasudok,
+                              NULL :: TEXT                                                           AS muud,
+                              0.00                                                                   AS jaak,
+                              0 :: INTEGER                                                           AS objektId,
+                              NULL :: VARCHAR(20)                                                    AS objekt,
+                              NULL :: VARCHAR(20)                                                    AS regkood,
+                              NULL :: VARCHAR(120)                                                   AS asutus,
+                              NULL :: TEXT                                                           AS aadress,
+                              NULL :: VARCHAR(120)                                                   AS kmkr,
+                              NULL :: INTEGER                                                        AS doklausid,
+                              NULL :: VARCHAR(120)                                                   AS dokprop,
+                              NULL :: TEXT                                                           AS konto,
+                              NULL :: TEXT                                                           AS kbmkonto,
+                              NULL :: INTEGER                                                        AS journalid,
+                              NULL :: INTEGER                                                        AS laus_nr,
+                              NULL :: VARCHAR(120)                                                   AS koostaja,
+                              0 ::INTEGER                                                            AS is_show_journal,
+                              ''::VARCHAR(120)                                                       AS viitenr,
+                              NULL::INTEGER                                                          AS isik_id,
+                              ''                                                                     AS isik
+                       FROM ou.userid u
+                       WHERE u.id = $2 :: INTEGER</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <select>
+    <sql>SELECT a1.id,
+                         $2 :: INTEGER                                                                   AS userid,
+                         a1.nomid,
+                         a1.kogus,
+                         a1.hind::NUMERIC(12, 4),
+                         a1.kbm::NUMERIC(12, 2),
+                         a1.kbmta::NUMERIC(12, 2),
+                         a1.summa::NUMERIC(12, 2),
+                         trim(n.kood) :: VARCHAR(20)                                                     AS kood,
+                         trim(n.nimetus) :: VARCHAR(254)                                                 AS nimetus,
+                         n.uhik :: TEXT                                                                  AS uhik,
+                         coalesce((a1.properties -&gt;&gt; 'soodustus')::NUMERIC(12, 4), 0)::NUMERIC(12, 4)    AS soodustus,
+                         coalesce((a1.properties -&gt;&gt; 'soodustus')::NUMERIC, 0) + a1.hind::NUMERIC(12, 4) AS tais_hind,
+                         a1.soodus::NUMERIC(12, 4),
+                         a1.kood1,
+                         a1.kood2,
+                         a1.kood3,
+                         a1.kood4,
+                         a1.kood5,
+                         a1.tunnus,
+                         a1.proj,
+                         a1.konto,
+                         a1.tp,
+                         NULL :: TEXT                                                                    AS vastisik,
+                         NULL :: TEXT                                                                    AS formula,
+                         (CASE
+                              WHEN a1.kbm_maar IS NULL
+                                  THEN COALESCE((n.properties :: JSONB -&gt;&gt;
+                                                 'vat'),
+                                                '-') :: VARCHAR(20)
+                              ELSE a1.kbm_maar END)::VARCHAR(20)                                         AS km,
+                         n.uhik,
+                         a1.muud,
+                         trim(n.nimetus) || ',' || a1.muud                                               AS markused
+                  FROM docs.arv1 a1
+                           INNER JOIN docs.arv a
+                                      ON a.id = a1.parentId
+                           INNER JOIN libs.nomenklatuur n ON n.id = a1.nomId
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                  WHERE a.parentid = $1 :: INTEGER
+                    AND a1.kogus &lt;&gt; 0</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <select>
+    <sql>SELECT rd.id,
+                         $2 :: INTEGER   AS userid,
+                         trim(l.kood)    AS doc_type,
+                         trim(l.nimetus) AS name,
+                         CASE
+                             WHEN t.id IS NOT NULL THEN t.number
+                             WHEN m.id IS NOT NULL THEN m.number
+                             WHEN aa.id IS NOT NULL THEN aa.number
+                             END         AS number
+                  FROM docs.doc d
+                           LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
+                           LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
+                           LEFT OUTER JOIN docs.teatis t ON t.parentid = rd.id
+                           LEFT OUTER JOIN docs.mk m ON m.parentid = rd.id
+                           LEFT OUTER JOIN docs.arv aa ON aa.parentid = rd.id
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                  WHERE d.id = $1 :: INTEGER</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>relations</alias>
+  </select>
+  <select>
+    <sql>SELECT Arvtasu.id,
+                         arvtasu.kpv,
+                         to_char(arvtasu.kpv, 'DD.MM.YYYY')                            AS print_kpv,
+                         arvtasu.summa,
+                         coalesce(arvtasu.inf3_summa, 0)                               AS inf3_summa,
+                         CASE WHEN mk.opt = 2 THEN 'SMK' ELSE 'VMK' END :: VARCHAR(20) AS dok,
+                         'PANK' :: VARCHAR                                             AS liik,
+                         mk.number                                                     AS dok_nr,
+                         pankkassa,
+                         mk1.journalid,
+                         doc_tasu_id,
+                         coalesce(journalid.number, 0)                                 AS number,
+                         a.nimetus                                                     AS maksja,
+                         coalesce(aasta.kinni, 0)                                      AS kinni,
+                         $2                                                            AS userid
+                  FROM docs.arvtasu arvtasu
+                           INNER JOIN docs.mk mk ON (arvtasu.doc_tasu_id = mk.parentid AND arvtasu.pankkassa = 1)
+                           INNER JOIN docs.mk1 mk1 ON (mk.id = mk1.parentid)
+                           LEFT OUTER JOIN docs.journalid journalid ON mk1.journalId = journalId.journalId
+                           INNER JOIN libs.asutus a ON a.id = mk1.asutusid
+                           LEFT OUTER JOIN ou.aasta aasta
+                                           ON aasta.rekvid = arvtasu.rekvid AND month(arvtasu.kpv) = aasta.kuu AND
+                                              year(arvtasu.kpv) = aasta.aasta
+                  WHERE Arvtasu.doc_arv_id = $1
+                    AND arvtasu.summa &lt;&gt; 0
+                    AND arvtasu.status &lt;&gt; 3
+                  UNION ALL
+                  SELECT Arvtasu.id,
+                         arvtasu.kpv,
+                         to_char(arvtasu.kpv, 'DD.MM.YYYY') AS print_kpv,
+                         arvtasu.summa,
+                         coalesce(arvtasu.inf3_summa, 0)    AS inf3_summa,
+                         'KASSAORDER' :: VARCHAR(20)        AS dok,
+                         'KASSA' :: VARCHAR                 AS liik,
+                         korder1.number                     AS dok_nr,
+                         pankkassa,
+                         korder1.journalid,
+                         doc_tasu_id,
+                         coalesce(journalid.number, 0)      AS number,
+                         a.nimetus                          AS maksja,
+                         coalesce(aasta.kinni, 0)           AS kinni,
+                         $2                                 AS userid
+
+                  FROM docs.arvtasu arvtasu
+                           INNER JOIN docs.korder1 korder1
+                                      ON (arvtasu.doc_tasu_id = korder1.parentid AND arvtasu.pankkassa = 2)
+                           LEFT OUTER JOIN docs.journalid journalid ON korder1.journalId = journalId.journalId
+                           INNER JOIN libs.asutus a ON a.id = korder1.asutusid
+                           LEFT OUTER JOIN ou.aasta aasta
+                                           ON aasta.rekvid = arvtasu.rekvid AND month(arvtasu.kpv) = aasta.kuu AND
+                                              year(arvtasu.kpv) = aasta.aasta
+
+                  WHERE Arvtasu.doc_arv_id = $1
+                    AND arvtasu.summa &lt;&gt; 0
+                    AND arvtasu.status &lt;&gt; 3
+                  UNION ALL
+                  SELECT Arvtasu.id,
+                         arvtasu.kpv,
+                         to_char(arvtasu.kpv, 'DD.MM.YYYY') AS print_kpv,
+                         arvtasu.summa,
+                         coalesce(arvtasu.inf3_summa, 0)    AS inf3_summa,
+                         'PAEVARAAMAT' :: VARCHAR(20)       AS dok,
+                         'JOURNAL' :: VARCHAR               AS liik,
+                         NULL::TEXT                         AS dok_nr,
+                         pankkassa,
+                         arvtasu.doc_tasu_id                AS journalid,
+                         doc_tasu_id,
+                         coalesce(journalid.number, 0)      AS number,
+                         a.nimetus                          AS maksja,
+                         coalesce(aasta.kinni, 0)           AS kinni,
+                         $2                                 AS userid
+                  FROM docs.arvtasu arvtasu
+                           LEFT OUTER JOIN docs.journal journal
+                                           ON (arvtasu.doc_tasu_id = journal.parentId AND arvtasu.pankkassa = 3)
+                           LEFT OUTER JOIN docs.journalid journalid ON (journal.id = journalId.journalId)
+                           INNER JOIN libs.asutus a ON a.id = journal.asutusid
+                           LEFT OUTER JOIN ou.aasta aasta
+                                           ON aasta.rekvid = arvtasu.rekvid AND month(arvtasu.kpv) = aasta.kuu AND
+                                              year(arvtasu.kpv) = aasta.aasta
+
+                  WHERE Arvtasu.doc_arv_id = $1
+                    AND arvtasu.summa &lt;&gt; 0
+                    AND arvtasu.status &lt;&gt; 3
+                    AND arvtasu.pankkassa = 3
+                  UNION ALL
+                  SELECT Arvtasu.id,
+                         arvtasu.kpv,
+                         to_char(arvtasu.kpv, 'DD.MM.YYYY') AS print_kpv,
+                         arvtasu.summa,
+                         coalesce(arvtasu.inf3_summa, 0)    AS inf3_summa,
+                         '' :: VARCHAR(20)                  AS dok,
+                         'MUUD' :: VARCHAR                  AS liik,
+                         NULL::TEXT                         AS dok_nr,
+                         pankkassa,
+                         0                                  AS journalid,
+                         NULL,
+                         0                                  AS number,
+                         ''::TEXT                           AS maksja,
+                         coalesce(aasta.kinni, 0)           AS kinni,
+                         $2                                 AS userid
+                  FROM docs.arvtasu arvtasu
+                           LEFT OUTER JOIN ou.aasta aasta
+                                           ON aasta.rekvid = arvtasu.rekvid AND month(arvtasu.kpv) = aasta.kuu AND
+                                              year(arvtasu.kpv) = aasta.aasta
+                  WHERE Arvtasu.doc_arv_id = $1
+                    AND arvtasu.summa &lt;&gt; 0
+                    AND arvtasu.status &lt;&gt; 3
+                    AND arvtasu.pankkassa IN (0, 4)
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>queryArvTasu</alias>
+  </select>
+  <selectAsLibs>
+    <sql>SELECT *
+                   FROM com_arved a
+                   WHERE (a.rekvId = $1::INTEGER)</sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select docs.sp_salvesta_arv($1::json, $2::integer, $3::integer) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>SELECT error_code, result, error_message
+                FROM docs.sp_delete_arv($1::INTEGER, $2::INTEGER)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>kpv,tahtaeg,asutusid,lapsid</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select docs.sp_kooperi_arv($1::integer, $2::integer) as result</sql>
+    <alias>kooperiArv</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql>SELECT error_code, result, error_message FROM docs.gen_lausend_arv($1::INTEGER, $2::INTEGER)</sql>
+    <alias>generateJournal</alias>
+  </generateJournal>
+  <print>
+    <view>arve_kaart</view>
+    <params>id</params>
+    <register>UPDATE docs.doc
+                       SET history = history ||
+                                     (SELECT row_to_json(row)
+                                      FROM (SELECT now()                                                AS print,
+                                                   (SELECT kasutaja FROM ou.userid WHERE id = $2)::TEXT AS user) row)::JSONB
+                       WHERE id = $1</register>
+  </print>
+  <print>
+    <view>arve_register</view>
+    <params>sqlWhere</params>
+  </print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()                                               AS id,
+                         (ajalugu -&gt;&gt; 'user')::TEXT                                         AS kasutaja,
+                         to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS') AS koostatud,
+                         to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS') AS muudatud,
+                         to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS')   AS prinditud,
+                         to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS')   AS email,
+                         to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS')   AS earve,
+                         to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS') AS kustutatud
+
+                  FROM (
+                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
+                           FROM docs.doc d,
+                                ou.userid u
+                           WHERE d.id = $1
+                             AND u.id = $2
+                       ) qry</sql>
+    <alias>getLogs</alias>
+  </getLog>
+</VFPData>
