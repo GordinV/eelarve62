@@ -91,8 +91,11 @@
                          aa.pank,
                          aa.konto::VARCHAR(20),
                          aa.tp,
-                         kassa AS kassapank,
-                         $2    AS userId
+                         kassa                                                              AS kassapank,
+                         $2                                                                 AS userId,
+                         coalesce((aa.properties -&gt;&gt; 'kas_tulud')::BOOLEAN, FALSE)::BOOLEAN AS kas_tulud,
+                         coalesce((aa.properties -&gt;&gt; 'kas_kulud')::BOOLEAN, FALSE)::BOOLEAN AS kas_kulud,
+                         coalesce((aa.properties -&gt;&gt; 'kas_palk')::BOOLEAN, FALSE)::BOOLEAN  AS kas_palk
                   FROM ou.Aa aa
                   WHERE Aa.parentid = $1</sql>
     <query />
