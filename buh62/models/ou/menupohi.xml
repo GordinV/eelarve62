@@ -107,11 +107,11 @@
   </select>
   <selectAsLibs>
     <sql>SELECT menu.id,
-                          submenu::VARCHAR(120),
-                          pad::VARCHAR(120),
-                          bar::VARCHAR(120),
-                          idx,
-                          name::VARCHAR(120),
+        submenu::VARCHAR(120),
+        pad::VARCHAR(120),
+        bar::VARCHAR(120),
+        idx,
+        name::VARCHAR(120),
                           eesti::VARCHAR(120),
                           vene::VARCHAR(120),
                           proc,
