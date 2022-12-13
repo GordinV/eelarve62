@@ -20,10 +20,14 @@
                      h.summa,
                      h.muud,
                      h.rekvid,
+                     n.kood,
                      $2::INTEGER AS user_id
               FROM hooldekodu.hootaabel h
                        INNER JOIN libs.asutus a ON a.id = h.isikid
-              WHERE h.id = $1</sql>
+                       INNER JOIN libs.nomenklatuur n ON n.id = h.nomid
+              WHERE h.isikid = $1
+                AND h.rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2)
+                AND h.kpv = $3::DATE</sql>
     <sqlAsNew>SELECT $1::INTEGER                                          AS id,
                           'HOOTEHINGUD'                                        AS doc_type_id,
                           0::INTEGER                                           AS isikid,
@@ -49,7 +53,7 @@
                      0                                 AS summa,
                      0                                 AS soodustus,
                      ht.lepingid,
-                     hl.isikid,                
+                     hl.isikid,
                      public.get_last_day(current_date) AS kpv
               FROM hooldekodu.hooteenused ht
                        INNER JOIN hooldekodu.hooleping hl ON ht.lepingid = hl.id

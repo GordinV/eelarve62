@@ -117,10 +117,12 @@
   <select>
     <sql>SELECT year(htab.kpv)                        AS aasta,
                          month(htab.kpv)                       AS kuu,
+                         htab.id,
+                         htab.kpv,
                          htab.nomid,
                          nom.kood,
-                         sum(htab.kogus)                       AS kogus,
-                         sum(htab.summa)                       AS summa,
+                         (htab.kogus)                          AS kogus,
+                         (htab.summa)                          AS summa,
                          htab.arvid,
                          coalesce(arv.number, '')::VARCHAR(20) AS number,
                          htab.rekvid,
@@ -130,9 +132,7 @@
                            INNER JOIN libs.nomenklatuur nom ON htab.nomid = nom.id
                            LEFT OUTER JOIN cur_arved arv ON arv.id = htab.arvid
                   WHERE htab.rekvid = $1
-                  GROUP BY year(htab.kpv), month(htab.kpv), htab.nomid, nom.kood, htab.arvid, arv.number, htab.isikid,
-                           htab.rekvid
-            </sql>
+                    AND htab.status &lt; 3</sql>
     <query />
     <multiple>true</multiple>
     <alias>curHooTaabel</alias>
@@ -182,6 +182,44 @@
     <multuple>false</multuple>
     <not_initial_load>true</not_initial_load>
     <alias>setDead</alias>
+  </select>
+  <select>
+    <sql>SELECT row_number() OVER ()                                          AS id,
+                         tulemus -&gt; 'result'                                           AS result,
+                         tulemus -&gt; 'error_code'                                       AS error_code,
+                         coalesce((tulemus -&gt;&gt; 'error_code')::INTEGER, 0)::INTEGER &gt; 0 AS kas_vigane,
+                         tulemus -&gt; 'error_message'                                    AS error_message
+                  FROM (
+                           SELECT to_jsonb(
+                                          hooldekodu.koosta_hoo_taabelid($2::INTEGER, id::INTEGER,
+                                                                         $3::DATE)) tulemus
+                           FROM libs.asutus
+                           WHERE id IN (
+                               SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
+                           )) qry</sql>
+    <query />
+    <multuple>false</multuple>
+    <not_initial_load>true</not_initial_load>
+    <alias>koostaTaabel</alias>
+  </select>
+  <select>
+    <sql>SELECT row_number() OVER ()                                          AS id,
+                         tulemus -&gt; 'result'                                           AS result,
+                         tulemus -&gt; 'error_code'                                       AS error_code,
+                         coalesce((tulemus -&gt;&gt; 'error_code')::INTEGER, 0)::INTEGER &gt; 0 AS kas_vigane,
+                         tulemus -&gt; 'error_message'                                    AS error_message
+                  FROM (
+                           SELECT to_jsonb(
+                                          hooldekodu.koosta_arve_hootaabeli_alusel($2::INTEGER, id::INTEGER,
+                                                                         $3::DATE)) tulemus
+                           FROM libs.asutus
+                           WHERE id IN (
+                               SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
+                           )) qry</sql>
+    <query />
+    <multuple>false</multuple>
+    <not_initial_load>true</not_initial_load>
+    <alias>koostaArved</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT id,
