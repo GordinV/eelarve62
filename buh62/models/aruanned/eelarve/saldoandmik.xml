@@ -126,7 +126,7 @@
                                                        AND qry.kpv &lt; '2022-10-01'
                                                        THEN ''                                              
                                                    WHEN l.is_tp AND left(konto, 6) IN ('150200', '150210', '150020') AND
-                                                        ltrim(rtrim(coalesce(rahavoog, ''))) IN ('01', '00', '17', '21')
+                                                        ltrim(rtrim(coalesce(rahavoog, ''))) IN ('01', '00', '17', '21','18')
                                                        THEN tp
                                                    WHEN l.is_tp AND
                                                         (ltrim(rtrim(coalesce(l.muud, ''))) &lt;&gt; '*' OR
@@ -183,7 +183,7 @@
                                               LEFT(konto, 6)::TEXT       AS konto,
                                               (CASE
                                                    WHEN is_tp AND (ltrim(rtrim(COALESCE(l.muud, ''))) &lt;&gt; '*' OR
-                                                                   ltrim(rtrim(qry.rahavoog)) IN ('01', '00', '21', '17'))
+                                                                   ltrim(rtrim(qry.rahavoog)) IN ('01', '00', '21', '17','18'))
                                                        THEN tp
                                                    ELSE
                                                        '' END)::CHAR(20) AS tp,
