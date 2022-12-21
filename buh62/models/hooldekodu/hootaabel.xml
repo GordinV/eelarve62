@@ -10,24 +10,48 @@
   <select>
     <sql>SELECT h.id,
                      h.isikid,
-                     a.nimetus   AS isik,
+                     a.nimetus                                                  AS isik,
                      h.kpv,
                      h.nomid,
                      h.kogus,
                      h.hind,
                      h.soodustus,
                      h.arvid,
-                     h.summa,
+                     h.sugulane_arv_id,
+                     CASE
+                         WHEN UPPER(n.uhik) = 'KUU' THEN h.alus_hind::NUMERIC(12, 2)
+                         ELSE h.summa END::NUMERIC(12, 2)                       AS summa,
+                     (h.summa)                                                  AS arv_summa,
                      h.muud,
                      h.rekvid,
                      n.kood,
-                     $2::INTEGER AS user_id
+                     a_isik.allikas_85,
+                     a_isik.allikas_muud,
+                     a_isik.allikas_vara,
+                     coalesce((h.properties -&gt;&gt; 'omavalitsus_osa')::NUMERIC, 0) AS omavalitsus_osa,
+                     coalesce((h.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)    AS sugulane_osa,
+                     $2::INTEGER                                                AS user_id
               FROM hooldekodu.hootaabel h
                        INNER JOIN libs.asutus a ON a.id = h.isikid
                        INNER JOIN libs.nomenklatuur n ON n.id = h.nomid
+                       LEFT OUTER JOIN (
+                  SELECT d.id,
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0))   AS allikas_85,
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)) AS allikas_muud,
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)) AS allikas_vara
+                  FROM docs.doc d
+                           INNER JOIN docs.arv a ON d.id = a.parentid
+                           LEFT JOIN docs.arv1 a1 ON a1.parentid = a.id
+                  WHERE a.properties -&gt;&gt; 'tyyp' = 'HOOLDEKODU_ISIKU_OSA'
+                    AND a.asutusid = $1
+                    AND d.rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2)
+                  GROUP BY d.id
+              ) a_isik ON a_isik.id = h.arvid
+
               WHERE h.isikid = $1
                 AND h.rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2)
-                AND h.kpv = $3::DATE</sql>
+                AND h.kpv = $3::DATE
+                AND h.status &lt; 3</sql>
     <sqlAsNew>SELECT $1::INTEGER                                          AS id,
                           'HOOTEHINGUD'                                        AS doc_type_id,
                           0::INTEGER                                           AS isikid,
@@ -38,8 +62,13 @@
                           0                                                    AS kogus,
                           0                                                    AS soodustus,
                           NULL::INTEGER                                        AS arvId,
+                          NULL::INTEGER                                        AS sugulane_arv_id,
                           0                                                    AS summa,
                           (SELECT rekvid FROM ou.userid WHERE id = $2 LIMIT 1) AS rekvid,
+                          0                                                    AS allikas_85,
+                          0                                                    AS allikas_muud,
+                          0                                                    AS allikas_vara,
+                          0                                                    AS sugulune_summa,
                           NULL::TEXT                                           AS muud</sqlAsNew>
     <query />
     <multiple>false</multiple>

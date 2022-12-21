@@ -115,24 +115,48 @@
     <alias>hooldajad</alias>
   </select>
   <select>
-    <sql>SELECT year(htab.kpv)                        AS aasta,
-                         month(htab.kpv)                       AS kuu,
+    <sql>with qryTab as (
+                    SELECT year(htab.kpv)                          AS aasta,
+                         month(htab.kpv)                         AS kuu,
                          htab.id,
                          htab.kpv,
                          htab.nomid,
                          nom.kood,
-                         (htab.kogus)                          AS kogus,
-                         (htab.summa)                          AS summa,
+                         (htab.kogus)                            AS kogus,
+                         (htab.summa)                            AS arv_summa,
                          htab.arvid,
-                         coalesce(arv.number, '')::VARCHAR(20) AS number,
+                         coalesce(arv.number, '')::VARCHAR(20)   AS number,
                          htab.rekvid,
                          htab.isikid,
-                         $2                                    AS user_id
+                         coalesce((htab.properties-&gt;&gt;'umardamine')::numeric,0) as umardamine,
+                         $2                                      AS user_id,
+                         coalesce((htab.properties -&gt;&gt; 'omavalitsus_osa')::NUMERIC, 0) AS omavalitsus_osa,
+                         coalesce((htab.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)    AS sugulane_osa,
+                         coalesce(arv.allikas_85,0) as allikas_85,
+                         coalesce(arv.allikas_muud,0) as allikas_muud,
+                         coalesce(arv.allikas_vara,0) as allikas_vara
                   FROM hooldekodu.hootaabel htab
                            INNER JOIN libs.nomenklatuur nom ON htab.nomid = nom.id
-                           LEFT OUTER JOIN cur_arved arv ON arv.id = htab.arvid
-                  WHERE htab.rekvid = $1
-                    AND htab.status &lt; 3</sql>
+                       LEFT OUTER JOIN (
+                          SELECT d.id,
+                                 a.number,
+                                 sum(coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0))   AS allikas_85,
+                                 sum(coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)) AS allikas_muud,
+                                 sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)) AS allikas_vara
+                          FROM docs.doc d
+                                   INNER JOIN docs.arv a ON d.id = a.parentid
+                                   LEFT JOIN docs.arv1 a1 ON a1.parentid = a.id
+                          WHERE a.properties -&gt;&gt; 'tyyp' = 'HOOLDEKODU_ISIKU_OSA'
+                            AND d.rekvid  = $1
+                            and d.status &lt; 3
+                          GROUP BY d.id, a.number
+                      ) arv ON arv.id = htab.arvid
+                  WHERE htab.rekvid  = $1
+                    AND htab.status &lt; 3)
+                    select qryTab.*, 
+                    arv_summa + umardamine as summa
+                    from qryTab
+                    </sql>
     <query />
     <multiple>true</multiple>
     <alias>curHooTaabel</alias>
@@ -211,7 +235,7 @@
                   FROM (
                            SELECT to_jsonb(
                                           hooldekodu.koosta_arve_hootaabeli_alusel($2::INTEGER, id::INTEGER,
-                                                                         $3::DATE)) tulemus
+                                                                                   $3::DATE)) tulemus
                            FROM libs.asutus
                            WHERE id IN (
                                SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
