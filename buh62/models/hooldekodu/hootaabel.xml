@@ -25,9 +25,9 @@
                      h.muud,
                      h.rekvid,
                      n.kood,
-                     a_isik.allikas_85,
-                     a_isik.allikas_muud,
-                     a_isik.allikas_vara,
+                     coalesce(a_isik.allikas_85, 0)                             AS allikas_85,
+                     coalesce(a_isik.allikas_muud, 0)                           AS allikas_muud,
+                     coalesce(a_isik.allikas_vara, 0)                           AS allikas_vara,
                      coalesce((h.properties -&gt;&gt; 'omavalitsus_osa')::NUMERIC, 0) AS omavalitsus_osa,
                      coalesce((h.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)    AS sugulane_osa,
                      $2::INTEGER                                                AS user_id
