@@ -130,11 +130,11 @@
                          htab.isikid,
                          coalesce((htab.properties-&gt;&gt;'umardamine')::numeric,0) as umardamine,
                          $2                                      AS user_id,
-                         coalesce((htab.properties -&gt;&gt; 'omavalitsus_osa')::NUMERIC, 0) AS omavalitsus_osa,
-                         coalesce((htab.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)    AS sugulane_osa,
                          coalesce(arv.allikas_85,0) as allikas_85,
                          coalesce(arv.allikas_muud,0) as allikas_muud,
-                         coalesce(arv.allikas_vara,0) as allikas_vara
+                         coalesce(arv.allikas_vara,0) as allikas_vara,
+                         coalesce(arv.omavalitsuse_osa,0) as omavalitsus_osa,
+                         coalesce(arv.sugulane_osa,0) as sugulane_osa
                   FROM hooldekodu.hootaabel htab
                            INNER JOIN libs.nomenklatuur nom ON htab.nomid = nom.id
                        LEFT OUTER JOIN (
@@ -142,7 +142,9 @@
                                  a.number,
                                  sum(coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0))   AS allikas_85,
                                  sum(coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)) AS allikas_muud,
-                                 sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)) AS allikas_vara
+                                 sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)) AS allikas_vara,
+                                 sum(coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)) AS omavalitsuse_osa,
+                                 sum(coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0))     AS sugulane_osa                             
                           FROM docs.doc d
                                    INNER JOIN docs.arv a ON d.id = a.parentid
                                    LEFT JOIN docs.arv1 a1 ON a1.parentid = a.id

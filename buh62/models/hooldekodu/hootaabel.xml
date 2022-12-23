@@ -10,35 +10,38 @@
   <select>
     <sql>SELECT h.id,
                      h.isikid,
-                     a.nimetus                                                  AS isik,
+                     a.nimetus                            AS isik,
                      h.kpv,
                      h.nomid,
                      h.kogus,
                      h.hind,
                      h.soodustus,
                      h.arvid,
+                     h.lepingid,
                      h.sugulane_arv_id,
                      CASE
                          WHEN UPPER(n.uhik) = 'KUU' THEN h.alus_hind::NUMERIC(12, 2)
-                         ELSE h.summa END::NUMERIC(12, 2)                       AS summa,
-                     (h.summa)                                                  AS arv_summa,
+                         ELSE h.summa END::NUMERIC(12, 2) AS summa,
+                     (h.summa)                            AS arv_summa,
                      h.muud,
                      h.rekvid,
                      n.kood,
-                     coalesce(a_isik.allikas_85, 0)                             AS allikas_85,
-                     coalesce(a_isik.allikas_muud, 0)                           AS allikas_muud,
-                     coalesce(a_isik.allikas_vara, 0)                           AS allikas_vara,
-                     coalesce((h.properties -&gt;&gt; 'omavalitsus_osa')::NUMERIC, 0) AS omavalitsus_osa,
-                     coalesce((h.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)    AS sugulane_osa,
-                     $2::INTEGER                                                AS user_id
+                     coalesce(a_isik.allikas_85, 0)       AS allikas_85,
+                     coalesce(a_isik.allikas_muud, 0)     AS allikas_muud,
+                     coalesce(a_isik.allikas_vara, 0)     AS allikas_vara,
+                     coalesce(a_isik.omavalitsuse_osa, 0) AS omavalitsus_osa,
+                     coalesce(a_isik.sugulane_osa, 0)     AS sugulane_osa,
+                     $2::INTEGER                          AS user_id
               FROM hooldekodu.hootaabel h
                        INNER JOIN libs.asutus a ON a.id = h.isikid
                        INNER JOIN libs.nomenklatuur n ON n.id = h.nomid
                        LEFT OUTER JOIN (
                   SELECT d.id,
-                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0))   AS allikas_85,
-                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)) AS allikas_muud,
-                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)) AS allikas_vara
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0))       AS allikas_85,
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0))     AS allikas_muud,
+                         sum(coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0))     AS allikas_vara,
+                         sum(coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)) AS omavalitsuse_osa,
+                         sum(coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0))     AS sugulane_osa
                   FROM docs.doc d
                            INNER JOIN docs.arv a ON d.id = a.parentid
                            LEFT JOIN docs.arv1 a1 ON a1.parentid = a.id
@@ -55,6 +58,7 @@
     <sqlAsNew>SELECT $1::INTEGER                                          AS id,
                           'HOOTEHINGUD'                                        AS doc_type_id,
                           0::INTEGER                                           AS isikid,
+                          0::INTEGER                                           AS lepingid,
                           NULL::VARCHAR(20)                                    AS kood,
                           ''::VARCHAR(254)                                     AS isik,
                           current_date::DATE                                   AS kpv,
