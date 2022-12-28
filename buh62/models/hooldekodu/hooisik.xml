@@ -190,6 +190,15 @@
     <alias>hoojaak</alias>
   </select>
   <select>
+    <sql>SELECT *,
+                         $2 AS user_id
+                  FROM hooldekodu.cur_hoojaak h
+                  WHERE h.isikid IN (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>hoojaagid</alias>
+  </select>
+  <select>
     <sql>SELECT *
                   FROM jsonb_to_recordset(
                                get_asutus_kasutus($2::INTEGER, $3::DATE,

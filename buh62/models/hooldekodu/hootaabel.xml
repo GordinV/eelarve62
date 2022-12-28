@@ -1,10 +1,17 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT a.*,
-                           $2::INTEGER AS userId
-                    FROM hooldekodu.cur_hootaabel a
-                    WHERE a.rekvid = $1</sql>
+    <sql>SELECT t.*,
+                           $2::INTEGER                           AS userId,
+                           a.regkood                             AS isikukood,
+                           a.nimetus                             AS nimi,
+                           coalesce(h.regkood, '')::VARCHAR(20)  AS regkood,
+                           coalesce(h.nimetus, '')::VARCHAR(254) AS hooldekodu 
+                    FROM hooldekodu.cur_hootaabel t
+                             INNER JOIN libs.asutus a ON a.id = t.isikid
+                             LEFT OUTER JOIN hooldekodu.hooleping hl ON t.lepingid = hl.id
+                             LEFT OUTER JOIN libs.asutus h ON h.id = hl.hooldekoduid
+                    WHERE t.rekvid = $1</sql>
     <alias>curHooTaabel</alias>
   </grid>
   <select>
