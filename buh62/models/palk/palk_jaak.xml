@@ -1,11 +1,10 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                          p.*,
-                          $2 as user_id
-                        FROM palk.cur_palk_jaak p
-                        WHERE p.rekvId in (select rekv_id from get_asutuse_struktuur($1::integer))</sql>
+    <sql>SELECT p.*,
+                           $2 AS user_id
+                    FROM palk.cur_palk_jaak p
+                    WHERE p.rekvId IN (SELECT rekv_id FROM get_asutuse_struktuur($1::INTEGER))</sql>
     <alias>curPalkJaak</alias>
   </grid>
   <selectAsLibs>
@@ -44,11 +43,75 @@
     <alias />
   </generateJournal>
   <print>
-    <sql>SELECT
-                          p.*,
-                          $2 as user_id
-                        FROM palk.print_palk_jaak p
-                        WHERE p.rekvId in (select rekv_id from get_asutuse_struktuur($1::integer))</sql>
+    <sql>SELECT p.*,
+                         $2 AS user_id
+                  FROM (SELECT j.jaak,
+                               j.kuu,
+                               j.aasta,
+                               coalesce(p.arv, 0)::NUMERIC(12, 2)   AS arv,
+                               coalesce(p.tasu, 0)::NUMERIC(12, 2)  AS tasu,
+                               coalesce(p.tka, 0)::NUMERIC(12, 2)   AS tka,
+                               coalesce(p.tki, 0)::NUMERIC(12, 2)   AS tki,
+                               coalesce(p.pm, 0)::NUMERIC(12, 2)    AS pm,
+                               coalesce(p.tm, 0)::NUMERIC(12, 2)    AS tm,
+                               coalesce(p.sm, 0)::NUMERIC(12, 2)    AS sm,
+                               coalesce(p.muud, 0)::NUMERIC(12, 2)  AS muud,
+                               coalesce(p.kinni, 0)::NUMERIC(12, 2) AS kinni,
+                               p.lepingid,
+                               t.rekvid,
+                               a.id                                 AS isikid,
+                               a.regkood                            AS isikukood,
+                               a.nimetus                            AS isik,
+                               o.kood                               AS osakond,
+                               o.nimetus                            AS osakonna_nimetus,
+                               coalesce(p.status, 2)                AS status
+                        FROM palk.palk_jaak j
+                                 LEFT OUTER JOIN (
+                            SELECT month(p.kpv)                                                       AS kuu,
+                                   year(p.kpv)                                                        AS aasta,
+                                   sum(p.summa)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 1)  AS arv,
+                                   sum(p.summa)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 6)  AS tasu,
+                                   sum(p.summa)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 2)  AS kinni,
+                                   sum(p.summa)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 3)  AS muud,
+                                   sum(p.pensmaks)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS pm,
+                                   sum(p.summa)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 5)  AS sm,
+                                   sum(p.tulubaas)                                                    AS mvt,
+                                   sum(p.tka)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tka,
+                                   sum(p.tootumaks)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tki,
+                                   sum(p.tulumaks)
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tm,
+                                   p.lepingid,
+                                   t.status
+                            FROM docs.doc d
+                                     INNER JOIN palk.palk_oper p ON p.parentid = d.id
+                                     INNER JOIN libs.library lib ON p.libid = lib.id AND lib.library = 'PALK'
+                                     INNER JOIN palk.tooleping t ON p.lepingid = t.id
+                            WHERE p.lepingid IS NOT NULL
+                              AND d.doc_type_id IN
+                                  (SELECT id FROM libs.library l WHERE l.library = 'DOK' AND l.kood = 'PALK_OPER')
+                              AND d.status &lt;&gt; 3
+                              AND lib.status &lt;&gt; 3
+                              AND t.status &lt;&gt; 3
+                              AND d.rekvId = $1::INTEGER
+                            GROUP BY month(p.kpv), year(p.kpv), p.lepingid, t.status) p
+                                                 ON p.lepingid = j.lepingid AND p.kuu = j.kuu AND p.aasta = j.aasta
+                                 INNER JOIN palk.tooleping t ON t.id = j.lepingid
+                                 INNER JOIN libs.asutus a ON a.id = t.parentid
+                                 INNER JOIN libs.library o ON o.id = t.osakondid) p
+                  WHERE p.rekvId = $1::INTEGER
+            </sql>
     <alias>printPalkJaak</alias>
   </print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
