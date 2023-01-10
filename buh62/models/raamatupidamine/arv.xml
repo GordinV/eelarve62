@@ -113,7 +113,10 @@
                               trim(l.kood)                                                           AS doc_type_id,
                               trim(s.nimetus)                                                        AS status,
                               0                                                                      AS doc_status,
-                              ou.get_aa(u.rekvid, 'TULUD'::TEXT)::VARCHAR(20)                        AS aa,
+                              (SELECT arve
+                               FROM ou.aa
+                               WHERE id = ou.get_aa(u.rekvid, 'TULUD'::TEXT)::INTEGER
+                               LIMIT 1)::VARCHAR(20)                                                 AS aa,
                               docs.sp_get_number(u.rekvId, 'ARV', year(date()), NULL) :: VARCHAR(20) AS number,
                               0.00                                                                   AS summa,
                               NULL :: INTEGER                                                        AS rekvId,
@@ -193,7 +196,7 @@
                          coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)::NUMERIC(12, 2)     AS allikas_vara,
                          coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)::NUMERIC(12, 2) AS omavalitsuse_osa,
                          coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)::NUMERIC(12, 2)     AS sugulane_osa,
-                      a1.muud
+                         a1.muud
                   FROM docs.arv1 AS a1
                            INNER JOIN docs.arv a ON a.id = a1.parentId
                            INNER JOIN libs.nomenklatuur n ON n.id = a1.nomId
