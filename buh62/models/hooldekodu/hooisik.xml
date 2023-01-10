@@ -193,10 +193,19 @@
     <sql>SELECT *,
                          $2 AS user_id
                   FROM hooldekodu.cur_hoojaak h
-                  WHERE h.isikid IN (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
+                  WHERE h.isikid = $1</sql>
     <query />
     <multiple>true</multiple>
     <alias>hoojaagid</alias>
+  </select>
+  <select>
+    <sql>SELECT *,
+                         $2 AS user_id
+                  FROM hooldekodu.cur_hoojaak h
+                  WHERE h.isikid in (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>print_hoojaagid</alias>
   </select>
   <select>
     <sql>SELECT *
