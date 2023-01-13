@@ -119,7 +119,7 @@
                                      qry.tyyp::INTEGER
                               FROM (
                                        SELECT qry.rekvid                  AS rekv_id,
-                                              LEFT(konto, 6)::TEXT        AS konto,
+                                              konto::TEXT        AS konto,
                                               (CASE
                                                    WHEN left(konto, 6) IN ('155920') AND (qry.rahavoog = '00' OR qry.kpv &lt;
                                                                                                                  make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))                                                                                                                 
@@ -180,7 +180,7 @@
 
                                        UNION ALL
                                        SELECT qry.rekvid                 AS rekv_id,
-                                              LEFT(konto, 6)::TEXT       AS konto,
+                                              konto::TEXT       AS konto,
                                               (CASE
                                                    WHEN is_tp AND (ltrim(rtrim(COALESCE(l.muud, ''))) &lt;&gt; '*' OR
                                                                    ltrim(rtrim(qry.rahavoog)) IN ('01', '00', '21', '17','18'))

@@ -62,7 +62,9 @@
                            LEFT OUTER JOIN ou.aa AS aa ON k.aaid = aa.Id
                            LEFT OUTER JOIN docs.arv AS arv ON k.arvid = arv.Id
                            LEFT OUTER JOIN libs.dokprop dp ON dp.id = k.doklausid
-                  WHERE d.id = $1</sql>
+                  WHERE d.id = $1
+                    AND d.status &lt; 3
+            </sql>
     <sqlAsNew>SELECT $1 :: INTEGER                                  AS id,
                               $2 :: INTEGER                                  AS userid,
                               to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT  AS created,
@@ -97,15 +99,15 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT $2 :: INTEGER      AS userid,
-                         trim(n.kood)       AS kood,
-                         trim(n.nimetus)    AS nimetus,
-                         trim(a.nimetus)    AS asutus,
-                         trim(a.aadress)    AS aadress,
-                         k.parentid         AS parent_id,
+    <sql>SELECT $2 :: INTEGER           AS userid,
+                         trim(n.kood)            AS kood,
+                         trim(n.nimetus)         AS nimetus,
+                         trim(a.nimetus)         AS asutus,
+                         trim(a.aadress)         AS aadress,
+                         k.parentid              AS parent_id,
                          k1.*,
-                         coalesce(l.number,0) AS lausnr,
-                         coalesce(l.lausend,'') as lausend
+                         coalesce(l.number, 0)   AS lausnr,
+                         coalesce(l.lausend, '') AS lausend
                   FROM docs.mk1 AS k1
                            INNER JOIN docs.mk k ON k.id = k1.parentId
                            INNER JOIN libs.nomenklatuur n ON n.id = k1.nomid
@@ -123,7 +125,8 @@
                            LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
                            LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
                            INNER JOIN ou.userid u ON u.id = $2::INTEGER
-                  WHERE d.id = $1</sql>
+                  WHERE d.id = $1
+                    AND d.status &lt;&gt; 3</sql>
     <query />
     <multiple>true</multiple>
     <alias>relations</alias>
