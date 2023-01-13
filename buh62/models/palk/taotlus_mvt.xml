@@ -61,6 +61,12 @@
     <multiple>false</multiple>
     <alias>v_isiku_mvt_taotlused</alias>
   </select>
+  <select>
+    <sql>SELECT palk.kas_soodustus_mvt($1::TEXT, $2::DATE)::INTEGER as tulemus</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>v_pensionari_mvt_kontrol</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
