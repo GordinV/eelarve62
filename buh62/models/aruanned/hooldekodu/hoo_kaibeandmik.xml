@@ -7,7 +7,7 @@
                            $2        AS user_id
                     FROM hooldekodu.hoo_kaibeandmik($3::DATE, $4:: DATE, $1::INTEGER, $5::INTEGER) qry
                              LEFT OUTER JOIN libs.asutus a ON a.id = qry.isik_id
-        </sql>
+                    ORDER BY a.nimetus        </sql>
     <alias>hoo_kaibeandmik</alias>
   </grid>
   <select></select>

@@ -113,4 +113,26 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS kustutatud
+
+                  FROM (SELECT $2                                                      AS user_id,
+                               jsonb_array_elements(jsonb_agg(jsonb_build_object('updated', propertis -&gt;&gt; 'updated', 'user',
+                                                            ltrim(rtrim(u.kasutaja))))) AS ajalugu
+                        FROM ou.logs l
+                                 LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
+                        WHERE propertis -&gt;&gt; 'table' = 'library'
+                          AND doc_id = $1) qry
+        </sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>

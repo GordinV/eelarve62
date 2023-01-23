@@ -1,18 +1,34 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select id, kood, nimetus,  $2::integer as userId
-            from libs.library l
-            where l.library = 'TP'
-            and l.status &lt;&gt; 3</sql>
+    <sql>SELECT id,
+                           kood,
+                           nimetus,
+                           $2::INTEGER                           AS userId,
+                           (properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+                    FROM libs.library l
+                    WHERE l.library = 'TP'
+                      AND l.status &lt;&gt; 3</sql>
     <alias>curTPR</alias>
   </grid>
   <select>
-    <sql>select l.id, l.rekvid, l.kood, l.nimetus, l.muud, l.status, l.library,
-                l.tun1, l.tun2, l.tun3, l.tun4, l.tun5, 
-                $2::integer as userid, 'TP' as doc_type_id
-                from libs.library l 
-                where l.id = $1</sql>
+    <sql>SELECT l.id,
+                     l.rekvid,
+                     l.kood,
+                     l.nimetus,
+                     l.muud,
+                     l.status,
+                     l.library,
+                     l.tun1,
+                     l.tun2,
+                     l.tun3,
+                     l.tun4,
+                     l.tun5,
+                     $2::INTEGER                             AS userid,
+                     'TP'                                    AS doc_type_id,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
+              FROM libs.library l
+              WHERE l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'TP' as doc_type_id,
@@ -26,13 +42,15 @@
             null::integer as tun4,
             null::integer as tun5,
             0::integer as status,
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
   <selectAsLibs>
-    <sql>select * from com_tp l</sql>
+    <sql>SELECT *
+                   FROM com_tp l</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -40,7 +58,8 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from libs.sp_delete_library($1::integer, $2::integer)</sql>
+    <sql>SELECT error_code, result, error_message
+                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -67,4 +86,26 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
+                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS koostatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS muudatud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS prinditud,
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                                  '')::VARCHAR(20)         AS kustutatud
+
+                  FROM (SELECT $2                                                      AS user_id,
+                               jsonb_array_elements(jsonb_agg(jsonb_build_object('updated', propertis -&gt;&gt; 'updated', 'user',
+                                                            ltrim(rtrim(u.kasutaja))))) AS ajalugu
+                        FROM ou.logs l
+                                 LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
+                        WHERE propertis -&gt;&gt; 'table' = 'library'
+                          AND doc_id = $1) qry
+        </sql>
+    <alias>getLogs</alias>
+  </getLog>
 </VFPData>
