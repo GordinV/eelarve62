@@ -1,18 +1,29 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
+    <sql>WITH rekv_ids AS (
+                        SELECT rekv_id
+                        FROM get_asutuse_struktuur($2)
+                        WHERE rekv_id = CASE
+                                            WHEN $3 = 1
+                                                THEN rekv_id
+                                            ELSE $2 END)
+                    SELECT
                       coalesce((SELECT sum(summa)
                                 FROM docs.pv_oper po
-                                WHERE po.pv_kaart_id = p.id AND liik = 2), 0) + p.algkulum AS kulum,
+                                WHERE po.pv_kaart_id = p.id 
+                                AND po.kpv &lt;= $1::DATE
+                                AND liik = 2), 0) + p.algkulum AS arv_kulum,
                       coalesce((SELECT sum(summa)
                                 FROM docs.pv_oper po
                                 WHERE po.pv_kaart_id = p.id AND liik IN (1, 3)), 0)        AS soetmaks,
                       (SELECT eluiga FROM libs.get_pv_kaart_jaak(p.id::INTEGER, $1::DATE))::NUMERIC(12,4) AS eluiga,
-                      p.*
+                      p.*,
+                      r.nimetus as asutus
                     FROM cur_pohivara p
+                    inner join ou.rekv r on r.id = p.rekvid
                     WHERE (p.mahakantud IS NULL or p.mahakantud &gt; $1)
-                      and p.rekvid = $2</sql>
+                      AND p.rekvid IN (SELECT rekv_id FROM rekv_ids)</sql>
     <alias>pv_inventuur_report</alias>
   </grid>
   <select></select>

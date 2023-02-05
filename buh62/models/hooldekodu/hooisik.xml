@@ -89,7 +89,7 @@
                          $2 :: INTEGER                       AS userid
                   FROM hooldekodu.hooTeenused ht
                            INNER JOIN libs.nomenklatuur nom ON nom.id = ht.nomid
-                  WHERE ht.lepingid IN (SELECT id FROM hooldekodu.hooleping WHERE isikid = $1)
+                  WHERE ht.lepingid IN (SELECT id FROM hooldekodu.hooleping hl WHERE hl.isikid = $1 and hl.status &lt; 3)
                     AND nom.rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2)</sql>
     <query />
     <multiple>true</multiple>
