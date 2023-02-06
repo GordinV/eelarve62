@@ -1,10 +1,11 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT
-                      *
-                    FROM docs.pv_kaibe_aruanne($1::date, $2::date, $3::integer) qry
-                    ORDER by konto, kood</sql>
+    <sql>SELECT qry.*,
+                           ltrim(rtrim(r.nimetus))::varchar(254) AS asutus
+                    FROM docs.pv_kaibe_aruanne($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER) qry
+                             INNER JOIN ou.rekv r ON qry.rekv_id = r.id
+                    ORDER BY konto, kood</sql>
     <alias>pv_kaibe_aruanne_report</alias>
   </grid>
   <select></select>
@@ -44,4 +45,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
