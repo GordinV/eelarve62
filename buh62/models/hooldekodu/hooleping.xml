@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>SELECT d.*
@@ -8,13 +8,13 @@
   </grid>
   <select>
     <sql>SELECT hl.id,
-                         hl.number AS number,
+                         hl.number                                                     AS number,
                          hl.rekvid,
                          hl.isikid,
                          hl.omavalitsusId,
                          hl.hooldekoduid,
                          hl.sugulane_id,
-                         hl.muud   AS muud,
+                         hl.muud                                                       AS muud,
                          hl.algkpv,
                          hl.loppkpv,
                          hl.summa,
@@ -22,7 +22,8 @@
                          hl.kovjaak,
                          hl.osa,
                          hl.sugulane_osa,
-                         hl.status
+                         hl.status,
+                         coalesce((hl.properties -&gt;&gt; 'algoritm')::INTEGER, 0)::INTEGER AS algoritm
                   FROM hooldekodu.hooleping hl
                            INNER JOIN libs.asutus a ON a.id = hl.hooldekoduid
                   WHERE hl.id = $1</sql>
@@ -49,7 +50,8 @@
                               0 :: NUMERIC                                                                 AS kovjaak,
                               0 :: NUMERIC                                                                 AS sugulane_osa,
                               0::INTEGER                                                                   AS osa,
-                              1                                                                            AS status
+                              1                                                                            AS status,
+                              0                                                                            AS algoritm
                        FROM ou.userid u
                        WHERE u.id = $2 :: INTEGER            </sqlAsNew>
     <query />
@@ -62,10 +64,10 @@
                          ht.nomid,
                          nom.kood,
                          nom.nimetus,
-                         ht.hind::numeric(12,2),
+                         ht.hind::NUMERIC(12, 2),
                          ht.allikas,
                          ht.tuluosa,
-                         ht.jaak::numeric(12,2),
+                         ht.jaak::NUMERIC(12, 2),
                          ht.muud,
                          ht.muud::VARCHAR(254) AS selg,
                          ht.kehtivus,
@@ -88,6 +90,14 @@
     <multiple>true</multiple>
     <alias>relations</alias>
   </select>
+  <select>
+    <sql>select 0 as id, 'Jääk kuu lõpus'::varchar(254) as nimetus, $1 as param1, $2 as param2
+                    union all
+                  select 1 as id, 'Vaba jääk'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>algoritmid</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT id,
                           isikukood,
@@ -98,7 +108,7 @@
                           loppkpv
                    FROM hooldekodu.com_asutus_hooldekodu hi
                    WHERE hi.rekvid = $1
-                       ORDER BY nimi</sql>
+                   ORDER BY nimi</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
