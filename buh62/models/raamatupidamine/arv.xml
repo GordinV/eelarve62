@@ -29,7 +29,8 @@
                            docs_ids,
                            coalesce(a.arve, qry_aa.arve)::VARCHAR(20) AS aa,
                            a.viitenr::VARCHAR(120)                    AS viitenr,
-                           ebatoenaolised
+                           ebatoenaolised,
+                           korr_konto
                     FROM cur_arved a,
                          (SELECT arve
                           FROM ou.aa aa
@@ -45,8 +46,8 @@
   <select>
     <sql>SELECT d.id,
                          $2 :: INTEGER                                                     AS userid,
-                         to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                   AS created,
-                         to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT                AS lastupdate,
+                         to_char(created, 'DD.MM.YYYY HH:MI:SS') :: TEXT                   AS created,
+                         to_char(lastupdate, 'DD.MM.YYYY HH:MI:SS') :: TEXT                AS lastupdate,
                          d.bpm,
                          trim(l.nimetus)                                                   AS doc,
                          trim(l.kood)                                                      AS doc_type_id,
@@ -106,8 +107,8 @@
                   WHERE d.id = $1</sql>
     <sqlAsNew>SELECT $1 :: INTEGER                                                          AS id,
                               $2 :: INTEGER                                                          AS userid,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                          AS created,
-                              to_char(now(), 'DD.MM.YYYY HH:MM:SS') :: TEXT                          AS lastupdate,
+                              to_char(now(), 'DD.MM.YYYY HH:MI:SS') :: TEXT                          AS created,
+                              to_char(now(), 'DD.MM.YYYY HH:MI:SS') :: TEXT                          AS lastupdate,
                               NULL                                                                   AS bpm,
                               trim(l.nimetus)                                                        AS doc,
                               trim(l.kood)                                                           AS doc_type_id,
