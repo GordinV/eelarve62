@@ -70,6 +70,9 @@
                                          AND d.doc_type_id IN (SELECT id FROM docs_types)
                                          AND d.status &lt;&gt; 3
                                          AND j.kpv &lt;= qryParams.kpv::DATE
+                                         AND (j1.deebet = '155920' AND j1.kreedit &lt;&gt; '888888' AND d.rekvid IN (130, 28) OR
+                                              year(qryParams.kpv) &lt; 2023)
+                                         
                                        UNION ALL
                                        SELECT coalesce(a.kpv, j.kpv),
                                               j.rekvid,
@@ -102,6 +105,9 @@
                                          AND d.doc_type_id IN (SELECT id FROM docs_types)
                                          AND j.kpv &lt;= qryParams.kpv::DATE
                                          AND d.status &lt;&gt; 3
+                                         AND (j1.kreedit = '155920' AND j1.deebet &lt;&gt; '888888' AND d.rekvid IN (130, 28) OR
+                                              year(qryParams.kpv) &lt; 2023)
+                                         
                                    )
                               SELECT rekv_id,
                                      konto :: VARCHAR(20),
@@ -121,10 +127,12 @@
                                        SELECT qry.rekvid                  AS rekv_id,
                                               konto::TEXT        AS konto,
                                               (CASE
-                                                   WHEN left(konto, 6) IN ('155920') AND (qry.rahavoog = '00' OR qry.kpv &lt;
-                                                                                                                 make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))                                                                                                                 
-                                                       AND qry.kpv &lt; '2023-01-01'
-                                                       THEN ''                                              
+                                                   WHEN left(konto, 6) IN ('155920')
+                                                       AND qry.kpv &lt; '2022-10-01'
+                                                       AND (qry.rahavoog = '00' OR qry.kpv &lt;
+                                                                                   make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))
+                                                       AND year(qryParams.kpv) &lt; 2023
+                                                       THEN ''
                                                    WHEN l.is_tp AND left(konto, 6) IN ('150200', '150210', '150020') AND
                                                         ltrim(rtrim(coalesce(rahavoog, ''))) IN ('01', '00', '17', '21','18')
                                                        THEN tp
@@ -136,7 +144,7 @@
                                               (CASE
                                                    WHEN left(konto, 6) IN ('155920') AND (qry.rahavoog = '00' OR qry.kpv &lt;
                                                                                                                  make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))
-                                                       AND qry.kpv &lt; '2023-01-01'
+                                                       AND qry.kpv &lt; '2022-10-01' AND year(qryParams.kpv) &lt; 2023
                                                        THEN ''
                                                    WHEN l.is_tegev AND (ltrim(rtrim(COALESCE(l.muud, ''))) &lt;&gt; '*' OR
                                                                         ltrim(rtrim(qry.rahavoog)) = '01')
