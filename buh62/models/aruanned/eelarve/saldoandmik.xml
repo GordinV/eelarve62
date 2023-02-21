@@ -71,7 +71,7 @@
                                          AND d.status &lt;&gt; 3
                                          AND j.kpv &lt;= qryParams.kpv::DATE
                                          AND (j1.deebet = '155920' AND j1.kreedit &lt;&gt; '888888' AND d.rekvid IN (130, 28) OR
-                                              year(qryParams.kpv) &lt; 2023)
+                                              year(qryParams.kpv) &lt; 2023 or j1.deebet &lt;&gt; '155920')
                                          
                                        UNION ALL
                                        SELECT coalesce(a.kpv, j.kpv),
@@ -106,7 +106,7 @@
                                          AND j.kpv &lt;= qryParams.kpv::DATE
                                          AND d.status &lt;&gt; 3
                                          AND (j1.kreedit = '155920' AND j1.deebet &lt;&gt; '888888' AND d.rekvid IN (130, 28) OR
-                                              year(qryParams.kpv) &lt; 2023)
+                                              year(qryParams.kpv) &lt; 2023 or j1.kreedit &lt;&gt; '155920')
                                          
                                    )
                               SELECT rekv_id,
