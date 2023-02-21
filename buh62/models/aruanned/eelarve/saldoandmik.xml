@@ -123,7 +123,7 @@
                                               (CASE
                                                    WHEN left(konto, 6) IN ('155920') AND (qry.rahavoog = '00' OR qry.kpv &lt;
                                                                                                                  make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))                                                                                                                 
-                                                       AND qry.kpv &lt; '2022-10-01'
+                                                       AND qry.kpv &lt; '2023-01-01'
                                                        THEN ''                                              
                                                    WHEN l.is_tp AND left(konto, 6) IN ('150200', '150210', '150020') AND
                                                         ltrim(rtrim(coalesce(rahavoog, ''))) IN ('01', '00', '17', '21','18')
@@ -136,7 +136,7 @@
                                               (CASE
                                                    WHEN left(konto, 6) IN ('155920') AND (qry.rahavoog = '00' OR qry.kpv &lt;
                                                                                                                  make_date(date_part('year', qryParams.kpv::DATE)::INTEGER, 1, 1))
-                                                       AND qry.kpv &lt; '2022-10-01'
+                                                       AND qry.kpv &lt; '2023-01-01'
                                                        THEN ''
                                                    WHEN l.is_tegev AND (ltrim(rtrim(COALESCE(l.muud, ''))) &lt;&gt; '*' OR
                                                                         ltrim(rtrim(qry.rahavoog)) = '01')
