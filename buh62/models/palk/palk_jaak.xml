@@ -49,7 +49,7 @@
                                    WHEN $3::TEXT IS NULL THEN j.jaak
                                    ELSE palk.get_projekt_jaak(j.lepingid,
                                                               (gomonth(make_date(j.aasta, j.kuu, 01), 1) - 1)::DATE,
-                                                              '23001'::TEXT) END::NUMERIC(12, 2) AS jaak,
+                                                              $3::TEXT) END::NUMERIC(12, 2) AS jaak,
                                j.kuu,
                                j.aasta,
                                coalesce(p.arv, 0)::NUMERIC(12, 2)                                AS arv,
@@ -112,6 +112,7 @@
                                  INNER JOIN libs.asutus a ON a.id = t.parentid
                                  INNER JOIN libs.library o ON o.id = t.osakondid) p
                   WHERE p.rekvId = $1::INTEGER
+                    AND p.lepingId IS NOT NULL
             </sql>
     <alias>printPalkJaak</alias>
   </print>

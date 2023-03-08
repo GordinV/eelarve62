@@ -99,15 +99,15 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT $2 :: INTEGER           AS userid,
-                         trim(n.kood)            AS kood,
-                         trim(n.nimetus)         AS nimetus,
-                         trim(a.nimetus)         AS asutus,
-                         trim(a.aadress)         AS aadress,
-                         k.parentid              AS parent_id,
+    <sql>SELECT $2 :: INTEGER                 AS userid,
+                         trim(n.kood)::VARCHAR(20)     AS kood,
+                         trim(n.nimetus)::VARCHAR(254) AS nimetus,
+                         trim(a.nimetus)::VARCHAR(254) AS asutus,
+                         trim(a.aadress)               AS aadress,
+                         k.parentid                    AS parent_id,
                          k1.*,
-                         coalesce(l.number, 0)   AS lausnr,
-                         coalesce(l.lausend, '') AS lausend
+                         coalesce(l.number, 0)         AS lausnr,
+                         coalesce(l.lausend, '')       AS lausend
                   FROM docs.mk1 AS k1
                            INNER JOIN docs.mk k ON k.id = k1.parentId
                            INNER JOIN libs.nomenklatuur n ON n.id = k1.nomid
@@ -176,17 +176,17 @@
   <getLog>
     <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
                          (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
                                                                                                                         email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
                            SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
