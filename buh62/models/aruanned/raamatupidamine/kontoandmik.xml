@@ -3,7 +3,7 @@
   <grid>
     <sql>SELECT qry.*, l.nimetus, 
                         (qry.alg_saldo + db_kokku - kr_kokku) as lopp_saldo 
-                        FROM docs.kontoandmik($1::text, $2::date, $3::date, $4::integer, $5::text, $6::JSONB) qry
+                        FROM docs.kontoandmik($1::text, $2::date, $3::date, $4::integer, $5::JSONB) qry
                         inner join com_kontoplaan l on l.kood = qry.konto
                         </sql>
     <alias>kontoandmik_report</alias>
