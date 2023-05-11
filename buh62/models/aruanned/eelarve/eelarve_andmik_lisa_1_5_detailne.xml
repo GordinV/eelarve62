@@ -1,0 +1,55 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT report.*, r.nimetus::varchar(254) AS asutus
+                    FROM eelarve.eelarve_andmik_lisa_1_5_detailne($1::DATE, $2::INTEGER,
+                                                                  $3::INTEGER) report
+                             LEFT OUTER JOIN ou.rekv r ON r.id = report.rekvid
+                    WHERE NOT EMPTY(tegev)
+                       OR NOT empty(artikkel)
+                       OR NOT EMPTY(saldoandmik)
+                    ORDER BY tegev, artikkel, allikas, CASE WHEN r.parentid IN (63, 0) THEN 0 ELSE 1 END, r.nimetus</sql>
+    <alias>eelarve_andmik_lisa_1_5_report</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
