@@ -1,7 +1,14 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT report.*, r.nimetus::varchar(254) AS asutus
+    <sql>SELECT report.idx:: VARCHAR(20),
+                           report.rekvid:: INTEGER,
+                           report.tegev:: VARCHAR(20),
+                           report.allikas:: VARCHAR(20),
+                           report.artikkel:: VARCHAR(20),
+                           report.nimetus:: VARCHAR(254),
+                           report.kassa:: NUMERIC(14, 2),
+                           r.nimetus::VARCHAR(254) AS asutus
                     FROM eelarve.eelarve_andmik_lisa_1_5_detailne($1::DATE, $2::INTEGER,
                                                                   $3::INTEGER) report
                              LEFT OUTER JOIN ou.rekv r ON r.id = report.rekvid</sql>
