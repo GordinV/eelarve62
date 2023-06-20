@@ -9,10 +9,14 @@
                            report.nimetus:: VARCHAR(254),
                            report.kassa:: NUMERIC(14, 2),
                            r.nimetus::VARCHAR(254) AS asutus,
-                          report.tunnus
+                           report.tunnus
                     FROM eelarve.eelarve_andmik_lisa_1_5_detailne($1::DATE, $2::INTEGER,
                                                                   $3::INTEGER) report
-                             LEFT OUTER JOIN ou.rekv r ON r.id = report.rekvid</sql>
+                             LEFT OUTER JOIN (SELECT id, nimetus
+                                              FROM ou.rekv
+                                              UNION ALL
+                                              SELECT 999 AS id, 'Kokku' AS nimetus
+                    ) r ON r.id = report.rekvid</sql>
     <alias>eelarve_andmik_lisa_1_5_report</alias>
   </grid>
   <select></select>
