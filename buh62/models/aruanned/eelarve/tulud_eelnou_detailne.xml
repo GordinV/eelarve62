@@ -1,8 +1,8 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH preReport AS (
-                        SELECT * FROM eelarve.tulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER)
+                        SELECT * FROM eelarve.tulud_eelnou($1::DATE, $2::INTEGER, $3::INTEGER,$4::jsonb)
                     ),
          qryKond AS (
              SELECT rekv_id,
