@@ -52,8 +52,13 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20) AS aa,
-                         $2 :: INTEGER                       AS userid
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20)                  AS aa,
+                         $2 :: INTEGER                                        AS userid,
+                         ((e.element -&gt;&gt; 'kas_palk') :: BOOLEAN)::INTEGER     AS kas_palk,
+                         ((e.element -&gt;&gt; 'kas_raama') :: BOOLEAN)::INTEGER    AS kas_raama,
+                         ((e.element -&gt;&gt; 'kas_oppetasu') :: BOOLEAN)::INTEGER AS kas_oppetasu,
+                         row_number() OVER ()                                 AS id,
+                         libs.get_asutuse_aa(a.id, 'RAAMA'::TEXT)             AS default_aa
                   FROM libs.asutus a,
                        json_array_elements(CASE
                                                WHEN (a.properties -&gt;&gt; 'asutus_aa') IS NULL THEN '[]'::JSON
@@ -89,7 +94,7 @@
                          $2 :: INTEGER                       AS userid
                   FROM hooldekodu.hooTeenused ht
                            INNER JOIN libs.nomenklatuur nom ON nom.id = ht.nomid
-                  WHERE ht.lepingid IN (SELECT id FROM hooldekodu.hooleping hl WHERE hl.isikid = $1 and hl.status &lt; 3)
+                  WHERE ht.lepingid IN (SELECT id FROM hooldekodu.hooleping hl WHERE hl.isikid = $1 AND hl.status &lt; 3)
                     AND nom.rekvid IN (SELECT rekvid FROM ou.userid WHERE id = $2)</sql>
     <query />
     <multiple>true</multiple>
@@ -202,7 +207,7 @@
     <sql>SELECT *,
                          $2 AS user_id
                   FROM hooldekodu.cur_hoojaak h
-                  WHERE h.isikid in (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
+                  WHERE h.isikid IN (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
     <query />
     <multiple>true</multiple>
     <alias>print_hoojaagid</alias>
@@ -254,6 +259,63 @@
                          tulemus -&gt; 'error_message'                                    AS error_message
                   FROM (
                            SELECT to_jsonb(
+                                          hooldekodu.arvuta_tasku_raha($2::INTEGER, id::INTEGER,
+                                                                       $3::DATE)) tulemus
+                           FROM libs.asutus
+                           WHERE id IN (
+                               SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
+                           )) qry</sql>
+    <query />
+    <multuple>false</multuple>
+    <not_initial_load>true</not_initial_load>
+    <alias>arvutaTaskuRaha</alias>
+  </select>
+  <select>
+    <sql>SELECT row_number() OVER ()                                          AS id,
+                         tulemus -&gt; 'result'                                           AS result,
+                         tulemus -&gt; 'error_code'                                       AS error_code,
+                         coalesce((tulemus -&gt;&gt; 'error_code')::INTEGER, 0)::INTEGER &gt; 0 AS kas_vigane,
+                         tulemus -&gt; 'error_message'                                    AS error_message
+                  FROM (
+                           SELECT to_jsonb(
+                                          hooldekodu.koosta_hoo_mk($2::INTEGER, id::INTEGER,
+                                                                   $3::DATE)) tulemus
+                           FROM libs.asutus
+                           WHERE id IN (
+                               SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
+                           )) qry</sql>
+    <query />
+    <multuple>false</multuple>
+    <not_initial_load>true</not_initial_load>
+    <alias>koostaHooMk</alias>
+  </select>
+  <select>
+    <sql>SELECT row_number() OVER ()                                          AS id,
+                         tulemus -&gt; 'result'                                           AS result,
+                         tulemus -&gt; 'error_code'                                       AS error_code,
+                         coalesce((tulemus -&gt;&gt; 'error_code')::INTEGER, 0)::INTEGER &gt; 0 AS kas_vigane,
+                         tulemus -&gt; 'error_message'                                    AS error_message
+                  FROM (
+                           SELECT to_jsonb(
+                                          hooldekodu.koosta_hoo_vorder($2::INTEGER, id::INTEGER,
+                                                                   $3::DATE)) tulemus
+                           FROM libs.asutus
+                           WHERE id IN (
+                               SELECT unnest(string_to_array($1::TEXT, ','::TEXT))::INTEGER
+                           )) qry</sql>
+    <query />
+    <multuple>false</multuple>
+    <not_initial_load>true</not_initial_load>
+    <alias>koostaHooVorder</alias>
+  </select>
+  <select>
+    <sql>SELECT row_number() OVER ()                                          AS id,
+                         tulemus -&gt; 'result'                                           AS result,
+                         tulemus -&gt; 'error_code'                                       AS error_code,
+                         coalesce((tulemus -&gt;&gt; 'error_code')::INTEGER, 0)::INTEGER &gt; 0 AS kas_vigane,
+                         tulemus -&gt; 'error_message'                                    AS error_message
+                  FROM (
+                           SELECT to_jsonb(
                                           hooldekodu.koosta_arve_hootaabeli_alusel($2::INTEGER, id::INTEGER,
                                                                                    $3::DATE)) tulemus
                            FROM libs.asutus
@@ -272,7 +334,8 @@
                           rekvid,
                           hooldekodu,
                           algkpv,
-                          loppkpv
+                          loppkpv,
+                          makse_viis
                    FROM hooldekodu.com_asutus_hooldekodu hi
                    WHERE hi.rekvid = $1
                    ORDER BY nimi</sql>

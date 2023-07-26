@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>SELECT d.*
@@ -21,6 +21,12 @@
                          hl.jaak,
                          hl.kovjaak,
                          hl.osa,
+                         hl.tasku_raha,
+                         hl.makse_viis,
+                         hl.rahasaaja_id,
+                         hl.aa,
+                         hl.tunnus,
+                         hl.bruttosissetulek,
                          hl.sugulane_osa,
                          hl.status,
                          coalesce((hl.properties -&gt;&gt; 'algoritm')::INTEGER, 0)::INTEGER AS algoritm
@@ -49,7 +55,12 @@
                               0 :: NUMERIC                                                                 AS jaak,
                               0 :: NUMERIC                                                                 AS kovjaak,
                               0 :: NUMERIC                                                                 AS sugulane_osa,
+                              NULL::INTEGER                                                                AS makse_viis,
+                              NULL::INTEGER                                                                AS rahasaaja_id,
+                              NULL::VARCHAR(20)                                                            AS aa,
+                              NULL::VARCHAR(20)                                                            AS tunnus,
                               0::INTEGER                                                                   AS osa,
+                              15::INTEGER                                                                  AS tasku_raha,
                               1                                                                            AS status,
                               0                                                                            AS algoritm
                        FROM ou.userid u
@@ -97,6 +108,14 @@
     <query />
     <multiple>true</multiple>
     <alias>algoritmid</alias>
+  </select>
+  <select>
+    <sql>select 1 as id, 'Makse korraldus'::varchar(254) as nimetus, $1 as param1, $2 as param2
+                    union all
+                  select 2 as id, 'Väljamakse kassaorder'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>makse_viis</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT id,
