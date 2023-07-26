@@ -1,0 +1,76 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT id,
+                           summa,
+                           kpv,
+                           left(coalesce(muud, ''), 254)::VARCHAR(254) AS muud,
+                           library,
+                           $2::INTEGER                                 AS userId,
+                           $1                                          AS rekv_id
+                    FROM hooldekodu.hoo_config
+                    WHERE status &lt; 3</sql>
+    <alias>curHooConfig</alias>
+  </grid>
+  <select>
+    <sql>SELECT $2 :: INTEGER AS userid,
+                     id,
+                     kpv::DATE,
+                     summa::NUMERIC(12, 2),
+                     library::VARCHAR(20),
+                     muud
+              FROM hooldekodu.hoo_config H
+              WHERE H.id = $1</sql>
+    <sqlAsNew>SELECT 0 as id,
+                      $1::integer as id_,
+                      $2 :: INTEGER        AS userid,
+                     'LIBNAME' AS library,
+                      0::numeric(12,4) as summa,
+                      current_date as kpv,
+                      null::text as muud</sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select hooldekodu.sp_salvesta_hoo_config($1, $2, $3) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql>SELECT error_code, result, error_message
+                FROM hooldekodu.sp_delete_hoo_config($1, $2)</sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate>summa,kpv</validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
