@@ -27,11 +27,24 @@
                          hl.aa,
                          hl.tunnus,
                          hl.bruttosissetulek,
+                         coalesce(hl.netosissetulek,0) as netosissetulek,
                          hl.sugulane_osa,
                          hl.status,
-                         coalesce((hl.properties -&gt;&gt; 'algoritm')::INTEGER, 0)::INTEGER AS algoritm
+                         coalesce((hl.properties -&gt;&gt; 'algoritm')::INTEGER, 0)::INTEGER AS algoritm,
+                         CASE
+                             WHEN coalesce(hl.hoolduskulud, 0) = 0 THEN h.summa
+                             ELSE hl.hoolduskulud END                                  AS hoolduskulud,
+                         hl.summa - (CASE
+                                         WHEN coalesce(hl.hoolduskulud, 0) = 0 THEN h.summa
+                                         ELSE hl.hoolduskulud END)                     AS isiku_kulud
                   FROM hooldekodu.hooleping hl
-                           INNER JOIN libs.asutus a ON a.id = hl.hooldekoduid
+                           INNER JOIN libs.asutus a ON a.id = hl.hooldekoduid,
+                       (SELECT summa
+                        FROM hooldekodu.hoo_config
+                        WHERE library = 'RIIGI_TOETUS'
+                          AND status &lt; 3
+                        ORDER BY kpv DESC
+                        LIMIT 1) h
                   WHERE hl.id = $1</sql>
     <sqlAsNew>SELECT $1 :: INTEGER                                                                AS id,
                               docs.sp_get_number(u.rekvId, 'HOOLEPING', year(date()), NULL) :: VARCHAR(20) AS number,
@@ -116,6 +129,12 @@
     <query />
     <multiple>true</multiple>
     <alias>makse_viis</alias>
+  </select>
+  <select>
+    <sql>select hooldekodu.sp_calc_netosissetulek($1::integer, $2::numeric) as summa</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>calcNeto</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT id,
