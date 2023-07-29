@@ -164,15 +164,15 @@
   </select>
   <select>
     <sql>SELECT a1.id,
-                         $2 :: INTEGER                                                                AS userid,
+                         $2 :: INTEGER                                                                 AS userid,
                          a1.nomid,
                          a1.kogus,
                          a1.hind,
                          a1.kbm,
                          a1.kbmta,
                          a1.summa,
-                         trim(n.kood) :: VARCHAR(20)                                                  AS kood,
-                         trim(n.nimetus) :: VARCHAR(254)                                              AS nimetus,
+                         trim(n.kood) :: VARCHAR(20)                                                   AS kood,
+                         trim(n.nimetus) :: VARCHAR(254)                                               AS nimetus,
                          a1.soodus,
                          a1.kood1,
                          a1.kood2,
@@ -183,20 +183,22 @@
                          a1.proj,
                          a1.konto,
                          a1.tp,
-                         NULL :: TEXT                                                                 AS vastisik,
-                         NULL :: TEXT                                                                 AS formula,
-                         'EUR' :: VARCHAR(20)                                                         AS valuuta,
-                         1 :: NUMERIC                                                                 AS kuurs,
+                         NULL :: TEXT                                                                  AS vastisik,
+                         NULL :: TEXT                                                                  AS formula,
+                         'EUR' :: VARCHAR(20)                                                          AS valuuta,
+                         1 :: NUMERIC                                                                  AS kuurs,
                          (CASE
                               WHEN a1.kbm_maar IS NULL
                                   THEN coalesce((n.properties :: JSONB -&gt;&gt; 'vat'), '-') :: VARCHAR(20)
-                              ELSE a1.kbm_maar END)::VARCHAR(20)                                      AS km,
+                              ELSE a1.kbm_maar END)::VARCHAR(20)                                       AS km,
                          n.uhik,
-                         coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0)::NUMERIC(12, 2)       AS allikas_85,
-                         coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)::NUMERIC(12, 2)     AS allikas_muud,
-                         coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)::NUMERIC(12, 2)     AS allikas_vara,
-                         coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)::NUMERIC(12, 2) AS omavalitsuse_osa,
-                         coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)::NUMERIC(12, 2)     AS sugulane_osa,
+                         coalesce((a1.properties -&gt;&gt; 'allikas_85')::NUMERIC, 0)::NUMERIC(12, 2)        AS allikas_85,
+                         coalesce((a1.properties -&gt;&gt; 'allikas_muud')::NUMERIC, 0)::NUMERIC(12, 2)      AS allikas_muud,
+                         coalesce((a1.properties -&gt;&gt; 'allikas_vara')::NUMERIC, 0)::NUMERIC(12, 2)      AS allikas_vara,
+                         coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)::NUMERIC(12, 2)  AS omavalitsuse_osa,
+                         coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)::NUMERIC(12, 2)      AS sugulane_osa,
+                         coalesce((a1.properties -&gt;&gt; 'allikas_taskuraha')::NUMERIC, 0)::NUMERIC(12, 2) AS taskuraha,
+                         coalesce((a1.properties -&gt;&gt; 'umardamine')::NUMERIC, 0)::NUMERIC(12, 2)        AS umardamine,
                          a1.muud
                   FROM docs.arv1 AS a1
                            INNER JOIN docs.arv a ON a.id = a1.parentId

@@ -27,7 +27,7 @@
                          hl.aa,
                          hl.tunnus,
                          hl.bruttosissetulek,
-                         coalesce(hl.netosissetulek,0) as netosissetulek,
+                         coalesce(hl.netosissetulek, 0)                                AS netosissetulek,
                          hl.sugulane_osa,
                          hl.status,
                          coalesce((hl.properties -&gt;&gt; 'algoritm')::INTEGER, 0)::INTEGER AS algoritm,
@@ -125,7 +125,9 @@
   <select>
     <sql>select 1 as id, 'Makse korraldus'::varchar(254) as nimetus, $1 as param1, $2 as param2
                     union all
-                  select 2 as id, 'Väljamakse kassaorder'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
+                  select 2 as id, 'Väljamakse kassaorder'::varchar(254) as nimetus, $1 as param1, $2 as param2
+                    union all
+                  select 3 as id, 'Tasaarveldus'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
     <query />
     <multiple>true</multiple>
     <alias>makse_viis</alias>
