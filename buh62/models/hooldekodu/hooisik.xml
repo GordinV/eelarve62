@@ -207,7 +207,10 @@
     <sql>SELECT *,
                          $2 AS user_id
                   FROM hooldekodu.cur_hoojaak h
-                  WHERE h.isikid IN (SELECT isikid FROM hooldekodu.hooleping hl WHERE rekvid = $1 AND status &lt; 3)</sql>
+                  WHERE h.isikid IN (SELECT isikid FROM hooldekodu.hooleping hl 
+                    WHERE rekvid = $1 AND status &lt; 3
+                      and (hl.loppkpv &gt;= current_date or hl.loppkpv is null)
+                      )</sql>
     <query />
     <multiple>true</multiple>
     <alias>print_hoojaagid</alias>
