@@ -117,7 +117,9 @@
   <select>
     <sql>select 0 as id, 'Jääk kuu lõpus'::varchar(254) as nimetus, $1 as param1, $2 as param2
                     union all
-                  select 1 as id, 'Vaba jääk'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
+                  select 1 as id, 'Vaba jääk'::varchar(254) as nimetus, $1 as param1, $2 as param2
+                    union all
+                  select 2 as id, 'Tulu arve'::varchar(254) as nimetus, $1 as param1, $2 as param2</sql>
     <query />
     <multiple>true</multiple>
     <alias>algoritmid</alias>
