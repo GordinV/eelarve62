@@ -11,7 +11,8 @@
                              INNER JOIN libs.asutus a ON a.id = t.isikid
                              LEFT OUTER JOIN hooldekodu.hooleping hl ON t.lepingid = hl.id
                              LEFT OUTER JOIN libs.asutus h ON h.id = hl.hooldekoduid
-                    WHERE t.rekvid = $1</sql>
+                    WHERE t.rekvid = $1
+                    ORDER BY a.nimetus</sql>
     <alias>curHooTaabel</alias>
   </grid>
   <select>
