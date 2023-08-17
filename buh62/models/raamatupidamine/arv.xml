@@ -85,7 +85,8 @@
                          (d.history -&gt; 0 -&gt;&gt; 'user') :: VARCHAR(120)                       AS koostaja,
                          coalesce((a.properties -&gt;&gt; 'aa')::TEXT, qry_aa.arve)::VARCHAR(20) AS aa,
                          coalesce((a.properties -&gt;&gt; 'viitenr')::TEXT, '')::VARCHAR(120)    AS viitenr,
-                         coalesce((a.properties -&gt;&gt; 'tyyp')::TEXT, '')::VARCHAR(20)        AS tyyp
+                         coalesce((a.properties -&gt;&gt; 'tyyp')::TEXT, '')::VARCHAR(20)        AS tyyp,
+                         coalesce((a.properties -&gt;&gt; 'taskuraha_kov')::NUMERIC, 0)          AS taskuraha_kov
 
                   FROM docs.doc d
                            INNER JOIN libs.library l ON l.id = d.doc_type_id
@@ -149,7 +150,8 @@
                               NULL :: INTEGER                                                        AS laus_nr,
                               NULL :: VARCHAR(120)                                                   AS koostaja,
                               0 ::INTEGER                                                            AS is_show_journal,
-                              ''::VARCHAR(120)                                                       AS viitenr
+                              ''::VARCHAR(120)                                                       AS viitenr,
+                              0::numeric as taskuraha_kov
                        FROM libs.library l,
                             libs.library s,
                             ou.userid u
@@ -198,6 +200,7 @@
                          coalesce((a1.properties -&gt;&gt; 'omavalitsuse_osa')::NUMERIC, 0)::NUMERIC(12, 2)  AS omavalitsuse_osa,
                          coalesce((a1.properties -&gt;&gt; 'sugulane_osa')::NUMERIC, 0)::NUMERIC(12, 2)      AS sugulane_osa,
                          coalesce((a1.properties -&gt;&gt; 'allikas_taskuraha')::NUMERIC, 0)::NUMERIC(12, 2) AS taskuraha,
+                         coalesce((a1.properties -&gt;&gt; 'allikas_taskuraha')::NUMERIC, 0)::NUMERIC(12, 2) AS allikas_taskuraha,
                          coalesce((a1.properties -&gt;&gt; 'umardamine')::NUMERIC, 0)::NUMERIC(12, 2)        AS umardamine,
                          a1.muud
                   FROM docs.arv1 AS a1
