@@ -14,7 +14,7 @@
                    eelarve_kassa,
                    taitmine,
                    taitmine_kassa,
-                   r.nimetus AS asutus
+                   r.nimetus::varchar(254) AS asutus
             FROM eelarve.eelarve_taitmine_jaak($1::DATE, $2::INTEGER, $3::INTEGER, $4::jsonb) qryReport
                      LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
                      INNER JOIN (SELECT id, parentid, regkood, nimetus
