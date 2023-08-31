@@ -60,8 +60,8 @@
                          $2                             AS user_id,
                          ''::VARCHAR(20)                AS koostatud,
                          ''::VARCHAR(20)                AS muudatud,
-                         (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'print') then to_char(l.timestamp, 'DD.MM.YYYY HH.MM.SS') else '' end)::VARCHAR(20) as  prinditud,
-                         (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'email') then to_char(l.timestamp, 'DD.MM.YYYY HH.MM.SS') else '' end)::VARCHAR(20) as  email,
+                         (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'print') then to_char(l.timestamp, 'DD.MM.YYYY HH24.MI.SS') else '' end)::VARCHAR(20) as  prinditud,
+                         (case when (coalesce((l.propertis-&gt;&gt;'event'),'no') = 'email') then to_char(l.timestamp, 'DD.MM.YYYY HH24.MI.SS') else '' end)::VARCHAR(20) as  email,
                          (l.propertis-&gt;&gt;'mail_info')::text as muud       
                   FROM ou.logs l
                            INNER JOIN ou.userid u ON l.user_id = u.id
