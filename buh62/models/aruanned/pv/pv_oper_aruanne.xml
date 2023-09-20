@@ -6,6 +6,7 @@
                       p.nimetus       AS pvnimetus,
                       po.kood,
                       p.nimetus,
+                      po.konto as korr_konto,
                       case when po.liik in (1, 3, 5) then po.summa else 0::numeric(14,2) end as deebet,
                       case when po.liik in (2, 4) then po.summa else 0::numeric(14,2) end as kreedit,
                       po.kpv,
