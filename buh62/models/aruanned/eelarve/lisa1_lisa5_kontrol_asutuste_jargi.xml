@@ -1,0 +1,61 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT k.*, 
+                    r.nimetus as asutus
+                    FROM eelarve.lisa_1_5_kontrol k
+                             INNER JOIN ou.rekv r ON r.id = k.rekv_id
+                    WHERE kpv = get_last_day($1::DATE)
+                      AND rekv_id IN (SELECT rekv_id
+                                      FROM get_asutuse_struktuur($2::INTEGER))
+                      AND rekv_id = (CASE
+                                         WHEN $3::INTEGER = 1
+                                             THEN rekv_id
+                                         ELSE $2::INTEGER END)
+                    ORDER BY CASE WHEN r.id = 63 THEN 0 WHEN parentid = 63 THEN 1 ELSE 2 END,
+                             r.id::TEXT || '-' || r.parentid ::TEXT, k.idx,
+                             CASE WHEN k.nimetus = 'PÕHITEGEVUSE TULUD KOKKU' THEN '1' ELSE k.nimetus END</sql>
+    <alias>lisa1_lisa5_kontrol</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql>select error_code, result, error_message from eelarve.koosta_lisa_1_5_kontrol($1::integer, $2::date)</sql>
+    <alias>koosta_lisa1_lisa5_kontrol</alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
