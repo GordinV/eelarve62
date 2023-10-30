@@ -6,6 +6,7 @@
                     FROM eelarve.lisa_1_5_kontrol k
                              INNER JOIN ou.rekv r ON r.id = k.rekv_id
                     WHERE kpv = get_last_day($1::DATE)
+                      and rekv_id &lt;&gt; 9
                       AND rekv_id IN (SELECT rekv_id
                                       FROM get_asutuse_struktuur($2::INTEGER))
                       AND rekv_id = (CASE
