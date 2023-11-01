@@ -3,16 +3,15 @@
   <grid>
     <sql>SELECT j.*
                     FROM cur_journal j
-                    WHERE j.rekvId IN (SELECT rekv_id FROM get_asutuse_struktuur($1::INTEGER))
-                      AND coalesce(docs.usersRigths(j.id, 'select', $2::INTEGER), TRUE)</sql>
+                    WHERE j.rekvId IN (SELECT rekv_id FROM get_asutuse_struktuur($1::INTEGER))</sql>
     <alias>curJournal</alias>
   </grid>
   <select>
     <sql>SELECT d.id,
                          $2 :: INTEGER                                                                      AS userid,
                          d.docs_ids,
-                         (to_char(created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT                                  AS created,
-                         (to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT                               AS lastupdate,
+                         (to_char(created, 'DD.MM.YYYY HH:MI:SS')) :: TEXT                                  AS created,
+                         (to_char(lastupdate, 'DD.MM.YYYY HH:MI:SS')) :: TEXT                               AS lastupdate,
                          d.bpm,
                          trim(l.nimetus)                                                                    AS doc,
                          trim(l.kood)                                                                       AS doc_type_id,
