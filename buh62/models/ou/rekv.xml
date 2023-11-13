@@ -16,9 +16,9 @@
                      r.parentid,
                      r.nimetus::VARCHAR(254),
                      coalesce(r.muud, nimetus)::VARCHAR(254)                                                        AS taisnimetus,
-                     (SELECT coalesce(r.muud, nimetus)::VARCHAR(254) AS nimetus
-                      FROM ou.rekv
-                      WHERE id = r.parentid)                                                                        AS parent_asutus,
+                     (SELECT coalesce(rekv.muud, rekv.nimetus)::VARCHAR(254) AS nimetus
+                      FROM ou.rekv rekv
+                      WHERE rekv.id = r.parentid)                                                                        AS parent_asutus,
                      r.aadress,
                      r.email::VARCHAR(254),
                      r.faks::VARCHAR(254),
