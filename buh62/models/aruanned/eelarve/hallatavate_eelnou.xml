@@ -17,7 +17,7 @@
                            qry.summa_2,
                            qry.summa_3,
                            qry.summa_4
-                    FROM eelarve.hallatavate_eelnou($1::DATE, $2::INTEGER, $3::INTEGER) qry
+                    FROM eelarve.hallatavate_eelnou($1::DATE, $2::INTEGER, $3::INTEGER, $4::integer) qry
                              LEFT OUTER JOIN ou.rekv r ON r.id = qry.rekv_id
                              LEFT OUTER JOIN ou.rekv p ON p.id = qry.parent_id
                              LEFT OUTER JOIN (SELECT kood, nimetus

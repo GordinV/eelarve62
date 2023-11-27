@@ -139,7 +139,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>kpv,lepingid,libid,summa</validate>
+    <validate>kpv,lepingid,libid</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
