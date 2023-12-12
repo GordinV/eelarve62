@@ -17,6 +17,7 @@
                            kood4,
                            kood5,
                            proj,
+                           objekt,
                            tunnus,
                            summa,
                            summa_kassa,
@@ -140,6 +141,7 @@
                      t1.kood4,
                      t1.kood5,
                      t1.proj,
+                     coalesce(t1.objekt,'')::varchar(20) as objekt,
                      t1.tunnus,
                      t1.summa,
                      t1.summa_kassa,
@@ -190,7 +192,7 @@
   </saveDoc>
   <deleteDoc>
     <sql>SELECT error_code, result, error_message
-                FROM eelarve.sp_delete_taotlus($1::INTEGER, $2::INTEGER)</sql>
+                FROM eelarve.sp_delete_hoo_config($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

@@ -264,6 +264,7 @@
                          a1.kood5,
                          a1.tunnus,
                          a1.proj,
+                         a1.objekt,
                          a1.konto,
                          a1.tp,
                          NULL :: TEXT                                                                  AS vastisik,
