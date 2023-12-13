@@ -9,6 +9,7 @@
                    tunnus,
                    proj,
                    uritus,
+                   objekt,
                    a.nimetus,
                    eelarve,
                    eelarve_kassa,
@@ -27,7 +28,7 @@
                                      , 'Kond' AS nimetus) r
                                 ON r.id = qryReport.rekv_id
                      LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
-            ORDER BY rekv_id DESC, artikkel, allikas, tegev, tunnus
+            ORDER BY rekv_id DESC, artikkel, allikas, tegev, tunnus, objekt
         )
         SELECT rekv_id,
                ''                  AS tegev,
@@ -36,6 +37,7 @@
                ''                  AS tunnus,
                '' as proj,
                '' as uritus,
+               '' as objekt,
                'Kulud'             AS nimetus,
                sum(eelarve)        AS eelarve,
                sum(eelarve_kassa)  AS eelarve_kassa,
@@ -56,6 +58,7 @@
             tunnus,
             proj,
             uritus,
+            objekt,
             nimetus,
             (eelarve) AS eelarve,
             (eelarve_kassa) AS eelarve_kassa,
