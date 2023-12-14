@@ -15,14 +15,16 @@
                            tunnus,
                            proj,
                            uritus,
+                           objekt,
                            a.nimetus::VARCHAR(254),
                            r.regkood::VARCHAR(20),
                            r.nimetus::VARCHAR(254)               AS asutus,
                            coalesce(p.regkood, '')::VARCHAR(20)  AS parregkood,
                            coalesce(p.nimetus, '')::VARCHAR(254) AS parasutus,
                            idx
-                    FROM eelarve.tulude_taitmine_a_art_tt_tunnus_proj_uritus($1::INTEGER, $2::DATE, $3::DATE, $4::INTEGER,
-                                                                  $5::INTEGER, $6::JSONB) qryReport
+                    FROM eelarve.tulude_taitmine_a_art_tt_tunnus_proj_uritus($1::INTEGER, $2::DATE, $3::DATE,
+                                                                             $4::INTEGER,
+                                                                             $5::INTEGER, $6::JSONB) qryReport
                              LEFT OUTER JOIN (
                         SELECT id, kood, nimetus, rekvid, is_kulud, valid
                         FROM com_artikkel
@@ -55,7 +57,6 @@
                                999999                                    AS rekvid,
                                FALSE                                     AS is_kulud,
                                NULL::DATE                                AS valid
-                               
                     ) a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
                                          FROM ou.rekv
