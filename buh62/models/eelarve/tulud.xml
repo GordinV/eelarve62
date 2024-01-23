@@ -5,7 +5,8 @@
                           d.*,
                           'TULUD'::varchar(20) as liik
                         FROM cur_tulud d
-                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1::integer))</sql>
+                        WHERE d.rekvId in (select rekv_id from get_asutuse_struktuur($1::integer))
+                          and (d.summa &lt;&gt; 0 or d.summa_kassa &lt;&gt; 0)</sql>
     <alias>curEelarve</alias>
   </grid>
   <select>
@@ -23,6 +24,7 @@
                     e.kood3::varchar(20) as kood3,
                     e.kood4::varchar(20) as kood4,
                     e.kood5::varchar(20) as kood5,
+                    e.objekt::varchar(20) as objekt,
                     e.tunnus,
                     e.is_parandus,
                     coalesce(e.is_kulud,0)::integer as is_kulud,
@@ -94,4 +96,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
