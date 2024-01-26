@@ -52,46 +52,47 @@
                                                               $3::TEXT) END::NUMERIC(12, 2) AS jaak,
                                j.kuu,
                                j.aasta,
-                               coalesce(p.arv, 0)::NUMERIC(12, 2)                                AS arv,
-                               coalesce(p.tasu, 0)::NUMERIC(12, 2)                               AS tasu,
-                               coalesce(p.tka, 0)::NUMERIC(12, 2)                                AS tka,
-                               coalesce(p.tki, 0)::NUMERIC(12, 2)                                AS tki,
-                               coalesce(p.pm, 0)::NUMERIC(12, 2)                                 AS pm,
-                               coalesce(p.tm, 0)::NUMERIC(12, 2)                                 AS tm,
-                               coalesce(p.sm, 0)::NUMERIC(12, 2)                                 AS sm,
-                               coalesce(p.muud, 0)::NUMERIC(12, 2)                               AS muud,
-                               coalesce(p.kinni, 0)::NUMERIC(12, 2)                              AS kinni,
+                               coalesce(p.arv, 0)::NUMERIC(12, 2)                           AS arv,
+                               coalesce(p.tasu, 0)::NUMERIC(12, 2)                          AS tasu,
+                               coalesce(p.tka, 0)::NUMERIC(12, 2)                           AS tka,
+                               coalesce(p.tki, 0)::NUMERIC(12, 2)                           AS tki,
+                               coalesce(p.pm, 0)::NUMERIC(12, 2)                            AS pm,
+                               coalesce(p.tm, 0)::NUMERIC(12, 2)                            AS tm,
+                               coalesce(p.sm, 0)::NUMERIC(12, 2)                            AS sm,
+                               coalesce(p.muud, 0)::NUMERIC(12, 2)                          AS muud,
+                               coalesce(p.kinni, 0)::NUMERIC(12, 2)                         AS kinni,
                                p.lepingid,
                                t.rekvid,
-                               a.id                                                              AS isikid,
-                               a.regkood                                                         AS isikukood,
-                               a.nimetus                                                         AS isik,
-                               o.kood                                                            AS osakond,
-                               o.nimetus                                                         AS osakonna_nimetus,
-                               coalesce(p.status, 2)                                             AS status
+                               a.id                                                         AS isikid,
+                               a.regkood                                                    AS isikukood,
+                               a.nimetus                                                    AS isik,
+                               o.kood                                                       AS osakond,
+                               o.nimetus                                                    AS osakonna_nimetus,
+                               coalesce(p.status, 2)                                        AS status
                         FROM palk.palk_jaak j
                                  LEFT OUTER JOIN (
-                            SELECT month(p.kpv)                                                       AS kuu,
-                                   year(p.kpv)                                                        AS aasta,
+                            SELECT month(p.kpv)                                                         AS kuu,
+                                   year(p.kpv)                                                          AS aasta,
                                    sum(p.summa)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 1)  AS arv,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 1)    AS arv,
                                    sum(p.summa)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 6)  AS tasu,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 6)    AS tasu,
                                    sum(p.summa)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 2)  AS kinni,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 2)    AS kinni,
                                    sum(p.summa)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 3)  AS muud,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 3)    AS muud,
                                    sum(p.pensmaks)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS pm,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6)   AS pm,
                                    sum(p.summa)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 5)  AS sm,
-                                   sum(p.tulubaas)                                                    AS mvt,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER = 5)    AS sm,
+                                   sum(p.tulubaas)                                                      AS mvt,
                                    sum(p.tka)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tka,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6 AND
+                                                 (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER IN (1)) AS tka,
                                    sum(p.tootumaks)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tki,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6)   AS tki,
                                    sum(p.tulumaks)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6) AS tm,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6)   AS tm,
                                    p.lepingid,
                                    t.status
                             FROM docs.doc d
@@ -106,7 +107,10 @@
                               AND t.status &lt;&gt; 3
                               AND d.rekvId = $1::INTEGER
                               AND ($3::TEXT IS NULL OR p.proj ILIKE $3::TEXT)
-                            GROUP BY month(p.kpv), year(p.kpv), p.lepingid, t.status) p
+                                GROUP BY month(p.kpv)
+                                , year(p.kpv)
+                                , p.lepingid
+                                , t.status) p
                                                  ON p.lepingid = j.lepingid AND p.kuu = j.kuu AND p.aasta = j.aasta
                                  INNER JOIN palk.tooleping t ON t.id = j.lepingid
                                  INNER JOIN libs.asutus a ON a.id = t.parentid
