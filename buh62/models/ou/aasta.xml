@@ -8,6 +8,9 @@
               CASE WHEN kinni = 1
                 THEN 'Jah'
               ELSE 'Ei' END :: VARCHAR AS kinni,
+              CASE WHEN palk_kinni = 1
+                       THEN 'Jah'
+                   ELSE 'Ei' END :: VARCHAR AS palk_kinni,
               CASE WHEN default_ = 1
                 THEN 'JAH'
               ELSE 'EI' END :: VARCHAR AS default_
@@ -26,6 +29,7 @@
               kuu,
               aasta,
               kinni,
+              palk_kinni,
               default_
             FROM ou.aasta aasta
             WHERE Aasta.rekvid = $1 
@@ -64,4 +68,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
