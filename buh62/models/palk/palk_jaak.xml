@@ -90,7 +90,8 @@
                                    FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6 AND
                                                  (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER IN (1)) AS tka,
                                    sum(p.tootumaks)
-                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6)   AS tki,
+                                   FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6 AND
+                                                 (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER IN (1)) AS tki,
                                    sum(p.tulumaks)
                                    FILTER (WHERE (lib.properties :: JSON -&gt;&gt; 'liik') :: INTEGER &lt;&gt; 6)   AS tm,
                                    p.lepingid,
@@ -107,10 +108,10 @@
                               AND t.status &lt;&gt; 3
                               AND d.rekvId = $1::INTEGER
                               AND ($3::TEXT IS NULL OR p.proj ILIKE $3::TEXT)
-                                GROUP BY month(p.kpv)
-                                , year(p.kpv)
-                                , p.lepingid
-                                , t.status) p
+                            GROUP BY month(p.kpv)
+                                    , year(p.kpv)
+                                    , p.lepingid
+                                    , t.status) p
                                                  ON p.lepingid = j.lepingid AND p.kuu = j.kuu AND p.aasta = j.aasta
                                  INNER JOIN palk.tooleping t ON t.id = j.lepingid
                                  INNER JOIN libs.asutus a ON a.id = t.parentid
