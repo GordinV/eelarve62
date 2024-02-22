@@ -1,0 +1,51 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT qry.*, r.nimetus::varchar(254) AS asutus
+                    FROM palk.pedagoogide_palk($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER, $5::JSONB) qry
+                             INNER JOIN ou.rekv r ON r.id = qry.rekv_id
+                    ORDER BY r.nimetus, qry.Isik, qry.konto</sql>
+    <alias>pedagoogide_palk</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>
