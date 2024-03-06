@@ -50,7 +50,8 @@
                          t.parentid,
                          (pl.properties::JSONB -&gt;&gt; 'liik')::INTEGER                        AS liik,
                          (pl.properties::JSONB -&gt;&gt; 'asutusest')::INTEGER                   AS asutusest,
-                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                         AS koostaja
+                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                         AS koostaja,
+                         (p.properties -&gt;&gt; 'objekt')::VARCHAR(20) as objekt
                   FROM docs.doc d
                            INNER JOIN palk.palk_oper p ON p.parentId = d.id
                            INNER JOIN palk.tooleping t ON t.id = p.lepingid
@@ -106,7 +107,8 @@
                           0::integer                                AS kas_lausend,
                           NULL::INTEGER                                 AS parentid,
                           1                                             AS liik,
-                          NULL :: INTEGER                               AS lausend</sqlAsNew>
+                          NULL :: INTEGER                               AS lausend,
+                          NULL :: VARCHAR(20)                           AS objekt</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
