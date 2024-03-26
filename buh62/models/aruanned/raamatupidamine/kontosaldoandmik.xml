@@ -11,9 +11,9 @@
                            a.tp,
                            a.aadress,
                            ltrim(rtrim(r.nimetus))::VARCHAR(254) AS rekv_nimetus
-                    FROM docs.kontosaldoandmik($1::TEXT, $2::INTEGER, $3::DATE, $4::INTEGER, $5::INTEGER) qry
+                    FROM docs.kontosaldoandmik($1::TEXT, $2::INTEGER, $3::DATE, $4::INTEGER, $5::INTEGER, $6::jsonb) qry
                              INNER JOIN libs.asutus a ON a.id = qry.asutus_id
-                             INNER JOIN com_kontoplaan l ON l.kood = qry.konto
+                             INNER JOIN com_kontoplaan l ON ltrim(rtrim(l.kood)) = ltrim(rtrim(qry.konto))
                              INNER JOIN (SELECT id, parentid, regkood, nimetus
                                          FROM ou.rekv
                                          WHERE parentid &lt; 999

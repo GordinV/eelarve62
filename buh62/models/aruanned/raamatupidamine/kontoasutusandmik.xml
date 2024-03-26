@@ -1,41 +1,47 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>  SELECT
-                        coalesce(sum(deebet)
-                          FILTER (WHERE kpv is null) OVER (
-                          PARTITION BY rekv_id, asutus_id, konto ),0)::numeric(14,2) AS alg_saldo,
-                        CASE WHEN kpv is not null
-                          THEN deebet
-                        ELSE 0 END                                 AS deebet,
-                        kreedit,
-                        coalesce(sum(deebet - kreedit)
-                        OVER (
-                          PARTITION BY rekv_id, asutus_id, konto ),0)::numeric(14,2) AS lopp_saldo,
-                        qryReport.kpv,
-                        qryReport.rekv_id,
-                        qryReport.asutus_id,
-                        qryReport.konto::varchar(20),
-                        qryReport.korr_konto::varchar(20),
-                        qryReport.dok::varchar(120),
-                        qryReport.number::varchar(20),
-                        qryReport.kood1::varchar(20),
-                        qryReport.kood2::varchar(20),
-                        qryReport.kood3::varchar(20),
-                        qryReport.kood4::varchar(20),
-                        qryReport.kood5::varchar(20),
-                        qryReport.proj::varchar(20),
-                        qryReport.tunnus::varchar(20),
-                        a.regkood::varchar(20), a.nimetus::varchar(254) as asutus, a.tp::varchar(20), a.aadress,
-                        l.nimetus::varchar(254),
-                        r.nimetus::varchar(254) as rekv_nimetus,
-                        r.parentid 
-                      FROM docs.kontoasutusandmik($1::text, $2 :: INTEGER, $3::date, $4 :: DATE, $5::integer) qryReport
-                      inner join libs.asutus a on a.id = qryReport.asutus_id
-                      inner join com_kontoplaan l on l.kood = qryReport.konto
-                      inner join com_rekv r on r.id = qryReport.rekv_id
-                      where qryReport.konto is not null and qryReport.asutus_id is not null
-                      order by qryReport.rekv_id, qryReport.konto, a.nimetus, qryReport.kpv</sql>
+    <sql>  SELECT coalesce(sum(deebet)
+                                      FILTER (WHERE kpv IS NULL) OVER (
+                                          PARTITION BY rekv_id, asutus_id, konto ), 0)::NUMERIC(14, 2) AS alg_saldo,
+                             CASE
+                                 WHEN kpv IS NOT NULL
+                                     THEN deebet
+                                 ELSE 0 END                                                            AS deebet,
+                             kreedit,
+                             coalesce(sum(deebet - kreedit)
+                                      OVER (
+                                          PARTITION BY rekv_id, asutus_id, konto ), 0)::NUMERIC(14, 2) AS lopp_saldo,
+                             qryReport.kpv,
+                             qryReport.rekv_id,
+                             qryReport.asutus_id,
+                             qryReport.konto::VARCHAR(20),
+                             qryReport.korr_konto::VARCHAR(20),
+                             qryReport.dok::VARCHAR(120),
+                             qryReport.number::VARCHAR(20),
+                             qryReport.kood1::VARCHAR(20),
+                             qryReport.kood2::VARCHAR(20),
+                             qryReport.kood3::VARCHAR(20),
+                             qryReport.kood4::VARCHAR(20),
+                             qryReport.kood5::VARCHAR(20),
+                             qryReport.proj::VARCHAR(20),
+                             qryReport.tunnus::VARCHAR(20),
+                             qryReport.objekt::VARCHAR(20),
+                             a.regkood::VARCHAR(20),
+                             a.nimetus::VARCHAR(254)                                                   AS asutus,
+                             a.tp::VARCHAR(20),
+                             a.aadress,
+                             l.nimetus::VARCHAR(254),
+                             r.nimetus::VARCHAR(254)                                                   AS rekv_nimetus,
+                             r.parentid
+                      FROM docs.kontoasutusandmik($1::TEXT, $2 :: INTEGER, $3::DATE, $4 :: DATE, $5::INTEGER,
+                                                  $6::JSONB) qryReport
+                               INNER JOIN libs.asutus a ON a.id = qryReport.asutus_id
+                               INNER JOIN com_kontoplaan l ON l.kood = qryReport.konto
+                               INNER JOIN com_rekv r ON r.id = qryReport.rekv_id
+                      WHERE qryReport.konto IS NOT NULL
+                        AND qryReport.asutus_id IS NOT NULL
+                      ORDER BY qryReport.rekv_id, qryReport.konto, a.nimetus, qryReport.kpv</sql>
     <alias>kontoasutusandmik_report</alias>
   </grid>
   <select></select>
@@ -75,4 +81,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
