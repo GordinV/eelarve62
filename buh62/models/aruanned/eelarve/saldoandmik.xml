@@ -2,6 +2,31 @@
 <VFPData>
   <grid>
     <sql>WITH qryReport AS (
+            WITH rekv_ids AS
+                     (
+                         SELECT r.*
+                         FROM get_asutuse_struktuur($2) r        
+                         WHERE rekv_id = CASE
+                                             WHEN $3 = 1
+                                                 THEN rekv_id
+                                             ELSE $2 END
+                     ),
+                    report AS (        
+                        SELECT CASE
+                                WHEN r.tase &gt; 2 THEN r.parent_id else r.rekv_id end as rekv_id,
+                               konto::VARCHAR(20),
+                               tp::VARCHAR(20),
+                               tegev::VARCHAR(20),
+                               allikas::VARCHAR(20),
+                               rahavoog::VARCHAR(20),
+                               (deebet)   AS deebet,
+                               (kreedit)  AS kreedit,
+                               tyyp::INTEGER AS tyyp
+                         FROM eelarve.saldoandmik_aruanne($1 :: DATE, $2 :: INTEGER, $3 ::INTEGER, $4::JSONB) s
+                              INNER JOIN rekv_ids r ON r.rekv_id = s.rekv_id                         
+                        WHERE deebet &lt;&gt; 0
+                           OR kreedit &lt;&gt; 0
+                   )
                     SELECT rekv_id,
                            konto::VARCHAR(20),
                            tp::VARCHAR(20),
@@ -11,7 +36,7 @@
                            sum(deebet)   AS deebet,
                            sum(kreedit)  AS kreedit,
                            tyyp::INTEGER AS tyyp
-                     FROM eelarve.saldoandmik_aruanne($1 :: DATE, $2 :: INTEGER, $3 ::INTEGER, $4::JSONB)
+                     FROM report
                     WHERE deebet &lt;&gt; 0
                        OR kreedit &lt;&gt; 0
                     GROUP BY rekv_id
@@ -21,6 +46,7 @@
                             , allikas
                             , rahavoog
                             , tyyp
+                   
                 ),
                  kond AS (
                      SELECT 999999        AS rekv_id,
