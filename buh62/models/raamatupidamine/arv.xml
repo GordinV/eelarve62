@@ -510,6 +510,18 @@
     <multiple>false</multiple>
     <alias>validate_asutus</alias>
   </select>
+  <select>
+    <sql>SELECT parentid as id, jaak, kpv 
+                  FROM docs.arv a
+                  WHERE a.asutusid = $3::INTEGER
+                    AND number = $2::TEXT
+                    AND rekvid = $1::INTEGER
+                  ORDER BY jaak DESC
+                  LIMIT 1</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>locate_arve_by_number</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT id,
                           arv_id,
