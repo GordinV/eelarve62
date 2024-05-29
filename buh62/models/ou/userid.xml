@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>SELECT $2 AS user_id,
@@ -44,7 +44,8 @@
                          (u.properties -&gt;&gt; 'user') :: TEXT                                             AS user,
                          (u.properties -&gt;&gt; 'pass') :: TEXT                                             AS pass,
                          (u.properties -&gt;&gt; 'smtp') :: TEXT                                             AS smtp,
-                         (u.properties -&gt;&gt; 'earved') :: TEXT                                           AS earved
+                         (u.properties -&gt;&gt; 'earved') :: TEXT                                           AS earved,
+                         current_date::DATE                                                            AS kpv
                   FROM ou.userid u
                   WHERE id = $1</sql>
     <sqlAsNew>SELECT
