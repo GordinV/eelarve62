@@ -10,15 +10,15 @@
     <alias>curRekv</alias>
   </grid>
   <select>
-    <sql>SELECT 'REKV'                                                                                         AS doc_type_id,
-                     $2::INTEGER                                                                                    AS userid,
+    <sql>SELECT 'REKV'                                                           AS doc_type_id,
+                     $2::INTEGER                                                      AS userid,
                      r.id,
                      r.parentid,
                      r.nimetus::VARCHAR(254),
-                     coalesce(r.muud, nimetus)::VARCHAR(254)                                                        AS taisnimetus,
+                     coalesce(r.muud, nimetus)::VARCHAR(254)                          AS taisnimetus,
                      (SELECT coalesce(rekv.muud, rekv.nimetus)::VARCHAR(254) AS nimetus
                       FROM ou.rekv rekv
-                      WHERE rekv.id = r.parentid)                                                                        AS parent_asutus,
+                      WHERE rekv.id = r.parentid)                                     AS parent_asutus,
                      r.aadress,
                      r.email::VARCHAR(254),
                      r.faks::VARCHAR(254),
@@ -29,24 +29,24 @@
                      r.muud,
                      r.regkood::VARCHAR(20),
                      r.tel::VARCHAR(254),
-                     ((r.properties -&gt;&gt; 'arved')::JSONB -&gt;&gt; 'tahtpaev')::INTEGER                                    AS tahtpaev,
-                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'ftp')::VARCHAR(120)                                  AS ftp,
-                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'login')::VARCHAR(120)                                AS login,
-                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'parool')::VARCHAR(120)                               AS parool,
-                     (r.properties -&gt;&gt; 'earved') ::VARCHAR(254)                                                     AS earved,
-                     (u.properties -&gt;&gt; 'earved')::VARCHAR(254)                                                      AS earved_omniva,
-                     (r.properties -&gt;&gt; 'earve_asutuse_nimi')::VARCHAR(254)                                          AS earve_asutuse_nimi,
-                     (r.properties -&gt;&gt; 'earve_regkood')::VARCHAR(254)                                               AS earve_regkood,
-                     coalesce((r.properties -&gt;&gt; 'seb_earve'), '')::VARCHAR(254)                                     AS seb_earve,
-                     coalesce((r.properties -&gt;&gt; 'swed_earve'), '')::VARCHAR(254)                                    AS swed_earve,
-                     (r.properties -&gt;&gt; 'liik') :: VARCHAR(20)                                                       AS liik,
-                     (r.properties -&gt;&gt; 'swed') ::VARCHAR(254)                                                       AS swed,
-                     (r.properties -&gt;&gt; 'seb') ::VARCHAR(254)                                                        AS seb,
+                     ((r.properties -&gt;&gt; 'arved')::JSONB -&gt;&gt; 'tahtpaev')::INTEGER      AS tahtpaev,
+                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'ftp')::VARCHAR(120)    AS ftp,
+                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'login')::VARCHAR(120)  AS login,
+                     ((r.properties -&gt;&gt; 'reklftp')::JSONB -&gt;&gt; 'parool')::VARCHAR(120) AS parool,
+                     (r.properties -&gt;&gt; 'earved') ::VARCHAR(254)                       AS earved,
+                     (u.properties -&gt;&gt; 'earved')::VARCHAR(254)                        AS earved_omniva,
+                     (r.properties -&gt;&gt; 'earve_asutuse_nimi')::VARCHAR(254)            AS earve_asutuse_nimi,
+                     (r.properties -&gt;&gt; 'earve_regkood')::VARCHAR(254)                 AS earve_regkood,
+                     coalesce((r.properties -&gt;&gt; 'seb_earve'), '')::VARCHAR(254)       AS seb_earve,
+                     coalesce((r.properties -&gt;&gt; 'swed_earve'), '')::VARCHAR(254)      AS swed_earve,
+                     (r.properties -&gt;&gt; 'liik') :: VARCHAR(20)                         AS liik,
+                     (r.properties -&gt;&gt; 'swed') ::VARCHAR(254)                         AS swed,
+                     (r.properties -&gt;&gt; 'seb') ::VARCHAR(254)                          AS seb,
                      (SELECT tp
                       FROM ou.aa
                       WHERE parentid = $1
                         AND kassa = 2
-                      LIMIT 1)::VARCHAR(20)                                                                         AS oma_tp
+                      LIMIT 1)::VARCHAR(20)                                           AS oma_tp
 
               FROM ou.rekv r,
                    ou.userid u
@@ -130,6 +130,24 @@
     <query />
     <multiple>false</multiple>
     <alias>config</alias>
+  </select>
+  <select>
+    <sql>SELECT arve,
+                         CASE
+                             WHEN p.muud IS NOT NULL THEN p.muud
+                             WHEN p.muud IS NULL AND p.nimetus IS NOT NULL THEN p.nimetus
+                             WHEN r.muud IS NOT NULL
+                                 THEN r.muud
+                             ELSE r.nimetus END::varchar(254) AS pay_to_name,
+                         $2                     AS user_id
+                  FROM ou.aa aa
+                           INNER JOIN ou.rekv r ON r.id = aa.parentid
+                           LEFT OUTER JOIN ou.rekv p ON p.id = r.parentid
+                  WHERE r.id = $1
+                    AND aa.kassa = 1</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>pay_to_name</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT id, nimetus::VARCHAR(254), regkood::VARCHAR(20), parentid
