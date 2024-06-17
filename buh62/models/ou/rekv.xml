@@ -133,13 +133,20 @@
   </select>
   <select>
     <sql>SELECT arve,
+                         aa.parentid                          AS omanik_id,
                          CASE
-                             WHEN p.muud IS NOT NULL THEN p.muud
-                             WHEN p.muud IS NULL AND p.nimetus IS NOT NULL THEN p.nimetus
+                             WHEN p.muud IS NOT NULL
+                                 AND exists(SELECT aa.arve
+                                            FROM ou.aa a
+                                            WHERE a.parentid = r.parentid
+                                              AND a.arve = aa.arve)
+                                 THEN p.muud
                              WHEN r.muud IS NOT NULL
                                  THEN r.muud
-                             ELSE r.nimetus END::varchar(254) AS pay_to_name,
-                         $2                     AS user_id
+                             WHEN r.muud IS NOT NULL
+                                 THEN r.muud
+                             ELSE r.nimetus END::VARCHAR(254) AS pay_to_name,
+                         $2                                   AS user_id
                   FROM ou.aa aa
                            INNER JOIN ou.rekv r ON r.id = aa.parentid
                            LEFT OUTER JOIN ou.rekv p ON p.id = r.parentid
