@@ -26,14 +26,7 @@
                       AND kassa &lt;&gt; 0
                   )
                   OR
-                  COALESCE
-                  (
-                  selg
-                  ,
-                  ''
-                  )
-                  =
-                  'test'</sql>
+                  COALESCE(selg,'') ='test'</sql>
     <query />
     <multiple>true</multiple>
     <alias>kontrol_pohitegevuse_tulud</alias>

@@ -25,7 +25,7 @@
                                      SELECT 999999
                                      , 0
                                      , '' AS regkood
-                                     , 'Kond' AS nimetus) r
+                                     , 'Koond' AS nimetus) r
                                 ON r.id = qryReport.rekv_id
                      LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
             ORDER BY rekv_id DESC, artikkel, allikas, tegev, tunnus, objekt
