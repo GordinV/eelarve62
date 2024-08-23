@@ -1,28 +1,30 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT row_number() OVER ()                           AS id,
-                           sum(qry.noude_50) OVER (PARTITION BY nimetus)  AS noude_50_group,
-                           sum(qry.noude_100) OVER (PARTITION BY nimetus) AS noude_100_group,
-                           sum(qry.jaak) OVER (PARTITION BY nimetus)      AS jaak_group,
-                           r.nimetus::varchar(254)                                AS asutus,
-                           qry.kpv::date,
-                           qry.number::varchar(20),
-                           qry.tahtaeg::date             AS tahtaeg,
-                           coalesce(qry.lapse_nimi,'')::varchar(254) as lapse_nimi,
-                           coalesce(qry.lapse_isikukood,'')::varchar(20) as lapse_isikukood,
-                           coalesce(qry.maksja_isikukood,'')::varchar(20) as maksja_isikukood,
-                           coalesce(qry.maksja_nimi,'')::varchar(254) as maksja_nimi, 
+    <sql>SELECT row_number() OVER ()                                         AS id,
+                           sum(qry.noude_50) OVER (PARTITION BY nimetus)                AS noude_50_group,
+                           sum(qry.noude_100) OVER (PARTITION BY nimetus)               AS noude_100_group,
+                           sum(qry.jaak) OVER (PARTITION BY nimetus)                    AS jaak_group,
+                           r.nimetus::VARCHAR(254)                                      AS asutus,
+                           qry.kpv::DATE,
+                           qry.number::VARCHAR(20),
+                           qry.tahtaeg::DATE                                            AS tahtaeg,
+                           coalesce(qry.lapse_nimi, '')::VARCHAR(254)                   AS lapse_nimi,
+                           coalesce(qry.lapse_isikukood, '')::VARCHAR(20)               AS lapse_isikukood,
+                           coalesce(qry.maksja_isikukood, '')::VARCHAR(20)              AS maksja_isikukood,
+                           coalesce(qry.maksja_nimi, '')::VARCHAR(254)                  AS maksja_nimi,
                            qry.noude_50,
                            qry.noude_100,
                            qry.jaak,
-                           qry.konto::varchar(20) as konto,
-                            qry.rekvid,
-                           $2::INTEGER                                    AS user_id
+                           qry.konto::VARCHAR(20)                                       AS konto,
+                           qry.rekvid,
+                           $2::INTEGER                                                  AS user_id,
+                           qry.ArvestatudPaevaraamatus                                  AS arv_pr,
+                           (qry.noude_50 + qry.noude_100) - qry.ArvestatudPaevaraamatus AS vahe
                     FROM lapsed.ebatoenaolised($1::INTEGER, $3::DATE) qry
                              INNER JOIN ou.rekv r ON r.id = qry.rekvid
                     WHERE (qry.noude_50 + qry.noude_100) &gt; 0
-                    ORDER BY asutus,konto, number
+                    ORDER BY asutus, konto, number
         </sql>
     <alias>ebatoenaolised_report</alias>
   </grid>
