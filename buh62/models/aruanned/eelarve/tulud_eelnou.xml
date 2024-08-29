@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>WITH report AS (
@@ -56,7 +56,7 @@
                          sum(eelarve_tekkepohine_kinnitatud)  AS eelarve_tekkepohine_kinnitatud,
                          sum(eelarve_tekkepohine_tapsustatud) AS eelarve_tekkepohine_tapsustatud
                   FROM report qry
-                  WHERE idx = 200
+                  WHERE idx in (200, 250)
                   GROUP BY qry.rekv_id, qry.idx, qry.artikkel
                   UNION ALL
                   SELECT qry.rekv_id,
