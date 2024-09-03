@@ -182,6 +182,18 @@
     <multiple>true</multiple>
     <alias>oodatav_taitmine</alias>
   </select>
+  <select>
+    <sql>select eelarve.sp_kooperi_taotlus($1::integer, $2::INTEGER) as id</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>kooperi_taotlus</alias>
+  </select>
+  <select>
+    <sql>select eelarve.koosta_eelarve_eelmise_aasta_alusel($1::integer, $2::JSONB) as id</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>koosta_taotlus</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>

@@ -9,8 +9,8 @@
   <select>
     <sql>SELECT d.id,
                      $2 :: INTEGER                                                  AS userid,
-                     to_char(created, 'DD.MM.YYYY HH:MM:SS') :: TEXT                AS created,
-                     to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS') :: TEXT             AS lastupdate,
+                     to_char(created, 'DD.MM.YYYY HH:MI:SS') :: TEXT                AS created,
+                     to_char(lastupdate, 'DD.MM.YYYY HH:MI:SS') :: TEXT             AS lastupdate,
                      d.bpm,
                      trim(l.nimetus)                                                AS doc,
                      trim(l.kood)                                                   AS doc_type_id,
@@ -38,8 +38,6 @@
                      po.muud,
                      n.kood,
                      n.nimetus,
-                     coalesce(v.valuuta, 'EUR')                                     AS valuuta,
-                     coalesce(v.kuurs, 1) :: NUMERIC(12, 4)                         AS kuurs,
                      coalesce(jid.number, 0) :: INTEGER                             AS laus_nr,
                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS korrkonto,
                      dp.selg :: VARCHAR(120)                                        AS dokprop
@@ -53,8 +51,6 @@
                        LEFT OUTER JOIN libs.dokprop dp ON dp.id = po.doklausid
                        LEFT OUTER JOIN docs.journal j ON j.parentid = po.journalid
                        LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
-                       LEFT OUTER JOIN docs.dokvaluuta1 v ON (v.dokid = po.id AND v.dokliik =
-                                                                                  array_position((enum_range(NULL :: DOK_VALUUTA)), 'pv_oper'))
               WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
                   $1 :: INTEGER        AS id,
@@ -103,6 +99,14 @@
     <query />
     <multiple>false</multiple>
     <alias>kulum_umber_arvestamine</alias>
+  </select>
+  <select>
+    <sql>SELECT d.*
+                  FROM docs.get_relative_docs($1::INTEGER) d
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>relations</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT *
