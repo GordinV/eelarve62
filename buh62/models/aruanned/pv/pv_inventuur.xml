@@ -12,7 +12,7 @@
                                               SELECT
                                                   rekv_id
                                               FROM
-                                                  params p, get_asutuse_struktuur(130)
+                                                  params p, get_asutuse_struktuur(p.rekvid)
                                               WHERE
                                                   rekv_id = CASE
                                                                 WHEN p.kond = 1
