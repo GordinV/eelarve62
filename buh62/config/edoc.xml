@@ -1,0 +1,11 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <edok>
+	<report_id>813</report_id>			 
+	<parameter>TSD2025_lisa1a</parameter>
+	<description>TSD2025</description>	
+	<url>http://localhost:3000/print/TSD2025_lisa1a/</url>
+	<format>CSV,XML</format>
+	<module>PALK</module>
+  </edok>  
+</VFPData>
