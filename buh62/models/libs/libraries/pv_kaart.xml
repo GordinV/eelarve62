@@ -64,7 +64,7 @@
                      (l.properties :: JSONB -&gt;&gt; 'korr_konto') :: VARCHAR(20)                               AS korr_konto,
                      coalesce((l.properties :: JSONB -&gt;&gt; 'soetkpv') :: DATE, now() :: DATE)                AS soetkpv,
                      (l.properties :: JSONB -&gt;&gt; 'kulum') :: NUMERIC(12, 4)                                 AS kulum,
-                     (l.properties :: JSONB -&gt;&gt; 'algkulum') :: NUMERIC(12, 4)                              AS algkulum,
+                     coalesce((l.properties :: JSONB -&gt;&gt; 'algkulum'):: NUMERIC(12, 4), 0) :: NUMERIC(12, 4)                  AS algkulum,
                      coalesce(jaak.kulum, 0) :: NUMERIC(12, 4)                                             AS kulum_kokku,
                      (l.properties :: JSONB -&gt;&gt; 'soetmaks') :: NUMERIC(12, 2)                              AS soetmaks,
                      (jaak.soetmaks) :: NUMERIC(12, 2)                                                     AS parhind,
@@ -142,7 +142,8 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT $2 :: INTEGER AS userid, $1 AS pv_id, po.*
+    <sql>SELECT $2 :: INTEGER AS userid, $1 AS pv_id, 
+                po.*
               FROM cur_pv_oper po
               WHERE po.pv_kaart_id = $1</sql>
     <multiple>true</multiple>
@@ -161,6 +162,13 @@
                   FROM libs.get_pv_kaart_jaak($1::INTEGER) po</sql>
     <multiple>false</multiple>
     <alias>pv_jaak</alias>
+  </select>
+  <select>
+    <sql>SELECT docs.sp_kooperi_pv_kaart($1::integer, $2::integer, 0::integer) as result</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>kooperi</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
     <sql>SELECT *
