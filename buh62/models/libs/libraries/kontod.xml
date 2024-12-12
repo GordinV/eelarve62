@@ -2,58 +2,60 @@
 <VFPData>
   <grid>
     <sql>SELECT id,
-                           trim(kood)::VARCHAR(20)        AS kood,
-                           trim(nimetus)::VARCHAR(254)    AS nimetus,
-                           $2::INTEGER                    AS userId,
+                           trim(kood)::VARCHAR(20)                                            AS kood,
+                           trim(nimetus)::VARCHAR(254)                                        AS nimetus,
+                           $2::INTEGER                                                        AS userId,
                            CASE
                                WHEN l.tun5 = 1 THEN 'SD'
                                WHEN l.tun5 = 2 THEN 'SK'
                                WHEN l.tun5 = 3 THEN 'D'
                                WHEN l.tun5 = 4 THEN 'K'
-                               ELSE NULL END::VARCHAR(20) AS konto_tyyp,
+                               ELSE NULL END::VARCHAR(20)                                     AS konto_tyyp,
                            l.tun1,
                            l.tun2,
                            l.tun3,
                            l.tun4,
                            l.muud,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'kas_virtual')::INTEGER, 0) AS kas_virtual,
-                           (l.properties::JSONB -&gt;&gt; 'valid')::DATE                       AS valid,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'tp_req')::CHAR(1),'')::CHAR(1)                   AS tp_req,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'tt_req')::CHAR(1),'')::CHAR(1)                   AS tt_req,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'a_req')::CHAR(1),'')::CHAR(1)                    AS a_req,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'rv_req')::CHAR(1),'')::CHAR(1)                   AS rv_req       
+                           coalesce((l.properties::JSONB -&gt;&gt; 'kas_virtual')::INTEGER, 0)      AS kas_virtual,
+                           (CASE
+                                WHEN ltrim(rtrim(l.properties::JSONB -&gt;&gt; 'valid')) = '' THEN NULL::TEXT
+                                ELSE l.properties::JSONB -&gt;&gt; 'valid' END)::DATE               AS VALID,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'tp_req')::CHAR(1), '')::CHAR(1) AS tp_req,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'tt_req')::CHAR(1), '')::CHAR(1) AS tt_req,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'a_req')::CHAR(1), '')::CHAR(1)  AS a_req,
+                           coalesce((l.properties::JSONB -&gt;&gt; 'rv_req')::CHAR(1), '')::CHAR(1) AS rv_req
                     FROM libs.library l
                     WHERE library = 'KONTOD'
                       AND l.status &lt;&gt; 3</sql>
     <alias>curKontod</alias>
   </grid>
   <select>
-    <sql>SELECT coalesce(l.rekvid, 0)                                         AS rekvid,
+    <sql>SELECT coalesce(l.rekvid, 0)                                              AS rekvid,
                      CASE
                          WHEN l.tun5 = 1 THEN 'SD'
                          WHEN l.tun5 = 2 THEN 'SK'
                          WHEN l.tun5 = 3 THEN 'D'
                          WHEN l.tun5 = 4 THEN 'K'
-                         ELSE NULL END::VARCHAR(20)                                AS konto_tyyp,
+                         ELSE NULL END::VARCHAR(20)                                     AS konto_tyyp,
                      l.id,
-                     trim(l.kood)::VARCHAR(20)                                     AS kood,
-                     trim(l.nimetus)::VARCHAR(254)                                 AS nimetus,
+                     trim(l.kood)::VARCHAR(20)                                          AS kood,
+                     trim(l.nimetus)::VARCHAR(254)                                      AS nimetus,
                      l.library,
                      l.tun1,
                      l.tun2,
                      l.tun3,
                      l.tun4,
                      l.muud,
-                     $2::INTEGER                                                   AS userid,
-                     'KONTOD'                                                      AS doc_type_id,
-                     l.tun5                                                        AS tyyp,
+                     $2::INTEGER                                                        AS userid,
+                     'KONTOD'                                                           AS doc_type_id,
+                     l.tun5                                                             AS tyyp,
                      l.status,
-                     coalesce((l.properties::JSONB -&gt;&gt; 'kas_virtual')::INTEGER, 0) AS kas_virtual,
-                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE                       AS valid,
-                     coalesce((l.properties::JSONB -&gt;&gt; 'tp_req')::CHAR(1),'')::CHAR(1)                   AS tp_req,
-                     coalesce((l.properties::JSONB -&gt;&gt; 'tt_req')::CHAR(1),'')::CHAR(1)                   AS tt_req,
-                     coalesce((l.properties::JSONB -&gt;&gt; 'a_req')::CHAR(1),'')::CHAR(1)                    AS a_req,
-                     coalesce((l.properties::JSONB -&gt;&gt; 'rv_req')::CHAR(1),'')::CHAR(1)                   AS rv_req
+                     coalesce((l.properties::JSONB -&gt;&gt; 'kas_virtual')::INTEGER, 0)      AS kas_virtual,
+                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE                            AS valid,
+                     coalesce((l.properties::JSONB -&gt;&gt; 'tp_req')::CHAR(1), '')::CHAR(1) AS tp_req,
+                     coalesce((l.properties::JSONB -&gt;&gt; 'tt_req')::CHAR(1), '')::CHAR(1) AS tt_req,
+                     coalesce((l.properties::JSONB -&gt;&gt; 'a_req')::CHAR(1), '')::CHAR(1)  AS a_req,
+                     coalesce((l.properties::JSONB -&gt;&gt; 'rv_req')::CHAR(1), '')::CHAR(1) AS rv_req
               FROM libs.library l
               WHERE id = $1</sql>
     <sqlAsNew>select null::integer as rekvId, 
@@ -70,7 +72,7 @@
             0 as status,
             0 as kas_virtual,
             null::text as muud,
-            null::date as valid
+            null::date as valid,
             ''::char(1) AS tp_req,
             ''::char(1) AS tt_req,
             ''::char(1) AS a_req,
