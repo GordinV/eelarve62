@@ -52,6 +52,22 @@
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>SELECT *
+                  FROM
+                      jsonb_to_recordset((
+                                             SELECT
+                                                 p.data
+                                             from
+                                                 palk.sp_import_taabel_from_virosoft($2::integer,$3::integer, $1::JSONB) p
+                                         )
+                      )
+                          AS x (error_message TEXT, error_code INTEGER, result INTEGER)</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>importDok</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
