@@ -1,8 +1,11 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT *
+    <sql>SELECT a.*,
+                           l.kood as ameti_kood,
+                           l.muud
                     FROM cur_ametid a
+                             inner join libs.library l on l.id = a.id
                     WHERE (a.rekvId = $1 OR a.rekvid IS NULL)</sql>
     <alias>curAmetid</alias>
   </grid>
