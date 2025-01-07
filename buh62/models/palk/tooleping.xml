@@ -28,36 +28,44 @@
                      t.koormus,
                      t.toopaev,
                      t.pank,
-                     coalesce((t.properties -&gt;&gt; 'kuupalk')::INTEGER, 0) AS kuupalk
+                     coalesce((t.properties -&gt;&gt; 'kuupalk')::INTEGER, 0) AS kuupalk,
+                     coalesce((t.properties -&gt;&gt; 'ameti_klassif')::varchar(20), '') AS ameti_klassif                     
               FROM palk.tooleping t
               WHERE t.id = $1</sql>
-    <sqlAsNew>SELECT $1::INTEGER           AS id,
-                          $2 :: INTEGER         AS userid,
-                          0::INTEGER            AS parentid,
-                          'TOOLEPING'           AS doc_type_id,
-                          0 :: INTEGER          AS osakondid,
-                          0 :: INTEGER          AS ametid,
-                          now() :: DATE         AS algab,
-                          NULL :: DATE          AS lopp,
-                          0 :: NUMERIC(12, 4)   AS palk,
-                          0 :: INTEGER          AS palgamaar,
-                          1                     AS pohikoht,
-                          0                     AS ametnik,
-                          1                     AS tasuliik,
-                          --astmepalk
-                          NULL :: TEXT          AS muud,
-                          (SELECT rekvid
-                           FROM ou.userid
-                           WHERE id = $2)       AS rekvid,
-                          1                     AS resident,
-                          NULL :: VARCHAR(2)    AS riik,
-                          NULL :: DATE          AS toend,
-                          100 :: NUMERIC(12, 4) AS koormus,
-                          'EUR'::VARCHAR(20)    AS valuuta,
-                          1::NUMERIC(12, 4)     AS kuurs,
-                          0::INTEGER            AS pank,
-                          0::INTEGER            AS kuupalk,
-                          8 :: NUMERIC(12, 4)   AS toopaev</sqlAsNew>
+    <sqlAsNew>SELECT
+                       $1::INTEGER           AS id,
+                       $2 :: INTEGER         AS userid,
+                       0::INTEGER            AS parentid,
+                       'TOOLEPING'           AS doc_type_id,
+                       0 :: INTEGER          AS osakondid,
+                       0 :: INTEGER          AS ametid,
+                       now() :: DATE         AS algab,
+                       NULL :: DATE          AS lopp,
+                       0 :: NUMERIC(12, 4)   AS palk,
+                       0 :: INTEGER          AS palgamaar,
+                       1                     AS pohikoht,
+                       0                     AS ametnik,
+                       1                     AS tasuliik,
+                       --astmepalk
+                       NULL :: TEXT          AS muud,
+                       (
+                           SELECT
+                               rekvid
+                           FROM
+                               ou.userid
+                           WHERE
+                               id = $2
+                       )                     AS rekvid,
+                       1                     AS resident,
+                       NULL :: VARCHAR(2)    AS riik,
+                       NULL :: DATE          AS toend,
+                       100 :: NUMERIC(12, 4) AS koormus,
+                       'EUR'::VARCHAR(20)    AS valuuta,
+                       1::NUMERIC(12, 4)     AS kuurs,
+                       0::INTEGER            AS pank,
+                       0::INTEGER            AS kuupalk,
+                       ''::varchar(20)       as ameti_klassif,
+                       8 :: NUMERIC(12, 4)   AS toopaev</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
