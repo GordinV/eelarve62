@@ -181,6 +181,14 @@
     <alias>importDok</alias>
     <not_initial_load>true</not_initial_load>
   </select>
+  <select>
+    <sql>SELECT result AS id, result, error_message
+                  FROM docs.updateDocLinks($1::integer, $2::integer,$3::JSONB, $4::JSONB)</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>updateDocLinks</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>

@@ -50,13 +50,41 @@
     <multiple>true</multiple>
     <alias>validate_lib_usage</alias>
   </select>
+  <select>
+    <sql>
+                select *
+                from
+                    (
+                        SELECT
+                            (jsonb_array_elements(properties::jsonb -&gt; 'palgaastmed') -&gt;&gt; 'id')::integer           as id,
+                            (jsonb_array_elements(properties::jsonb -&gt; 'palgaastmed') -&gt;&gt; 'summa')::numeric(12, 2) AS summa,
+                            (jsonb_array_elements(properties::jsonb -&gt; 'palgaastmed') -&gt;&gt;
+                             'palgamaar')::integer                                                                 AS palgamaar
+                        FROM
+                            libs.library l
+                        WHERE
+                            l.id = $1
+                    ) qry
+                order by
+                    palgamaar </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <select>
+    <sql>select * from palk.uuendaPalgaLepingud($1:: integer, $2::INTEGER)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>uuendaPalgad</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
   <selectAsLibs>
     <sql>SELECT *, $1 AS rekv_id
                    FROM com_ameti_klassif l</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_library($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_ametiklassif($1, $2, $3) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
