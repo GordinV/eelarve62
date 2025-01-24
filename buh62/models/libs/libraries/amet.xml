@@ -40,7 +40,7 @@
             0::integer as status,
             null::integer as osakondId,
             null::numeric(18,2) as kogus,
-            null::varchar(20) as ameti_klassif
+            null::varchar(20) as ameti_klassif,
             null::integer as palgamaar,
             null::integer as tunnusId,
             null::date as valid,
@@ -117,17 +117,6 @@
     <query />
     <multiple>true</multiple>
     <alias>comPalgamaar</alias>
-  </select>
-  <select>
-    <sql>update palk.tooleping set palk = $1::numeric 
-                  where rekvid = $2::integer
-                    and coalesce($3::integer,0) &gt; 0  
-                    and coalesce(palgamaar,9999999) = $3::integer
-                    and (lopp is null or lopp &gt;= current_date)</sql>
-    <query />
-    <multiple>true</multiple>
-    <alias>uuendaPalgad</alias>
-    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
     <sql>SELECT *
