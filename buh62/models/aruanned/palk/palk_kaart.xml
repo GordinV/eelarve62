@@ -1,8 +1,29 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select qry.*
-                    FROM palk.palk_kaart($1::date, $2::date, $3::integer, $4::integer) qry</sql>
+    <sql>        with
+                                params as (
+                                              select
+                                                  $1::date as kpv_1,
+                                                  $2::date as kpv_2,
+                                                  $3                 as rekv_id,
+                                                  $4                  as kond
+                                )
+                            select
+                                qry.*
+                            FROM
+                                params                                                                             p,
+                                palk.palk_kaart(p.kpv_1::date, p.kpv_2::date, p.rekv_id::integer, p.kond::integer) qry
+                            where
+                                p.kpv_2::date &lt; '2025-01-01'::date
+                            union all
+                            select
+                                qry.*
+                            FROM
+                                params                                                                                  p,
+                                palk.palk_kaart_2025(p.kpv_1::date, p.kpv_2::date, p.rekv_id::integer, p.kond::integer) qry
+                            where
+                                p.kpv_1::date &gt;= '2025-01-01'::date</sql>
     <alias>palk_kaart</alias>
   </grid>
   <select></select>
@@ -42,4 +63,8 @@
     <alias />
   </generateJournal>
   <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
 </VFPData>
