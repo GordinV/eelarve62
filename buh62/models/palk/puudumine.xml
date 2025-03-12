@@ -45,8 +45,15 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>select id, liik::varchar(20), eesti::varchar(120), vene::varchar(120) 
-                    from palk.com_puudumiste_tyyp</sql>
+    <sql>select
+                     id,
+                     liik::varchar(20),
+                     eesti::varchar(120),
+                     vene::varchar(120)
+                 from
+                     palk.com_puudumiste_tyyp
+                 where
+                     kas_kehtiv</sql>
     <query />
     <multiple>true</multiple>
     <alias>com_puudumised</alias>
