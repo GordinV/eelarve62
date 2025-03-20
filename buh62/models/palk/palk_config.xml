@@ -1,34 +1,49 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT *, $2::INTEGER AS userId
-                    FROM palk.palk_config
-                    WHERE rekvid = $1</sql>
+    <sql>SELECT *,
+                           $2::INTEGER AS userId
+                    FROM
+                        palk.palk_config
+                    WHERE
+                        rekvid = $1</sql>
     <alias>curPalkConfig</alias>
   </grid>
   <select>
-    <sql>SELECT $2 :: INTEGER                                                                 AS userid,
-                     'PALK_CONFIG'                                                                 AS doc_type_id,
-                     p.id,
-                     p.rekvid,
-                     coalesce(p.minpalk, 725)::NUMERIC(14, 2)                                      AS minpalk,
-                     coalesce(p.tulubaas, 654)::NUMERIC(14, 2)                                     AS tulubaas,
-                     coalesce(p.pensionari_tulubaas, 704)::NUMERIC(12, 2)                          AS pensionari_tulubaas,
-                     p.round::NUMERIC(14, 2)                                                       AS round,
-                     p.jaak::NUMERIC(14, 2)                                                        AS jaak,
-                     p.genlausend,
-                     p.suurasu,
-                     coalesce(p.tm, 20)                                                            AS tm,
-                     coalesce(p.pm, 2)                                                             AS pm,
-                     coalesce(p.tka, 0.80)                                                         AS tka,
-                     coalesce(p.tki, 1.6)                                                          AS tki,
-                     coalesce(p.sm, 33)                                                            AS sm,
-                     p.muud1,
-                     p.muud2,
-                     p.status,
-                     (coalesce((p.properties::JSONB -&gt;&gt; 'mmk')::BOOLEAN, FALSE)::BOOLEAN)::INTEGER AS mmk
-              FROM palk.palk_config p
-              WHERE p.rekvid = $1
+    <sql>SELECT
+                  $2 :: INTEGER                                                                         AS userid,
+                  'PALK_CONFIG'                                                                         AS doc_type_id,
+                  p.id,
+                  p.rekvid,
+                  coalesce(p.minpalk, 725)::NUMERIC(14, 2)                                              AS minpalk,
+                  coalesce(p.tulubaas, 654)::NUMERIC(14, 2)                                             AS tulubaas,
+                  coalesce(p.pensionari_tulubaas, 704)::NUMERIC(12, 2)                                  AS pensionari_tulubaas,
+                  p.round::NUMERIC(14, 2)                                                               AS round,
+                  p.jaak::NUMERIC(14, 2)                                                                AS jaak,
+                  p.genlausend,
+                  p.suurasu,
+                  coalesce(p.tm, 20)                                                                    AS tm,
+                  coalesce(p.pm, 2)                                                                     AS pm,
+                  coalesce(p.tka, 0.80)                                                                 AS tka,
+                  coalesce(p.tki, 1.6)                                                                  AS tki,
+                  coalesce(p.sm, 33)                                                                    AS sm,
+                  p.muud1,
+                  p.muud2,
+                  p.status,
+                  (coalesce((p.properties::JSONB -&gt;&gt; 'mmk')::BOOLEAN, FALSE)::BOOLEAN)::INTEGER         AS mmk,
+                  coalesce((p.properties -&gt; 'projekt' -&gt;&gt; 'ped_palk_alus')::numeric,
+                           1820)::NUMERIC(12, 2)                                                        AS ped_palk_alus,
+                  coalesce((p.properties -&gt; 'projekt' -&gt;&gt; 'ped_kooli_osa')::numeric,
+                           50)::NUMERIC(12, 2)                                                          AS ped_kooli_osa,
+                  coalesce((p.properties -&gt; 'projekt' -&gt;&gt; 'ped_lasteaed_osa')::numeric,
+                           30)::NUMERIC(12, 2)                                                          AS ped_lasteaed_osa,
+                  coalesce((p.properties -&gt; 'projekt' -&gt;&gt; 'dir_osa')::numeric, 100)::NUMERIC(12, 2)     AS dir_osa,
+                  coalesce((p.properties -&gt; 'projekt' -&gt;&gt; 'all_juht_osa')::numeric, 85)::NUMERIC(12, 2) AS all_juht_osa
+
+              FROM
+                  palk.palk_config p
+              WHERE
+                    p.rekvid = $1
                 AND p.status &lt;&gt; 'deleted'</sql>
     <sqlAsNew>SELECT
                       0 :: INTEGER        AS id,
@@ -51,7 +66,12 @@
                       0::numeric as muud2,
                       1 as status,
                       null::text as muud,
-                      0::integer as mmk</sqlAsNew>
+                      0::integer as mmk,
+                      1820::NUMERIC(12, 2)                                                            AS ped_palk_alus,
+                      50::NUMERIC(12, 2)                                                              AS ped_kooli_osa,
+                      30::NUMERIC(12, 2)                                                              AS ped_lasteaed_osa,
+                      100::NUMERIC(12, 2)                                                             AS dir_osa,
+          85::NUMERIC(12, 2)                                                                          AS all_juht_osa</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
@@ -65,8 +85,12 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>SELECT error_code, result, error_message
-                FROM palk.sp_delete_palk_config($1, $2)</sql>
+    <sql>SELECT
+                    error_code,
+                    result,
+                    error_message
+                FROM
+                    palk.sp_delete_palk_config($1, $2)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

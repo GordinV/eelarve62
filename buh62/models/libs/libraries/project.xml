@@ -13,18 +13,24 @@
     <alias>curProjektid</alias>
   </grid>
   <select>
-    <sql>SELECT l.id,
-                     l.rekvid,
-                     l.kood,
-                     l.nimetus,
-                     l.muud,
-                     l.status,
-                     l.library,
-                     $2::INTEGER                             AS userid,
-                     'PROJECT'                               AS doc_type_id,
-                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE AS valid
-              FROM libs.library l
-              WHERE l.id = $1</sql>
+    <sql>SELECT
+                  l.id,
+                  l.rekvid,
+                  l.kood,
+                  l.nimetus,
+                  l.muud,
+                  l.status,
+                  l.library,
+                  $2::INTEGER                                     AS userid,
+                  'PROJECT'                                       AS doc_type_id,
+                  (l.properties::JSONB -&gt;&gt; 'proj_alates')::DATE   AS proj_alates,
+                  (l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE     AS proj_kuni,
+                  (l.properties::JSONB -&gt;&gt; 'proj_summa')::Numeric AS proj_summa,
+                  (l.properties::JSONB -&gt;&gt; 'valid')::DATE         AS valid
+              FROM
+                  libs.library l
+              WHERE
+                  l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             $2::integer as userid, 
             'PROJECT' as doc_type_id,
@@ -33,11 +39,53 @@
             ''::text as nimetus,
             'PROJ'::text as library,
             0::integer as status,
+            null::date as proj_alates,
+            null::date as proj_kuni,
+            null::numeric as proj_summa,
             null::date as valid,            
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
+  </select>
+  <select>
+    <sql>with
+                      proj_details as (
+                                          SELECT
+                                              $2 :: INTEGER                                                                                                   AS userid,
+                                              l.kood,
+                                              l.nimetus,
+                                              a.regkood                                                                                                       as isikukood,
+                                              a.nimetus                                                                                                       as isik,
+                                              pl.proj_id                                                                                                      as parentid,
+                                              amet.kood                                                                                                       as amet,
+                                              coalesce((l.properties::jsonb -&gt;&gt; 'proj_summa')::numeric, 0)::numeric(12, 2)                                    as proj_summa,
+                                              pl.leping_id,
+                                              pl.proj_id,
+                                              pl.kuu_summa,
+                                              pl.summa::numeric(12, 2)                                                                                        as summa,
+                                              pl.korrigeerimine::numeric(12, 2)                                                                               as korrigeerimine,
+                                              palk.get_projekt_kasutatud_summa(pl.leping_id:: integer,
+                                                                               pl.proj_id:: INTEGER,
+                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()))::numeric(12, 2) as kasutatud
+                                          FROM
+                                              libs.library                      l
+                                                  inner join libs.proj_laiendus pl on l.id = pl.proj_id
+                                                  inner join palk.tooleping     tl on tl.id = pl.leping_id
+                                                  inner join libs.asutus        a on a.id = tl.parentid
+                                                  inner join libs.library       amet on amet.id = tl.ametid
+                                          WHERE
+                                              pl.proj_id = $1
+                      )
+                  select
+                      pd.*,
+                      (pd.summa - pd.kasutatud)::numeric(12, 2) as jaak
+                  from
+                      proj_details pd
+
+            </sql>
+    <multiple>true</multiple>
+    <alias>details</alias>
   </select>
   <select>
     <sql>SELECT $1 AS rekv_id, *
@@ -50,6 +98,31 @@
     <multiple>true</multiple>
     <alias>validate_lib_usage</alias>
   </select>
+  <select>
+    <sql>select
+                      sum(summa) as summa
+                  from
+                      cur_journal
+                  where
+                        rekvid = $1::integer
+                    and deebet like '100100%'
+                    and kpv &gt;= $2::date
+                    and kpv &lt;= $3::date
+                    and kood2 = '60'
+                    and kood5 = '3500'
+                    and proj = $4::varchar(20)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>get_projekt_summa</alias>
+  </select>
+  <select>
+    <sql>select *
+                  from
+                      palk.get_projekt_jaotamine($1::integer, $2::numeric)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>get_projekti_jaotamine</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM com_projekt l
@@ -57,7 +130,7 @@
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select libs.sp_salvesta_library($1, $2, $3) as id</sql>
+    <sql>select libs.sp_salvesta_proj($1, $2, $3) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
