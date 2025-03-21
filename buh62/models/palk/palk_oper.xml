@@ -2,7 +2,62 @@
 <VFPData>
   <grid>
     <sql>SELECT d.*
-                    FROM palk.cur_palkoper d
+                    FROM  (
+                             SELECT
+                                 d.id,
+                                 p.kpv,
+                                 p.summa,
+                                 p.rekvid,
+                                 a.regkood                                                                                  AS isikukood,
+                                 a.nimetus                                                                                  AS isik,
+                                 coalesce(jid.number, 0)                                                                    AS journalid,
+                                 o.kood                                                                                     AS osakond,
+                                 lib.nimetus,
+                                 ((enum_range(NULL :: PALK_LIIK))[(lib.properties :: JSONB -&gt;&gt; 'liik') :: INTEGER]) :: TEXT AS palk_liik,
+                                 ((enum_range(NULL :: PALK_OPER_LIIK))[CASE ((lib.properties :: JSONB -&gt;&gt; 'liik') ||
+                                                                             (lib.properties :: JSONB -&gt;&gt; 'asutusest')) :: TEXT
+                                                                           WHEN '10'
+                                                                               THEN 1
+                                                                           WHEN '20'
+                                                                               THEN 2
+                                                                           WHEN '40'
+                                                                               THEN 2
+                                                                           WHEN '70'
+                                                                               THEN 2
+                                                                           WHEN '71'
+                                                                               THEN 3
+                                                                           WHEN '80'
+                                                                               THEN 2
+                                                                           WHEN '60'
+                                                                               THEN 2
+                                                                           ELSE 3 END]) :: VARCHAR(20)                      AS liik,                                 
+                                 (lib.properties :: JSONB -&gt;&gt; 'tululiik') :: TEXT                                           AS tululiik,
+                                 coalesce(p.konto, '')::varchar(20)                                                         as konto,
+                                 coalesce(p.kood2, '')::varchar(20)                                                         as allikas,
+                                 coalesce(p.tunnus, '')::varchar(20)                                                        as tunnus,
+                                 coalesce(p.proj, '')::varchar(20)                                                          as proj
+                             FROM
+                                 docs.doc                           d
+                                     INNER JOIN      palk.palk_oper p ON p.parentid = d.id
+                                     INNER JOIN      libs.library   lib ON p.libid = lib.id AND lib.library = 'PALK'
+                                     INNER JOIN      palk.tooleping t ON p.lepingid = t.id
+                                     INNER JOIN      libs.asutus    a ON t.parentid = a.id
+                                     LEFT OUTER JOIN libs.library   o ON o.id = t.osakondid
+                                     LEFT OUTER JOIN docs.doc       dd ON p.journalid = dd.id
+                                     LEFT OUTER JOIN docs.journal   j ON j.parentid = dd.id
+                                     LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+                             WHERE
+                                   d.doc_type_id IN (
+                                                        SELECT
+                                                            id
+                                                        FROM
+                                                            libs.library l
+                                                        WHERE
+                                                              l.library = 'DOK'
+                                                          AND l.kood = 'PALK_OPER'
+                                                    )
+                               AND d.status &lt;&gt; 3
+                                     ) d
                     WHERE d.rekvId = $1
                       AND coalesce(docs.usersRigths(d.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curPalkOper</alias>
@@ -42,6 +97,7 @@
                          p.period,
                          p.pohjus,
                          (p.properties -&gt;&gt; 'pohjus_selg')::VARCHAR(254)                    AS pohjus_selg,
+                         (p.properties -&gt;&gt; 'paranduse_kpv')::DATE                          AS paranduse_kpv,                         
                          coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS korr_konto,
                          dp.selg :: VARCHAR(120)                                           AS dokprop,
                          (CASE WHEN empty(dp.registr::INTEGER) THEN 0 ELSE 1 END)::INTEGER AS kas_lausend,
@@ -99,7 +155,8 @@
                           0 :: NUMERIC(12, 2)                           AS tka,
                           NULL :: DATE                                  AS period,
                           NULL :: TEXT                                  AS pohjus,
-                          NULL::varchar(254) AS pohjus_selg,
+                          NULL::varchar(254)                            AS pohjus_selg,
+                          null::date                                    as paranduse_kpv,
                           NULL :: INTEGER                               AS journalid,
                           null :: VARCHAR(20)                           AS korr_konto,
                           null :: VARCHAR(120)                          AS dokprop,                          
@@ -114,15 +171,9 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT rd.id,
-                         $2 :: INTEGER   AS userid,
-                         trim(l.kood)    AS doc_type,
-                         trim(l.nimetus) AS name
-                  FROM docs.doc d
-                           LEFT OUTER JOIN docs.doc rd ON rd.id IN (SELECT unnest(d.docs_ids))
-                           LEFT OUTER JOIN libs.library l ON rd.doc_type_id = l.id
-                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                  WHERE d.id = $1</sql>
+    <sql>SELECT d.*
+                  FROM docs.get_relative_docs($1::INTEGER) d
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER</sql>
     <query />
     <multiple>true</multiple>
     <alias>relations</alias>
