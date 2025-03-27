@@ -1,17 +1,21 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT l.id,
-                           l.kood,
-                           l.nimetus,
-                           l.tun5                                                          AS kehtiv,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'tululiik'), '')::VARCHAR(20) AS tululiik,
-                           coalesce((l.properties::JSONB -&gt;&gt; 'liik')::INTEGER, 1)          AS liik,
-                           $2::INTEGER                                                     AS userId,
-                           l.tun5                                                          AS is_arhiiv,
-                           (l.properties::JSONB -&gt;&gt; 'valid')::DATE                         AS valid
-                    FROM libs.library l
-                    WHERE l.library = 'PALK'
+    <sql>SELECT
+                        l.id,
+                        l.kood,
+                        l.nimetus,
+                        l.tun5                                                          AS kehtiv,
+                        coalesce((l.properties::JSONB -&gt;&gt; 'tululiik'), '')::VARCHAR(20) AS tululiik,
+                        coalesce((l.properties::JSONB -&gt;&gt; 'liik')::INTEGER, 1)          AS liik,
+                        $2::INTEGER                                                     AS userId,
+                        l.tun5                                                          AS is_arhiiv,
+                        (l.properties::JSONB -&gt;&gt; 'proj')::varchar(20)                   AS proj,
+                        (l.properties::JSONB -&gt;&gt; 'valid')::DATE                         AS valid
+                    FROM
+                        libs.library l
+                    WHERE
+                          l.library = 'PALK'
                       AND l.status &lt;&gt; 3
                       AND (l.rekvId = $1 OR l.rekvid IS NULL)</sql>
     <alias>curPalklib</alias>

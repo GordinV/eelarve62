@@ -64,10 +64,14 @@
                                               pl.proj_id,
                                               pl.kuu_summa,
                                               pl.summa::numeric(12, 2)                                                                                        as summa,
-                                              pl.korrigeerimine::numeric(12, 2)                                                                               as korrigeerimine,
+                                              pl.korrigeerimine::numeric(12, 2)                                                                               as korrigeerimine,                                              
+                                              pl.sm::numeric(12, 2)                                                                                           as sm,
                                               palk.get_projekt_kasutatud_summa(pl.leping_id:: integer,
                                                                                pl.proj_id:: INTEGER,
-                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()))::numeric(12, 2) as kasutatud
+                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()), 'sm')::numeric(12, 2) as sm_kasutatud,
+                                              palk.get_projekt_kasutatud_summa(pl.leping_id:: integer,
+                                                                               pl.proj_id:: INTEGER,
+                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()), 'summa')::numeric(12, 2)  as kasutatud
                                           FROM
                                               libs.library                      l
                                                   inner join libs.proj_laiendus pl on l.id = pl.proj_id
@@ -116,12 +120,24 @@
     <alias>get_projekt_summa</alias>
   </select>
   <select>
-    <sql>select *
+    <sql>select
+                      leping_Id:: INTEGER,
+                      proj_id:: INTEGER,
+                      isik:: varchar(254),
+                      amet:: varchar(254),
+                      summa:: NUMERIC(14, 2),
+                      sm:: numeric(14, 2)
                   from
                       palk.get_projekt_jaotamine($1::integer, $2::numeric)</sql>
     <query />
     <multiple>true</multiple>
     <alias>get_projekti_jaotamine</alias>
+  </select>
+  <select>
+    <sql>select palk.paranda_palga_kaardid($1::integer, $2::integer)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>paranda_palga_kaardid</alias>
   </select>
   <selectAsLibs>
     <sql>SELECT *
