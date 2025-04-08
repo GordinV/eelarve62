@@ -42,7 +42,7 @@
             null::date as proj_alates,
             null::date as proj_kuni,
             null::numeric as proj_summa,
-            null::date as valid,            
+            null::date as valid,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -52,26 +52,47 @@
     <sql>with
                       proj_details as (
                                           SELECT
-                                              $2 :: INTEGER                                                                                                   AS userid,
+                                              $2 :: INTEGER                                                                AS userid,
                                               l.kood,
                                               l.nimetus,
-                                              a.regkood                                                                                                       as isikukood,
-                                              a.nimetus                                                                                                       as isik,
-                                              pl.proj_id                                                                                                      as parentid,
-                                              amet.kood                                                                                                       as amet,
-                                              coalesce((l.properties::jsonb -&gt;&gt; 'proj_summa')::numeric, 0)::numeric(12, 2)                                    as proj_summa,
+                                              a.regkood                                                                    as isikukood,
+                                              a.nimetus                                                                    as isik,
+                                              pl.proj_id                                                                   as parentid,
+                                              amet.kood                                                                    as amet,
+                                              coalesce((l.properties::jsonb -&gt;&gt; 'proj_summa')::numeric, 0)::numeric(12, 2) as proj_summa,
+                                              pl.selgitus                                                                  as selgitus,
                                               pl.leping_id,
                                               pl.proj_id,
                                               pl.kuu_summa,
-                                              pl.summa::numeric(12, 2)                                                                                        as summa,
-                                              pl.korrigeerimine::numeric(12, 2)                                                                               as korrigeerimine,                                              
-                                              pl.sm::numeric(12, 2)                                                                                           as sm,
+                                              pl.summa::numeric(12, 2)                                                     as summa,
+                                              pl.korrigeerimine::numeric(12, 2)                                            as korrigeerimine,
+                                              pl.sm::numeric(12, 2)                                                        as sm,
                                               palk.get_projekt_kasutatud_summa(pl.leping_id:: integer,
                                                                                pl.proj_id:: INTEGER,
-                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()), 'sm')::numeric(12, 2) as sm_kasutatud,
+                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()),
+                                                                               'sm')::numeric(12, 2)                       as sm_kasutatud,
                                               palk.get_projekt_kasutatud_summa(pl.leping_id:: integer,
                                                                                pl.proj_id:: INTEGER,
-                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()), 'summa')::numeric(12, 2)  as kasutatud
+                                                                               coalesce((l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE, date()),
+                                                                               'summa')::numeric(12, 2)                    as kasutatud,
+                                              round(((l.properties::jsonb -&gt;&gt; 'proj_kuni')::date -
+                                                     (l.properties::jsonb -&gt;&gt; 'proj_alates')::date) / 30,
+                                                    0)                                                                     as proj_osad_kokku,
+                                              coalesce(round((get_last_day((
+                                                                               select
+                                                                                   max(kpv) as kpv
+                                                                               from
+                                                                                   palk.palk_oper po
+                                                                               where
+                                                                                     po.kpv &lt; get_last_day(current_date)
+                                                                                 and po.lepingid = tl.id
+                                                                                 and po.kpv &gt;= (l.properties::jsonb -&gt;&gt; 'proj_alates')::date
+                                                                           )) -
+                                                              (l.properties::jsonb -&gt;&gt; 'proj_alates')::date)::numeric /
+                                                             30,
+                                                             0),
+                                                       0)                                                                  as cur_osad_used
+
                                           FROM
                                               libs.library                      l
                                                   inner join libs.proj_laiendus pl on l.id = pl.proj_id
@@ -83,7 +104,12 @@
                       )
                   select
                       pd.*,
-                      (pd.summa - pd.kasutatud)::numeric(12, 2) as jaak
+                      (pd.summa - pd.kasutatud)::numeric(12, 2) as jaak,
+                      case
+                          when (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud) &gt; 0
+                              then (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud)
+                          else 0 end::numeric(12, 2)            as tagastus
+
                   from
                       proj_details pd
 
@@ -126,7 +152,8 @@
                       isik:: varchar(254),
                       amet:: varchar(254),
                       summa:: NUMERIC(14, 2),
-                      sm:: numeric(14, 2)
+                      sm:: numeric(14, 2),
+                      selgitus::text 
                   from
                       palk.get_projekt_jaotamine($1::integer, $2::numeric)</sql>
     <query />

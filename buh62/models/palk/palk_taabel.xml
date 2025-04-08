@@ -1,7 +1,8 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT t.*, $2::INTEGER AS userId
+    <sql>SELECT t.*, t.ametikood as ameti_kood,
+                    $2::INTEGER AS userId
                     FROM palk.cur_palk_taabel t
                     WHERE (t.rekvid = $1 OR rekvid IS NULL)</sql>
     <alias>curTaabel1</alias>
