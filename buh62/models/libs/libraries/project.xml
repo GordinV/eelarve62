@@ -112,6 +112,7 @@
 
                   from
                       proj_details pd
+                      order by pd.isik, pd.amet
 
             </sql>
     <multiple>true</multiple>
