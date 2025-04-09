@@ -55,6 +55,9 @@
                                               $2 :: INTEGER                                                                AS userid,
                                               l.kood,
                                               l.nimetus,
+                                              (l.properties::JSONB -&gt;&gt; 'proj_alates')::DATE                                AS proj_alates,
+                                              (l.properties::JSONB -&gt;&gt; 'proj_kuni')::DATE                                  AS proj_kuni,
+                                              l.rekvid                                                                     as rekv_id,
                                               a.regkood                                                                    as isikukood,
                                               a.nimetus                                                                    as isik,
                                               pl.proj_id                                                                   as parentid,
@@ -104,15 +107,25 @@
                       )
                   select
                       pd.*,
-                      (pd.summa - pd.kasutatud)::numeric(12, 2) as jaak,
+                      (pd.summa + korrigeerimine - pd.kasutatud)::numeric(12, 2)     as jaak,
+                      (pd.sm - pd.sm_kasutatud)::numeric(12, 2)                      as sm_jaak,
                       case
                           when (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud) &gt; 0
                               then (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud)
-                          else 0 end::numeric(12, 2)            as tagastus
+                          else 0 end::numeric(12, 2)                                 as tagastus,
+                      ((case
+                            when (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud) &gt; 0
+                                then (pd.kuu_summa * pd.cur_osad_used - pd.kasutatud)
+                            else 0 end) * (pc.sm + pc.tka) * 0.01) ::numeric(12, 2)  as sm_tagastus,
+                      (pd.korrigeerimine * (pc.sm + pc.tka) * 0.01) ::numeric(12, 2) as sm_korrigeerimine
 
                   from
-                      proj_details pd
-                      order by pd.isik, pd.amet
+                      proj_details     pd,
+                      palk.palk_config pc
+                  where
+                      pc.rekvid = pd.rekv_id
+                  order by
+                      pd.isik, pd.amet
 
             </sql>
     <multiple>true</multiple>
