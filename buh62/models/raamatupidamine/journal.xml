@@ -94,7 +94,8 @@
                          (SELECT ametnik
                           FROM ou.userid
                           WHERE rekvid = j.rekvid
-                            AND kasutaja = (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120) LIMIT 1)::VARCHAR(120) AS koostaja
+                            AND kasutaja = (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120) LIMIT 1)::VARCHAR(120) AS koostaja,
+                        (j.properties-&gt;&gt;'vn')::varchar(10) as vn
                   FROM docs.doc d
                            INNER JOIN libs.library l ON l.id = d.doc_type_id
                            INNER JOIN docs.journal j ON j.parentId = d.id
@@ -123,7 +124,8 @@
                               '' :: VARCHAR(20)                           AS regkood,
                               '' :: VARCHAR(254)                          AS asutus,
                               '' :: VARCHAR(120)                          AS kasutaja,
-                              '' :: VARCHAR(120)                          AS koostaja</sqlAsNew>
+                              '' :: VARCHAR(120)                          AS koostaja,
+                              null::varchar(10) as vn</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
@@ -187,6 +189,39 @@
     <query />
     <multiple>false</multiple>
     <alias>updateDocLinks</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>
+                with
+                    params as (
+                                  select
+                                      lapsed.get_laps_from_viitenumber($1::TEXT)     as laps_id,
+                                      lapsed.get_rekv_id_from_viitenumber($1:: TEXT) as rekv_id
+                    )
+                SELECT
+                    l.id,
+                    l.nimi::varchar(254) as lapse_nimi
+                FROM
+                    lapsed.laps l,
+                    params      p
+                where
+                      l.id = p.laps_id
+                  and exists
+                      (
+                          select
+                              id
+                          from
+                              lapsed.lapse_kaart lk,
+                              params             p
+                          where
+                                lk.parentid = p.laps_id
+                            and lk.rekvid = p.rekv_id
+                      )
+                  and l.staatus &lt; 3</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>validateLaps</alias>
     <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>

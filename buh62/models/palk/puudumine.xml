@@ -1,15 +1,19 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select a.*, $2::integer as userId
-            from palk.cur_puudumine a
-            where rekvid = $1</sql>
+    <sql>select
+                        a.*,
+                        $2::integer as userId
+                    from
+                        palk.cur_puudumine a
+                    where
+                        rekvid = $1</sql>
     <alias>curPuudumine</alias>
   </grid>
   <select>
     <sql>SELECT
-                  $2 :: INTEGER            AS userid,
-                 'PUUDUMINE' AS doc_type_id,
+                  $2 :: INTEGER                                      AS userid,
+                  'PUUDUMINE'                                        AS doc_type_id,
                   p.id,
                   p.lepingid,
                   p.libid,
@@ -17,14 +21,32 @@
                   p.kpv1,
                   p.kpv2,
                   p.paevad,
+                  coalesce((p.properties-&gt;&gt;'arvestatud_paevad')::integer,p.paevad) as arvestatud_paevad,
                   p.puudumiste_liik::varchar(20),
                   p.tyyp,
                   p.status,
                   p.muud,
-                  t.parentid
-                FROM palk.puudumine p
-                inner join palk.tooleping t on t.id = p.lepingid
-                WHERE p.id = $1</sql>
+                  t.parentid,
+                  (p.properties -&gt;&gt; 'palk_oper_id')::integer         as palk_oper_id,
+                  (p.properties -&gt;&gt; 'algorithm')::varchar(100)       as algorithm,
+                  (p.properties -&gt;&gt; 'amet')::varchar(254)            as amet,
+                  (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric      as avg_paeva_summa,
+                  (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer as arv_paevad_perioodis,
+                  p.properties -&gt;&gt; 'selg'                            as selg,
+                  (p.properties -&gt;&gt; 'allikas')::varchar(20)          as allikas,
+                  (p.properties -&gt;&gt; 'tegev')::varchar(20)            as tegev,
+                  (p.properties -&gt;&gt; 'artikkel')::varchar(20)         as artikkel,
+                  (p.properties -&gt;&gt; 'tunnus')::varchar(20)           as tunnus,
+                  (p.properties -&gt;&gt; 'kpv1')::date                    as params_kpv1,
+                  (p.properties -&gt;&gt; 'kpv2')::date                    as params_kpv2,
+                  pt.vs_kooded,
+                  pt.eesti as pt_nimetus                  
+              FROM
+                  palk.puudumine                p
+                      inner join palk.tooleping t on t.id = p.lepingid
+                      left outer join palk.com_puudumiste_tyyp pt on pt.liik = p.puudumiste_liik and pt.id = p.tyyp              
+              WHERE
+                  p.id = $1</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
@@ -39,6 +61,7 @@
                       'PUHKUS'::varchar(20) as puudumiste_liik,
                       0 as tyyp,
                       1 as status,
+                      null::integer as palk_oper_id,
                       null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -46,14 +69,14 @@
   </select>
   <select>
     <sql>select
-                     id,
-                     liik::varchar(20),
-                     eesti::varchar(120),
-                     vene::varchar(120)
-                 from
-                     palk.com_puudumiste_tyyp
-                 where
-                     kas_kehtiv</sql>
+                      id,
+                      liik::varchar(20),
+                      eesti::varchar(120),
+                      vene::varchar(120)
+                  from
+                      palk.com_puudumiste_tyyp
+                  where
+                      kas_kehtiv</sql>
     <query />
     <multiple>true</multiple>
     <alias>com_puudumised</alias>
@@ -65,13 +88,49 @@
                                              SELECT
                                                  p.data
                                              from
-                                                 palk.sp_import_puudumine_from_virosoft($2::integer,$3::integer, $1::JSONB) p
+                                                 palk.sp_import_puudumine_from_virosoft($2::integer, $3::integer,
+                                                                                        $1::JSONB) p
                                          )
                       )
                           AS x (error_message TEXT, error_code INTEGER, result INTEGER)</sql>
     <query />
     <multiple>false</multiple>
     <alias>importDok</alias>
+  </select>
+  <select>
+    <sql>select *
+                  from
+                      palk.calc_avg_income_vacation($1::INTEGER, $2:: JSON) a
+                  order by
+                      a.avg_paeva_summa desc</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>arvutaKeskPalk</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>select * from palk.gen_puhkuse_oper($1::INTEGER, $2:: JSONB) </sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>genPuhkuseOper</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>select *
+                  from
+                      palk.arvuta_keskpalga_period($1:: JSONB) a</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>arvutaKeskPalgaPeriod</alias>
+    <not_initial_load>true</not_initial_load>
+  </select>
+  <select>
+    <sql>select *
+                  from
+                      palk.arvuta_puudumise_paevad($1:: JSONB) a</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>arvutaPuudumisePaevad</alias>
     <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
@@ -83,7 +142,12 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>select error_code, result, error_message from palk.sp_delete_puudumine($1, $2)</sql>
+    <sql>select
+                    error_code,
+                    result,
+                    error_message
+                from
+                    palk.sp_delete_puudumine($1, $2)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -94,7 +158,12 @@
     <alias></alias>
   </executeSql>
   <executeCommand>
-    <sql>select error_code, result, error_message from palk.sp_calc_puhkuse_paevad($1, $2)</sql>
+    <sql>select
+                      error_code,
+                      result,
+                      error_message
+                  from
+                      palk.sp_calc_puhkuse_paevad($1, $2)</sql>
     <alias>calcPuhkusePaevad</alias>
   </executeCommand>
   <register>
@@ -111,28 +180,35 @@
   </generateJournal>
   <print></print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
-                         (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
-                                                                                                                        email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS kustutatud
-                  FROM (
-                           SELECT jsonb_array_elements('[]'::jsonb || d.ajalugu) AS ajalugu, d.id
-                           FROM palk.puudumine d,
-                                ou.userid u
-                           WHERE d.id = $1
-                             AND u.id = $2
-                       ) qry
-                  WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL
+    <sql>SELECT
+                      ROW_NUMBER() OVER ()                                                                        AS id,
+                      (qry.ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                       AS kasutaja,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS koostatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS muudatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS prinditud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
+                                                                                                                     email,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS earve,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS kustutatud
+                  FROM
+                      (
+                          SELECT
+                              jsonb_array_elements('[]'::jsonb || d.ajalugu) AS ajalugu,
+                              d.id
+                          FROM
+                              palk.puudumine d,
+                              ou.userid      u
+                          WHERE
+                                d.id = $1
+                            AND u.id = $2
+                      ) qry
+                  WHERE
+                      (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL
         </sql>
     <alias>getLogs</alias>
   </getLog>
