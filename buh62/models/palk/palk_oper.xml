@@ -16,6 +16,7 @@
                                 coalesce(jid.number, 0)                                                                    AS journalid,
                                 coalesce(j.parentid, 0)                                                                    AS lausend_id,
                                 o.kood                                                                                     AS osakond,
+                                amet.kood                                                                                  as ameti_kood,
                                 lib.nimetus,
                                 ((enum_range(NULL :: PALK_LIIK))[(lib.properties :: JSONB -&gt;&gt; 'liik') :: INTEGER]) :: TEXT AS palk_liik,
                                 ((enum_range(NULL :: PALK_OPER_LIIK))[CASE ((lib.properties :: JSONB -&gt;&gt; 'liik') ||
@@ -43,7 +44,8 @@
                                 coalesce(lib.tun1, 0)::INTEGER                                                             AS is_ametiuhingu_liikme,
                                 (lib.properties :: JSONB -&gt;&gt; 'asutusest') :: BOOLEAN                                       AS is_asutusest,
                                 (lib.properties :: JSONB -&gt;&gt; 'maks') :: BOOLEAN                                            AS is_maksustatav,
-                                (lib.properties :: JSONB -&gt;&gt; 'sots') :: BOOLEAN                                            AS is_sotsmaks
+                                (lib.properties :: JSONB -&gt;&gt; 'sots') :: BOOLEAN                                            AS is_sotsmaks,
+                                coalesce((p.properties -&gt;&gt; 'kas_ettemaks')::boolean, false)::BOOLEAN                       AS is_ettemaks
 
                             FROM
                                 docs.doc                           d
@@ -52,6 +54,7 @@
                                     INNER JOIN      palk.tooleping t ON p.lepingid = t.id
                                     INNER JOIN      libs.asutus    a ON t.parentid = a.id
                                     LEFT OUTER JOIN libs.library   o ON o.id = t.osakondid
+                                    LEFT OUTER JOIN libs.library   amet ON amet.id = t.ametid
                                     LEFT OUTER JOIN docs.doc       dd ON p.journalid = dd.id
                                     LEFT OUTER JOIN docs.journal   j ON j.parentid = dd.id
                                     LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
@@ -73,69 +76,72 @@
     <alias>curPalkOper</alias>
   </grid>
   <select>
-    <sql>SELECT
-                      d.id,
-                      d.docs_ids,
-                      (to_char(d.created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT               AS created,
-                      (to_char(d.lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT            AS lastupdate,
-                      d.bpm,
-                      trim(l.nimetus)                                                   AS doc,
-                      trim(l.kood)                                                      AS doc_type_id,
-                      trim(s.nimetus)                                                   AS status,
-                      p.kpv                                                             AS kpv,
-                      p.rekvid,
-                      p.libid,
-                      p.lepingid,
-                      p.summa,
-                      p.tululiik,
-                      p.journalid,
-                      p.muud,
-                      p.kood1,
-                      p.kood2,
-                      p.kood3,
-                      p.kood4,
-                      p.kood5,
-                      p.konto,
-                      p.tp,
-                      p.tunnus,
-                      p.proj,
-                      p.tulumaks,
-                      p.sotsmaks,
-                      p.tootumaks,
-                      p.pensmaks,
-                      p.tulubaas,
-                      p.tka,
-                      p.period,
-                      p.pohjus,
-                      (p.properties -&gt;&gt; 'pohjus_selg')::VARCHAR(254)                    AS pohjus_selg,
-                      (p.properties -&gt;&gt; 'paranduse_kpv')::DATE                          AS paranduse_kpv,
-                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS korr_konto,
-                      dp.selg :: VARCHAR(120)                                           AS dokprop,
-                      (CASE WHEN empty(dp.registr::INTEGER) THEN 0 ELSE 1 END)::INTEGER AS kas_lausend,
-                      p.doklausid                                                       AS dokpropid,
-                      coalesce(jid.number, 0) :: INTEGER                                AS lausend,
-                      t.parentid,
-                      (pl.properties::JSONB -&gt;&gt; 'liik')::INTEGER                        AS liik,
-                      (pl.properties::JSONB -&gt;&gt; 'asutusest')::INTEGER                   AS asutusest,
-                      (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                         AS koostaja,
-                      (p.properties -&gt;&gt; 'objekt')::VARCHAR(20)                          as objekt,
-                      (p.properties -&gt;&gt; 'maksekpv')::DATE                               AS maksekpv
+    <sql>SELECT d.id,
+                         d.docs_ids,
+                         (to_char(d.created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT               AS created,
+                         (to_char(d.lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT            AS lastupdate,
+                         d.bpm,
+                         trim(l.nimetus)                                                   AS doc,
+                         trim(l.kood)                                                      AS doc_type_id,
+                         trim(s.nimetus)                                                   AS status,
+                         p.kpv                                                             AS kpv,
+                         p.rekvid,
+                         p.libid,
+                         p.lepingid,
+                         p.summa,
+                         p.tululiik,
+                         p.journalid,
+                         p.muud,
+                         p.kood1,
+                         p.kood2,
+                         p.kood3,
+                         p.kood4,
+                         p.kood5,
+                         p.konto,
+                         p.tp,
+                         p.tunnus,
+                         p.proj,
+                         p.tulumaks,
+                         p.sotsmaks,
+                         p.tootumaks,
+                         p.pensmaks,
+                         p.tulubaas,
+                         p.tka,
+                         p.period,
+                         p.pohjus,
+                         (p.properties -&gt;&gt; 'pohjus_selg')::VARCHAR(254)                    AS pohjus_selg,
+                         (p.properties -&gt;&gt; 'paranduse_kpv')::DATE                          AS paranduse_kpv,
+                         coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)    AS korr_konto,
+                         dp.selg :: VARCHAR(120)                                           AS dokprop,
+                         (CASE WHEN empty(dp.registr::INTEGER) THEN 0 ELSE 1 END)::INTEGER AS kas_lausend,
+                         p.doklausid                                                       AS dokpropid,
+                         coalesce(jid.number, 0) :: INTEGER                                AS lausend,
+                         t.parentid,
+                         (pl.properties::JSONB -&gt;&gt; 'liik')::INTEGER                        AS liik,
+                         (pl.properties::JSONB -&gt;&gt; 'asutusest')::INTEGER                   AS asutusest,
+                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                         AS koostaja,
+                         (p.properties -&gt;&gt; 'objekt')::VARCHAR(20)                          as objekt,
+                         (p.properties -&gt;&gt; 'maksekpv')::DATE                               AS maksekpv,
+                         (p.properties -&gt;&gt; 'alus_oper_ids')::text                          as alus_oper_ids,
+                         (p.properties -&gt;&gt; 'kas_ettemaks')::boolean                        as kas_ettemaks,
+                         (p.properties -&gt;&gt; 'puudumise_id')::integer                        as puudumise_id,
+                         (p.properties -&gt;&gt; 'alus_oper_ids')::text                          as alus_oper_ids,
+                         (p.properties -&gt;&gt; 'ettemaksu_periood')::date                      as ettemaksu_periood,
+                         (p.properties -&gt;&gt; 'ettemaksu_oper_ids')::text                     as ettemaksu_oper_ids
 
-                  FROM
-                      docs.doc                           d
-                          INNER JOIN      palk.palk_oper p ON p.parentId = d.id
-                          INNER JOIN      palk.tooleping t ON t.id = p.lepingid
-                          INNER JOIN      ou.userid      u ON u.id = $2 :: INTEGER
-                          INNER JOIN      libs.asutus    a ON a.id = t.parentid
-                          LEFT OUTER JOIN libs.library   pl ON pl.id = p.libid
-                          LEFT OUTER JOIN libs.library   l ON l.id = d.doc_type_id
-                          LEFT OUTER JOIN libs.library   s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
-                          LEFT OUTER JOIN libs.dokprop   dp ON dp.id = p.doklausid
-                          LEFT OUTER JOIN docs.doc       dj ON p.journalid = dj.id
-                          LEFT OUTER JOIN docs.journal   j ON j.parentid = dj.id
-                          LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
-                  WHERE
-                      d.id = $1</sql>
+                  FROM docs.doc d
+                           INNER JOIN palk.palk_oper p ON p.parentId = d.id
+                           INNER JOIN palk.tooleping t ON t.id = p.lepingid
+                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
+                           INNER JOIN libs.asutus a ON a.id = t.parentid
+                           LEFT OUTER JOIN libs.library pl ON pl.id = p.libid
+                           LEFT OUTER JOIN libs.library l ON l.id = d.doc_type_id
+                           LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
+                           LEFT OUTER JOIN libs.dokprop dp ON dp.id = p.doklausid
+                           LEFT OUTER JOIN docs.doc dj ON p.journalid = dj.id
+                           LEFT OUTER JOIN docs.journal j ON j.parentid = dj.id
+                           LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
+                  WHERE d.id = $1</sql>
     <sqlAsNew>SELECT
                           $1 :: INTEGER                                 AS id,
                           $2 :: INTEGER                                 AS userid,
@@ -181,7 +187,13 @@
                           1                                             AS liik,
                           NULL :: INTEGER                               AS lausend,
                           NULL :: VARCHAR(20)                           AS objekt,
-                          NULL::DATE                                    AS maksekpv</sqlAsNew>
+                          NULL::DATE                                    AS maksekpv,
+                          null::text as alus_oper_ids,
+                          false::boolean as kas_ettemaks,
+                          null::integer as puudumise_id,
+                          null::text as alus_oper_ids,
+                          null::date as ettemaksu_periood,
+                         null::text as ettemaksu_oper_ids</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
@@ -218,12 +230,10 @@
     <sql>SELECT DISTINCT *
                   FROM jsonb_to_recordset(
                                (SELECT qry.data -&gt; 'data'
-                                FROM (
-                                         SELECT *
-                                         FROM sp_execute_task($1::INTEGER, $2::JSON, $3::TEXT)
-                                     ) qry)
-                           ) AS x (error_message TEXT, error_code INTEGER, summa NUMERIC, selg TEXT, tki NUMERIC,
-                                   tka NUMERIC, tm NUMERIC, pm NUMERIC, sm NUMERIC, mvt NUMERIC)
+                                FROM (SELECT *
+                                      FROM sp_execute_task($1::INTEGER, $2::JSON, $3::TEXT)) qry)
+                       ) AS x (error_message TEXT, error_code INTEGER, summa NUMERIC, selg TEXT, tki NUMERIC,
+                               tka NUMERIC, tm NUMERIC, pm NUMERIC, sm NUMERIC, mvt NUMERIC)
         </sql>
     <alias>executeTask</alias>
   </executeCommand>
@@ -256,13 +266,11 @@
                                   '')::VARCHAR(20)                                                                   AS earve,
                          coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
-                  FROM (
-                           SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
-                           FROM docs.doc d,
-                                ou.userid u
-                           WHERE d.id = $1
-                             AND u.id = $2
-                       ) qry</sql>
+                  FROM (SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
+                        FROM docs.doc d,
+                             ou.userid u
+                        WHERE d.id = $1
+                          AND u.id = $2) qry</sql>
     <alias>getLogs</alias>
   </getLog>
 </VFPData>
