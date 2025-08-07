@@ -130,12 +130,48 @@
     <alias>arvutaPuudumisePaevad</alias>
     <not_initial_load>true</not_initial_load>
   </select>
+  <select>
+    <sql>select
+                      x.kpv1,
+                      x.kpv2,
+                      x.paevad,
+                      x.summa,
+                      x.alus,
+                      x.palk_oper_id,
+                      coalesce(x.deleted, '0') as deleted,
+                      $2 :: INTEGER            AS userid
+                  from
+                      jsonb_to_recordset(
+                              coalesce((
+                                           select
+                                               properties -&gt; 'pk'
+                                           from
+                                               palk.puudumine p
+                                           where
+                                                 p.id = $1
+                                             and p.properties -&gt;&gt; 'pk' is not null
+                                       ),
+                                       '[]'::jsonb || jsonb_build_object('kpv1', null::date,
+                                                                         'kpv2', null::date,
+                                                                         'paevad', 0,
+                                                                         'summa', 0,
+                                                                         'alus', null,
+                                                                         'palk_oper_id', 0,
+                                                                         'deleted', '1')
+                              )
+                      ) as x(kpv1 date, kpv2 date, paevad integer, summa numeric, alus text, palk_oper_id integer,
+                             deleted varchar(1))
+            </sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
-    <sql>select palk.sp_salvesta_puudumine($1, $2, $3) as id</sql>
+    <sql>select palk.sp_salvesta_puudumine($1::json, $2::integer, $3::integer) as id</sql>
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
