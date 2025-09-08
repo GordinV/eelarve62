@@ -1,4 +1,4 @@
-<?xml version = "1.0" encoding="utf-8" standalone="yes"?>
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
     <sql>select
@@ -187,7 +187,7 @@
                                            expanded_data
                                        UNION ALL
                                        SELECT
-                                           'Tööpäevad' ::varchar(20)                                                as nimetus,
+                                           'Toopaevad' ::varchar(20)                                                as nimetus,
                                            MAX(CASE WHEN period = periods[1] THEN toopaevad::text END)::varchar(20) as &#34;01&#34;,
                                            MAX(CASE WHEN period = periods[2] THEN toopaevad::text END)::varchar(20) as &#34;02&#34;,
                                            MAX(CASE WHEN period = periods[3] THEN toopaevad::text END)::varchar(20) as &#34;03&#34;,
@@ -199,7 +199,7 @@
                                            expanded_data
                                        UNION ALL
                                        SELECT
-                                           'Kalendripäevad'::varchar(20)                                                as nimetus,
+                                           'Kalendripaeevad'::varchar(20)                                                as nimetus,
                                            MAX(CASE WHEN period = periods[1] THEN kalendripaevad::text END)::varchar(20) as &#34;01&#34;,
                                            MAX(CASE WHEN period = periods[2] THEN kalendripaevad::text END)::varchar(20) as &#34;02&#34;,
                                            MAX(CASE WHEN period = periods[3] THEN kalendripaevad::text END)::varchar(20) as &#34;03&#34;,
@@ -211,7 +211,7 @@
                                            expanded_data
                                        UNION ALL
                                        SELECT
-                                           'Pühad'::varchar(20)                                                 as nimetus,
+                                           'Puhad'::varchar(20)                                                 as nimetus,
                                            MAX(CASE WHEN period = periods[1] THEN puhad::text END)::varchar(20) as &#34;01&#34;,
                                            MAX(CASE WHEN period = periods[2] THEN puhad::text END)::varchar(20) as &#34;02&#34;,
                                            MAX(CASE WHEN period = periods[3] THEN puhad::text END)::varchar(20) as &#34;03&#34;,
