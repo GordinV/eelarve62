@@ -142,75 +142,9 @@
     <not_initial_load>true</not_initial_load>
   </select>
   <select>
-    <sql>with
-                      puudumine as (
-                                       select
-                                           p.id,
-                                           p.kpv1,
-                                           p.kpv2,
-                                           tl.parentid as isik_id,
-                                           tl.rekvid
-                                       from
-                                           palk.puudumine                p
-                                               inner join palk.tooleping tl on tl.id = p.lepingid
-                                       where
-                                           p.id = $1
-                                   ),
-                      result as (
-                                       select --pp.*
-                                              tl.id                                                as leping_id,
-                                              tl.ametid                                            as amet_id,
-                                              tl.parentid                                          as isik_id,
-                                              (to_jsonb(palk.get_keskpalga_details(pp.id::integer, 'null'::text,
-                                                                                   'null'::text))) as arv,
-                                              pp.id                                                as puudumine_id
-
-                                       from
-                                           palk.puudumine                pp
-                                               inner join palk.tooleping tl on tl.id = pp.lepingid,
-                                           puudumine                     p
-                                       where
-                                             tl.parentid = p.isik_id
-                                         and tl.rekvid = p.rekvid
-                                         and pp.kpv1 = p.kpv1
-                                         and pp.kpv2 = p.kpv2
-                                   ),
-                      agg as (
-                                       select
-                                           jsonb_agg(r.arv) as arv,
-                                           r.amet_id,
-                                           r.isik_id,
-                                           r.puudumine_id
-                                       from
-                                           result r
-                                       group by
-                                           r.amet_id, r.puudumine_id, r.isik_id
-                                   )
-                  select
-                      isik.nimetus         as isik,
-                      amet.nimetus         as amet,
-                      elem -&gt;&gt; 'nimetus'   as nimetus,
-                      elem -&gt;&gt; 'period_01' as period_01,
-                      elem -&gt;&gt; 'period_02' as period_02,
-                      elem -&gt;&gt; 'period_03' as period_03,
-                      elem -&gt;&gt; 'period_04' as period_04,
-                      elem -&gt;&gt; 'period_05' as period_05,
-                      elem -&gt;&gt; 'period_06' as period_06,
-                      elem -&gt;&gt; 'kokku'     as kokku,
-                      elem -&gt;&gt; 'allikas'   as allikas,
-                      elem -&gt;&gt; 'tegev'     as tegev,
-                      elem -&gt;&gt; 'artikkel'  as artikkel,
-                      elem -&gt;&gt; 'tunnus'    as tunnus
-
+    <sql>select *
                   from
-                      libs.library                  as amet,
-                      libs.asutus                   as isik,
-                                                       agg,
-                      jsonb_array_elements(agg.arv) as elem
-                  where
-                        amet.id = agg.amet_id
-                    and isik.id = agg.isik_id
-            </sql>
+                      palk.get_full_keskpalga_arvestus($1::integer)</sql>
     <query />
     <multiple>true</multiple>
     <alias>getFullArvestus</alias>
