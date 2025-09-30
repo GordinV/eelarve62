@@ -144,7 +144,7 @@
   <select>
     <sql>select *
                   from
-                      palk.get_full_keskpalga_arvestus($1::integer)</sql>
+                      palk.get_full_keskpalga_arvestus($1::integer, $2::text, $3::text)</sql>
     <query />
     <multiple>true</multiple>
     <alias>getFullArvestus</alias>
