@@ -30,7 +30,8 @@
                   coalesce((p.properties -&gt;&gt; 'palk_oper_id')::integer, 0)::integer         as palk_oper_id,
                   (p.properties -&gt;&gt; 'algorithm')::varchar(100)                             as algorithm,
                   (p.properties -&gt;&gt; 'amet')::varchar(254)                                  as amet,
-                  coalesce((p.properties -&gt;&gt; 'summa')::numeric, 0)::numeric                as puhkuse_summa,
+                  round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric * (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,
+                        2)                                                                 as puhkuse_summa,
                   (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
                   (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer                       as arv_paevad_perioodis,
                   p.properties -&gt;&gt; 'selg'                                                  as selg,
@@ -45,7 +46,10 @@
                   (p.properties -&gt;&gt; 'kokkuleppe_summa')::numeric                           as kokkuleppe_summa,
                   coalesce((p.properties -&gt;&gt; 'kas_arvesta_parandus')::integer, 0)::integer as kas_arvesta_parandus,
                   pt.vs_kooded,
-                  pt.eesti                                                                 as pt_nimetus
+                  pt.eesti                                                                 as pt_nimetus,
+                  (p.properties -&gt;&gt; 'puudumiste_kood')::varchar(20)                        as puudumiste_kood,
+                  (p.properties -&gt;&gt; 'puudumise_tyyp')::char(1)                             as puudumise_tyyp,
+                  (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id
               FROM
                   palk.puudumine                               p
                       inner join      palk.tooleping           t on t.id = p.lepingid
@@ -70,7 +74,10 @@
                       0::integer as kas_arvesta_parandus,
                       null::date                                          as params_kpv1,
                       null::date                                          as params_kpv2,
-                      null::date                                        as params_vm_kpv,                      
+                      null::date                                        as params_vm_kpv,   
+                      null::text                                       as puudumiste_kood,
+                      null::text                                        as puudumise_tyyp,
+                      null::integer                       as eelmise_puudumine_id,                   
                       null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -89,6 +96,24 @@
     <query />
     <multiple>true</multiple>
     <alias>com_puudumised</alias>
+  </select>
+  <select>
+    <sql>
+                select
+                    p.id , 
+                    p.eesti::varchar(254) as nimetus, 
+                    pt.kood::varchar(20), 
+                    p.liik
+                from
+                    (select distinct unnest(p.vs_kooded) as kood
+                     from palk.com_puudumiste_tyyp p )
+                                                            pt
+                        inner join palk.com_puudumiste_tyyp p on array[pt.kood] &lt;@ p.vs_kooded
+                where
+                    p.kas_kehtiv</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>com_vs_puudumised</alias>
   </select>
   <select>
     <sql>SELECT *
@@ -136,7 +161,9 @@
     <not_initial_load>true</not_initial_load>
   </select>
   <select>
-    <sql>select * from palk.get_keskpalga_details($1::integer, $2::text, $3::text)</sql>
+    <sql>select *
+                  from
+                      palk.get_keskpalga_details($1::integer, $2::text, $3::text)</sql>
     <query />
     <multiple>true</multiple>
     <alias>getArvestuseDetails</alias>
@@ -218,7 +245,7 @@
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
-    <validate>puudumiste_liik,tyyp,lepingid,kpv1,kpv2,paev,summa</validate>
+    <validate>puudumiste_liik,tyyp,lepingid,kpv1,kpv2,paev</validate>
   </requiredFields>
   <executeSql>
     <sql></sql>
