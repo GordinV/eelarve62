@@ -1,0 +1,72 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>SELECT $2 AS user_id,
+                           $1 as rekv_id,
+                           t.*
+                    FROM ou.task  t</sql>
+    <alias>curTasks</alias>
+  </grid>
+  <select>
+    <sql>SELECT
+                  'TASK'                                                          AS doc_type_id,
+                  $2::INTEGER                                                       AS userid,
+                  t.*
+              FROM
+                  ou.task t,
+                  ou.userid u
+              WHERE
+                    t.id = $1
+                AND u.id = $2</sql>
+    <sqlAsNew>SELECT
+                      $1 :: INTEGER         AS id,
+                      $2 :: INTEGER         AS userid,
+                      'TASK'              AS doc_type_id,
+                      null::text as sql,
+                      null::text as nimetus
+                      </sqlAsNew>
+    <query />
+    <multiple>false</multiple>
+    <alias>row</alias>
+  </select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql>select ou.sp_salvesta_task($1::text, $2::text, $3::integer) as id</sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql />
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+</VFPData>

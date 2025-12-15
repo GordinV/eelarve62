@@ -22,6 +22,7 @@
                   p.kpv2,
                   p.paevad,
                   coalesce((p.properties -&gt;&gt; 'arvestatud_paevad')::integer, p.paevad)      as arvestatud_paevad,
+                  coalesce((p.properties -&gt;&gt; 'arvestatud_paevad_j')::integer, p.paevad)      as arvestatud_paevad_j,
                   p.puudumiste_liik::varchar(20),
                   p.tyyp,
                   p.status,
@@ -49,7 +50,9 @@
                   pt.eesti                                                                 as pt_nimetus,
                   (p.properties -&gt;&gt; 'puudumiste_kood')::varchar(20)                        as puudumiste_kood,
                   (p.properties -&gt;&gt; 'puudumise_tyyp')::char(1)                             as puudumise_tyyp,
-                  (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id
+                  (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id,
+                  (p.properties -&gt;&gt; 'allikas_e')::varchar(20)                              as allikas_e,
+                  (p.properties -&gt;&gt; 'allikas_j')::varchar(20)                              as allikas_j
               FROM
                   palk.puudumine                               p
                       inner join      palk.tooleping           t on t.id = p.lepingid
@@ -77,7 +80,9 @@
                       null::date                                        as params_vm_kpv,   
                       null::text                                       as puudumiste_kood,
                       null::text                                        as puudumise_tyyp,
-                      null::integer                       as eelmise_puudumine_id,                   
+                      null::integer                       as eelmise_puudumine_id,        
+                      null::varchar(20) as allikas_e,
+                      null::varchar(20) as allikas_j,           
                       null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -88,7 +93,8 @@
                       id,
                       liik::varchar(20),
                       eesti::varchar(120),
-                      vene::varchar(120)
+                      vene::varchar(120),
+                      kas_luba_allikad::integer  
                   from
                       palk.com_puudumiste_tyyp
                   where
