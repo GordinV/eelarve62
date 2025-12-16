@@ -66,6 +66,7 @@
                               when (konto_tyyp -&gt;&gt; 'puhkuse_konto')::boolean then 'PUHKUS'
                               when (konto_tyyp -&gt;&gt; 'haiguse_konto')::boolean then 'HAIGUS'
                               when (konto_tyyp -&gt;&gt; 'lisatasu_konto')::boolean then 'LISATASU'
+                              when (konto_tyyp -&gt;&gt; 'koolituse_konto')::boolean then 'KOOLITUS'
                               else 'MUUD'
                               END::varchar(20)
                       from
