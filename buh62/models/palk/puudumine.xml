@@ -22,7 +22,7 @@
                   p.kpv2,
                   p.paevad,
                   coalesce((p.properties -&gt;&gt; 'arvestatud_paevad')::integer, p.paevad)      as arvestatud_paevad,
-                  coalesce((p.properties -&gt;&gt; 'arvestatud_paevad_j')::integer, p.paevad)      as arvestatud_paevad_j,
+                  coalesce((p.properties -&gt;&gt; 'arvestatud_paevad_j')::integer, p.paevad)    as arvestatud_paevad_j,
                   p.puudumiste_liik::varchar(20),
                   p.tyyp,
                   p.status,
@@ -31,8 +31,18 @@
                   coalesce((p.properties -&gt;&gt; 'palk_oper_id')::integer, 0)::integer         as palk_oper_id,
                   (p.properties -&gt;&gt; 'algorithm')::varchar(100)                             as algorithm,
                   (p.properties -&gt;&gt; 'amet')::varchar(254)                                  as amet,
-                  round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric * (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,
-                        2)                                                                 as puhkuse_summa,
+--                  round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric * (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,2) as puhkuse_summa,
+                  case
+                      when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
+                           (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
+                          then (p.properties -&gt;&gt; 'puhkuse_summa')::numeric(12, 2)
+                      when p.properties -&gt; 'data' is not null and p.properties -&gt; 'data' -&gt; 0 is not null
+                          then (p.properties -&gt; 'data' -&gt; 0 -&gt;&gt; 'summa')::numeric
+                      else
+                          round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric *
+                                (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,
+                                2) end::numeric(12, 2)                                     as puhkuse_summa,
+
                   (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
                   (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer                       as arv_paevad_perioodis,
                   p.properties -&gt;&gt; 'selg'                                                  as selg,

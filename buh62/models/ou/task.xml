@@ -1,11 +1,31 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT $2 AS user_id,
-                           $1 as rekv_id,
-                           t.*
-                    FROM ou.task  t</sql>
-    <alias>curTasks</alias>
+    <sql>SELECT
+                        $2                                                                      AS user_id,
+                        $1                                                                      as rekv_id,
+                        u.kasutaja,
+                        t.id,
+                        to_char(t.created, 'DD.MM.YYYY HH24:MI:SS')::varchar(20)                AS created,
+                        coalesce(to_char(t.finished, 'DD.MM.YYYY HH24:MI:SS'), '')::varchar(20) AS finished,
+                        t.tulemused                                                             as viga,
+                        t.nimetus::varchar(254)                                                 as nimetus,
+                        case
+                            when t.status = 0 then 'Ootel'
+                            when t.status = 1 then 'Edukalt'
+                            when t.status = 2 then 'Vigane'
+                            else
+                                ''
+                            end::varchar(20)                                                    as status
+                    from
+                        ou.task                  t
+                            inner join ou.userid u on u.id = t.user_id
+                    where
+                          u.rekvid = $1
+                      and t.status &lt;&gt; 3
+                    order by
+                        id desc</sql>
+    <alias>curTask</alias>
   </grid>
   <select>
     <sql>SELECT
@@ -28,6 +48,13 @@
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
+  </select>
+  <select>
+    <sql>select * from ou.tuhista_task_staatus($1::INTEGER , $2::jsonb)</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>tuhistaTaskStaatus</alias>
+    <not_initial_load>true</not_initial_load>
   </select>
   <selectAsLibs>
     <sql></sql>
