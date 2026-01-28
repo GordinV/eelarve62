@@ -28,10 +28,18 @@
                   p.status,
                   p.muud,
                   t.parentid,
-                  coalesce((p.properties -&gt;&gt; 'palk_oper_id')::integer, 0)::integer         as palk_oper_id,
+--                  coalesce((p.properties -&gt;&gt; 'palk_oper_id')::integer, 0)::integer         as palk_oper_id,
+                  case
+                      when (p.properties -&gt;&gt; 'palk_oper_id') is not null and
+                           exists
+                           (
+                               select 1 from palk.palk_oper where t.parentid = (p.properties -&gt;&gt; 'palk_oper_id')::integer
+                           )
+                          then (p.properties -&gt;&gt; 'palk_oper_id')::integer
+                      else 0 end::integer                                                  as palk_oper_id,
+
                   (p.properties -&gt;&gt; 'algorithm')::varchar(100)                             as algorithm,
                   (p.properties -&gt;&gt; 'amet')::varchar(254)                                  as amet,
---                  round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric * (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,2) as puhkuse_summa,
                   case
                       when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
                            (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
@@ -51,7 +59,6 @@
                                      (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric, 0)
                       else (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
                       end::integer                                                         as arv_paevad_perioodis,
---                  (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer                       as arv_paevad_perioodis,
                   p.properties -&gt;&gt; 'selg'                                                  as selg,
                   coalesce((p.properties -&gt;&gt; 'konto'), '')::varchar(20)                    as konto,
                   (p.properties -&gt;&gt; 'allikas')::varchar(20)                                as allikas,

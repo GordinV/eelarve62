@@ -1,10 +1,12 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>select 
-                $2::integer as userId, *
-                from cur_tahtpaevad l       
-                where (l.rekvId = $1 or l.rekvid is null)</sql>
+    <sql>select
+                        $1::integer as rekvid,
+                        $2::integer as userId,
+                        *
+                    from
+                        cur_tahtpaevad l</sql>
     <alias>curHoliday</alias>
   </grid>
   <select>
@@ -71,25 +73,26 @@
   </generateJournal>
   <print></print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
-                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS kustutatud
-
-                  FROM (SELECT $2                                                      AS user_id,
-                               jsonb_array_elements(jsonb_agg(jsonb_build_object('updated', propertis -&gt;&gt; 'updated', 'user',
-                                                            ltrim(rtrim(u.kasutaja))))) AS ajalugu
-                        FROM ou.logs l
-                                 LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
-                        WHERE propertis -&gt;&gt; 'table' = 'library'
-                          AND doc_id = $1) qry
-        </sql>
+    <sql>SELECT
+                      $2::integer                            as user_id,
+                      ROW_NUMBER() OVER (ORDER BY l.id DESC) AS id,
+                      ltrim(rtrim(u.kasutaja))::VARCHAR(20)  AS kasutaja,
+                      coalesce(to_char((l.propertis -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH24:MI:SS'),
+                               '')::VARCHAR(20)              AS koostatud,
+                      coalesce(to_char((l.propertis -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH24:MI:SS'),
+                               '')::VARCHAR(20)              AS muudatud,
+                      coalesce(to_char((l.propertis -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH24:MI:SS'),
+                               '')::VARCHAR(20)              AS prinditud,
+                      coalesce(to_char((l.propertis -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH24:MI:SS'),
+                               '')::VARCHAR(20)              AS kustutatud
+                  FROM
+                      ou.logs                       l
+                          LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
+                  WHERE
+                        l.doc_id = $1::integer
+                    AND l.propertis -&gt;&gt; 'table' = 'library'
+                  ORDER BY
+                      l.id DESC;</sql>
     <alias>getLogs</alias>
   </getLog>
 </VFPData>
