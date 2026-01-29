@@ -33,7 +33,7 @@
                       when (p.properties -&gt;&gt; 'palk_oper_id') is not null and
                            exists
                            (
-                               select 1 from palk.palk_oper where t.parentid = (p.properties -&gt;&gt; 'palk_oper_id')::integer
+                               select 1 from palk.palk_oper po where po.parentid = (p.properties -&gt;&gt; 'palk_oper_id')::integer
                            )
                           then (p.properties -&gt;&gt; 'palk_oper_id')::integer
                       else 0 end::integer                                                  as palk_oper_id,
