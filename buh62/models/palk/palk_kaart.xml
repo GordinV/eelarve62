@@ -88,7 +88,7 @@
   </executeSql>
   <executeCommand>
     <sql>SELECT error_code, result, error_message
-                  FROM palk.change_kaart_status($1::INTEGER, $2::INTEGER)</sql>
+                  FROM palk.change_kaart_status($1::INTEGER, $2::INTEGER, $3::integer)</sql>
     <alias>changeStatus</alias>
   </executeCommand>
   <register>

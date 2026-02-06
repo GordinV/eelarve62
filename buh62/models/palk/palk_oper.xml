@@ -38,6 +38,8 @@
                                                                           ELSE 3 END]) :: VARCHAR(20)                      AS liik,
                                 (lib.properties :: JSONB -&gt;&gt; 'tululiik') :: TEXT                                           AS tululiik,
                                 coalesce(p.konto, '')::varchar(20)                                                         as konto,
+                                coalesce(p.kood1, '')::varchar(20)                                                         as tegev,
+                                coalesce(p.kood4, '')::varchar(20)                                                         as uritus,
                                 coalesce(p.kood2, '')::varchar(20)                                                         as allikas,
                                 coalesce(p.tunnus, '')::varchar(20)                                                        as tunnus,
                                 coalesce(p.proj, '')::varchar(20)                                                          as proj,

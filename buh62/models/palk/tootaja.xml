@@ -81,47 +81,159 @@
     <alias>tooleping</alias>
   </select>
   <select>
-    <sql>SELECT liik_::VARCHAR(20),
-                         tund_::VARCHAR(20),
-                         maks_::VARCHAR(20),
-                         id,
-                         parentid,
-                         lepingid,
-                         libid,
-                         summa,
-                         CASE
-                             WHEN NOT empty(percent_::INTEGER)
-                                 THEN 'JAH'
-                             ELSE 'EI' END :: VARCHAR(5) AS percent_,
-                         CASE
-                             WHEN empty(tulumaks::INTEGER)
-                                 THEN 'JAH'
-                             ELSE 'EI' END :: VARCHAR(5) AS tulumaks_,
-                         tulumaks,
-                         tulumaar,
-                         status,
-                         muud,
-                         alimentid,
-                         tunnus,
-                         amet::VARCHAR(20),
-                         osakond::VARCHAR(20),
-                         osakondid,
-                         tund,
-                         liik,
-                         maks,
-                         asutusest,
-                         round,
-                         tululiik,
-                         minsots,
-                         rekvid,
-                         kood::VARCHAR(20)               AS kood,
-                         nimetus::VARCHAR(254)           AS nimetus,
-                         pk.objekt::VARCHAR(20)
-                  FROM palk.cur_palk_kaart pk
-                  WHERE pk.parentid = $1 --asutus_id
-                    AND pk.rekvid IN (SELECT rekvid
-                                      FROM ou.userid u
-                                      WHERE u.id = $2)</sql>
+    <sql>SELECT
+                      liik_::VARCHAR(20),
+                      tund_::VARCHAR(20),
+                      maks_::VARCHAR(20),
+                      id,
+                      parentid,
+                      lepingid,
+                      libid,
+                      summa,
+                      CASE
+                          WHEN NOT empty(percent_::INTEGER)
+                              THEN 'JAH'
+                          ELSE 'EI' END :: VARCHAR(5) AS percent_,
+                      CASE
+                          WHEN empty(tulumaks::INTEGER)
+                              THEN 'JAH'
+                          ELSE 'EI' END :: VARCHAR(5) AS tulumaks_,
+                      tulumaks,
+                      tulumaar,
+                      status,
+                      muud,
+                      alimentid,
+                      tunnus,
+                      amet::VARCHAR(20),
+                      osakond::VARCHAR(20),
+                      osakondid,
+                      tund,
+                      liik,
+                      maks,
+                      asutusest,
+                      round,
+                      tululiik,
+                      minsots,
+                      rekvid,
+                      kood::VARCHAR(20)               AS kood,
+                      nimetus::VARCHAR(254)           AS nimetus,
+                      pk.objekt::VARCHAR(20)
+                  FROM
+                      palk.cur_palk_kaart pk
+                  WHERE
+                        pk.parentid = $1 --asutus_id
+                    AND pk.rekvid IN (
+                                         SELECT
+                                             rekvid
+                                         FROM
+                                             ou.userid u
+                                         WHERE
+                                             u.id = $2
+                                     )
+                  union all
+                  select
+                      liik_::VARCHAR(20),
+                      tund_::VARCHAR(20),
+                      maks_::VARCHAR(20),
+                      id,
+                      parentid,
+                      lepingid,
+                      libid,
+                      summa,
+                      CASE
+                          WHEN NOT empty(percent_::INTEGER)
+                              THEN 'JAH'
+                          ELSE 'EI' END :: VARCHAR(5) AS percent_,
+                      CASE
+                          WHEN empty(tulumaks::INTEGER)
+                              THEN 'JAH'
+                          ELSE 'EI' END :: VARCHAR(5) AS tulumaks_,
+                      tulumaks,
+                      tulumaar,
+                      status,
+                      muud,
+                      alimentid,
+                      tunnus,
+                      amet::VARCHAR(20),
+                      osakond::VARCHAR(20),
+                      osakondid,
+                      tund,
+                      liik,
+                      maks,
+                      asutusest,
+                      round,
+                      tululiik,
+                      minsots,
+                      rekvid,
+                      kood::VARCHAR(20)               AS kood,
+                      nimetus::VARCHAR(254)           AS nimetus,
+                      objekt::VARCHAR(20)
+
+                  from
+                      (
+                          SELECT *,
+                                 coalesce(((enum_range(NULL :: PALK_OPER_LIIK))[qry.liik])::VARCHAR(10),
+                                          '')::VARCHAR(10)                      AS liik_,
+                                 (enum_range(NULL :: PALK_TUND_LIIK))[qry.tund] AS tund_,
+                                 CASE
+                                     WHEN maks = 1
+                                         THEN 'JAH'
+                                     ELSE 'EI' END                              AS maks_
+                          FROM
+                              (
+                                  SELECT
+                                      pk.id,
+                                      pk.parentid,
+                                      pk.lepingid,
+                                      pk.libid,
+                                      pk.summa,
+                                      pk.percent_,
+                                      pk.tulumaks,
+                                      pk.tulumaar,
+                                      pk.status,
+                                      pk.muud,
+                                      pk.alimentid,
+                                      pk.tunnus,
+                                      osakond.kood                                             AS osakond,
+                                      osakond.id                                               AS osakondId,
+                                      amet.kood                                                AS amet,
+                                      l.kood,
+                                      l.nimetus,
+                                      (l.properties :: JSONB -&gt;&gt; 'liik') :: INTEGER            AS liik,
+                                      (l.properties :: JSONB -&gt;&gt; 'tund') :: INTEGER            AS tund,
+                                      (l.properties :: JSONB -&gt;&gt; 'maks') :: INTEGER            AS maks,
+                                      (l.properties :: JSONB -&gt;&gt; 'asutusest') :: INTEGER       AS asutusest,
+                                      (l.properties :: JSONB -&gt;&gt; 'tunnusid') :: NUMERIC(12, 4) AS tunnusid,
+                                      (l.properties :: JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)    AS round,
+                                      'EUR' :: VARCHAR                                         AS valuuta,
+                                      1 :: NUMERIC                                             AS kuurs,
+                                      CASE
+                                          WHEN coalesce((l.properties :: JSONB -&gt;&gt; 'tululiik'), '99') = ''
+                                              THEN '99'
+                                          ELSE (l.properties :: JSONB -&gt;&gt; 'tululiik') END      AS tululiik,
+                                      pk.minsots,
+                                      t.rekvid,
+                                      coalesce(pk.properties -&gt;&gt; 'objekt', '')::VARCHAR(20)    AS objekt
+                                  FROM
+                                      libs.library                        l
+                                          INNER JOIN      palk.palk_kaart pk ON pk.libId = l.id
+                                          LEFT OUTER JOIN palk.tooleping  t ON pk.lepingId = t.id
+                                          LEFT OUTER JOIN libs.library    amet ON amet.id = t.ametid
+                                          LEFT OUTER JOIN libs.library    osakond ON osakond.id = t.osakondid
+                                  WHERE
+                                        pk.status = 3
+                                    and pk.parentid = $1 --asutus_id
+                                    AND l.rekvid IN (
+                                                        SELECT
+                                                            rekvid
+                                                        FROM
+                                                            ou.userid u
+                                                        WHERE
+                                                            u.id = $2
+                                                    )
+
+                              ) qry
+                      ) del_pk</sql>
     <query />
     <multiple>true</multiple>
     <alias>palk_kaart</alias>
