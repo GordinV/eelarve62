@@ -76,7 +76,8 @@
                   (p.properties -&gt;&gt; 'puudumise_tyyp')::char(1)                             as puudumise_tyyp,
                   (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id,
                   (p.properties -&gt;&gt; 'allikas_e')::varchar(20)                              as allikas_e,
-                  (p.properties -&gt;&gt; 'allikas_j')::varchar(20)                              as allikas_j
+                  (p.properties -&gt;&gt; 'allikas_j')::varchar(20)                              as allikas_j,
+                  (p.properties -&gt;&gt; 'pohi_leping_id')::integer                              as pohi_lepingid
               FROM
                   palk.puudumine                               p
                       inner join      palk.tooleping           t on t.id = p.lepingid
@@ -107,7 +108,8 @@
                       null::integer                       as eelmise_puudumine_id,        
                       null::varchar(20) as allikas_e,
                       null::varchar(20) as allikas_j,           
-                      null::text as muud</sqlAsNew>
+                      null::text as muud,
+                      null::integer as pohi_lepingid</sqlAsNew>
     <query />
     <multiple>false</multiple>
     <alias>row</alias>
