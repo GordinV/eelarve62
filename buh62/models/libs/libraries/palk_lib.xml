@@ -21,37 +21,41 @@
     <alias>curPalklib</alias>
   </grid>
   <select>
-    <sql>SELECT l.id,
-                     l.rekvid,
-                     l.kood,
-                     l.nimetus,
-                     l.status,
-                     l.library,
-                     l.tun1,
-                     l.tun5,
-                     $2::INTEGER                                          AS userid,
-                     'PALK_LIB'                                           AS doc_type_id,
-                     (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER          AS liik,
-                     (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER          AS tund,
-                     (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER          AS maks,
-                     (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER     AS asutusest,
-                     (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER     AS palgafond,
-                     (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER          AS sots,
-                     (l.properties::JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)  AS round,
-                     (l.properties::JSONB -&gt;&gt; 'konto') :: VARCHAR(20)     AS konto,
-                     (l.properties::JSONB -&gt;&gt; 'korrkonto') :: VARCHAR(20) AS korrkonto,
-                     (l.properties::JSONB -&gt;&gt; 'tunnusid') :: INTEGER      AS tunnusId,
-                     (l.properties::JSONB -&gt;&gt; 'elatis') :: INTEGER        AS elatis,
-                     (l.properties::JSONB -&gt;&gt; 'uuritus') :: VARCHAR(20)   AS uuritus,
-                     (l.properties::JSONB -&gt;&gt; 'proj') :: VARCHAR(20)      AS proj,
-                     (l.properties::JSONB -&gt;&gt; 'tegev') :: VARCHAR(20)     AS tegev,
-                     (l.properties::JSONB -&gt;&gt; 'allikas') :: VARCHAR(20)   AS allikas,
-                     (l.properties::JSONB -&gt;&gt; 'artikkel') :: VARCHAR(20)  AS artikkel,
-                     (l.properties::JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20)  AS tululiik,
-                     (l.properties::JSONB -&gt;&gt; 'valid')::DATE              AS valid,
-                     l.muud
-              FROM libs.library l
-              WHERE l.id = $1</sql>
+    <sql>SELECT
+                  l.id,
+                  l.rekvid,
+                  l.kood,
+                  l.nimetus,
+                  l.status,
+                  l.library,
+                  l.tun1,
+                  l.tun5,
+                  $2::INTEGER                                           AS userid,
+                  'PALK_LIB'                                            AS doc_type_id,
+                  (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER           AS liik,
+                  (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER           AS tund,
+                  (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER           AS maks,
+                  (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER      AS asutusest,
+                  (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER      AS palgafond,
+                  (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER           AS sots,
+                  (l.properties::JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)   AS round,
+                  (l.properties::JSONB -&gt;&gt; 'konto') :: VARCHAR(20)      AS konto,
+                  (l.properties::JSONB -&gt;&gt; 'korrkonto') :: VARCHAR(20)  AS korrkonto,
+                  (l.properties::JSONB -&gt;&gt; 'tunnusid') :: INTEGER       AS tunnusId,
+                  (l.properties::JSONB -&gt;&gt; 'elatis') :: INTEGER         AS elatis,
+                  (l.properties::JSONB -&gt;&gt; 'uuritus') :: VARCHAR(20)    AS uuritus,
+                  (l.properties::JSONB -&gt;&gt; 'proj') :: VARCHAR(20)       AS proj,
+                  (l.properties::JSONB -&gt;&gt; 'tegev') :: VARCHAR(20)      AS tegev,
+                  (l.properties::JSONB -&gt;&gt; 'allikas') :: VARCHAR(20)    AS allikas,
+                  (l.properties::JSONB -&gt;&gt; 'artikkel') :: VARCHAR(20)   AS artikkel,
+                  (l.properties::JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20)   AS tululiik,
+                  (l.properties::JSONB -&gt;&gt; 'valid')::DATE               AS valid,
+                  coalesce((l.properties::JSONB -&gt;&gt; 'tabeli_tyyp'),'TAVALINE'):: VARCHAR(20) AS tabeli_tyyp,
+                  l.muud
+              FROM
+                  libs.library l
+              WHERE
+                  l.id = $1</sql>
     <sqlAsNew>select  $1::integer as id , 
             null::integer as tun1, null::integer as tun5,
             $2::integer as userid, 
@@ -79,6 +83,7 @@
             null::varchar(20) as artikkel,
             null::varchar(20) as tululiik,
             null::date as valid,
+            null:::: VARCHAR(20) as tabeli_tyyp,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
