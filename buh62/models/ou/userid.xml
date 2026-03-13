@@ -35,6 +35,7 @@
                          coalesce((u.roles -&gt;&gt; 'is_rekl_maksuhaldur') :: BOOLEAN, FALSE) :: INTEGER    AS is_rekl_maksuhaldur,
                          coalesce((u.roles -&gt;&gt; 'is_ladu_kasutaja') :: BOOLEAN, FALSE) :: INTEGER       AS is_ladu_kasutaja,
                          coalesce((u.roles -&gt;&gt; 'is_arvestaja') :: BOOLEAN, FALSE) :: INTEGER           AS is_arvestaja,
+                         coalesce((u.roles -&gt;&gt; 'is_tabeli_korraldaja') :: BOOLEAN, FALSE) :: INTEGER   AS is_tabeli_korraldaja,
                          coalesce((u.roles -&gt;&gt; 'is_palga_kasutaja') :: BOOLEAN, FALSE) :: INTEGER      AS is_palga_kasutaja,
                          coalesce((u.roles -&gt;&gt; 'is_pohivara_kasutaja') :: BOOLEAN, FALSE) :: INTEGER   AS is_pohivara_kasutaja,
                          coalesce((u.roles -&gt;&gt; 'is_sa_ametnik') :: BOOLEAN, FALSE) :: INTEGER          AS is_sa_ametnik,
@@ -73,6 +74,7 @@
                       0 :: INTEGER     AS is_ladu_kasutaja,
                       0 :: INTEGER     AS is_kasutaja,
                       0:: integer as is_arvestaja,
+                      0:: integer as is_tabeli_korraldaja,
                       0:: integer as is_palga_kasutaja,
                       0:: integer as is_pohivara_kasutaja,
                       '' :: VARCHAR(254) AS email</sqlAsNew>
@@ -81,10 +83,18 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT r.id, r.regkood, r.nimetus:: VARCHAR(254), r.parentid, u.id AS user_id
-                  FROM ou.userid u
-                           INNER JOIN ou.rekv r ON r.id = u.rekvid
-                  WHERE kasutaja = $1
+    <sql>SELECT
+                      r.id,
+                      r.regkood,
+                      r.nimetus:: VARCHAR(254),
+                      r.parentid,
+                      u.id                                                                        AS user_id,
+                      case when r.parentid = 119 then left(r.nimetus, 7) else '' end::varchar(20) as tunnus
+                  FROM
+                      ou.userid              u
+                          INNER JOIN ou.rekv r ON r.id = u.rekvid
+                  WHERE
+                        kasutaja = $1
                     AND u.status &lt;&gt; 3
                     AND r.status &lt;&gt; 3</sql>
     <query />
