@@ -117,7 +117,8 @@
                       rekvid,
                       kood::VARCHAR(20)               AS kood,
                       nimetus::VARCHAR(254)           AS nimetus,
-                      pk.objekt::VARCHAR(20)
+                      pk.objekt::VARCHAR(20),
+                      0::integer as  valik
                   FROM
                       palk.cur_palk_kaart pk
                   WHERE
@@ -167,8 +168,8 @@
                       rekvid,
                       kood::VARCHAR(20)               AS kood,
                       nimetus::VARCHAR(254)           AS nimetus,
-                      objekt::VARCHAR(20)
-
+                      objekt::VARCHAR(20),
+                      0::integer as  valik
                   from
                       (
                           SELECT *,

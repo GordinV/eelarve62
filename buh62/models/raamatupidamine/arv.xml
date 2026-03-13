@@ -308,7 +308,8 @@
                            INNER JOIN docs.arv a ON a.id = a1.parentId
                            INNER JOIN libs.nomenklatuur n ON n.id = a1.nomId
                            INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                  WHERE a.parentid = $1 :: INTEGER</sql>
+                  WHERE a.parentid = $1 :: INTEGER
+                  ORDER BY a1.id</sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>

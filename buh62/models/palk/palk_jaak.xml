@@ -76,6 +76,10 @@
                               coalesce(p.status, 2)                                        AS status
                           FROM
                               palk.palk_jaak                     j
+                                  INNER JOIN      palk.tooleping t ON t.id = j.lepingid
+                                  INNER JOIN      libs.asutus    a ON a.id = t.parentid
+                                  INNER JOIN      libs.library   o ON o.id = t.osakondid
+                                  
                                   LEFT OUTER JOIN (
                                                       SELECT
                                                           month(p.kpv)                                                       AS kuu,
@@ -112,15 +116,7 @@
                                                               INNER JOIN palk.palk_oper p ON p.parentid = d.id
                                                               INNER JOIN libs.library   lib ON p.libid = lib.id AND lib.library = 'PALK'
                                                               INNER JOIN palk.tooleping t ON p.lepingid = t.id
-                                                      WHERE
-                                                            p.lepingid IS NOT NULL
-                                                        AND d.doc_type_id IN
-                                                            (
-                                                                SELECT id
-                                                                FROM libs.library l
-                                                                WHERE l.library = 'DOK' AND l.kood = 'PALK_OPER'
-                                                            )
-                                                        AND d.status &lt;&gt; 3
+                                                      WHERE d.status &lt;&gt; 3
                                                         AND lib.status &lt;&gt; 3
                                                         AND t.status &lt;&gt; 3
                                                         AND d.rekvId = $1::INTEGER
@@ -132,13 +128,9 @@
                                                         , t.status
                                                   )              p
                                                   ON p.lepingid = j.lepingid AND p.kuu = j.kuu AND p.aasta = j.aasta
-                                  INNER JOIN      palk.tooleping t ON t.id = j.lepingid
-                                  INNER JOIN      libs.asutus    a ON a.id = t.parentid
-                                  INNER JOIN      libs.library   o ON o.id = t.osakondid
                       ) p
                   WHERE
                         p.rekvId = $1::INTEGER
-                    AND p.lepingId IS NOT NULL
             </sql>
     <alias>printPalkJaak</alias>
   </print>
