@@ -30,27 +30,27 @@
                   l.library,
                   l.tun1,
                   l.tun5,
-                  $2::INTEGER                                           AS userid,
-                  'PALK_LIB'                                            AS doc_type_id,
-                  (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER           AS liik,
-                  (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER           AS tund,
-                  (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER           AS maks,
-                  (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER      AS asutusest,
-                  (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER      AS palgafond,
-                  (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER           AS sots,
-                  (l.properties::JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)   AS round,
-                  (l.properties::JSONB -&gt;&gt; 'konto') :: VARCHAR(20)      AS konto,
-                  (l.properties::JSONB -&gt;&gt; 'korrkonto') :: VARCHAR(20)  AS korrkonto,
-                  (l.properties::JSONB -&gt;&gt; 'tunnusid') :: INTEGER       AS tunnusId,
-                  (l.properties::JSONB -&gt;&gt; 'elatis') :: INTEGER         AS elatis,
-                  (l.properties::JSONB -&gt;&gt; 'uuritus') :: VARCHAR(20)    AS uuritus,
-                  (l.properties::JSONB -&gt;&gt; 'proj') :: VARCHAR(20)       AS proj,
-                  (l.properties::JSONB -&gt;&gt; 'tegev') :: VARCHAR(20)      AS tegev,
-                  (l.properties::JSONB -&gt;&gt; 'allikas') :: VARCHAR(20)    AS allikas,
-                  (l.properties::JSONB -&gt;&gt; 'artikkel') :: VARCHAR(20)   AS artikkel,
-                  (l.properties::JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20)   AS tululiik,
-                  (l.properties::JSONB -&gt;&gt; 'valid')::DATE               AS valid,
-                  coalesce((l.properties::JSONB -&gt;&gt; 'tabeli_tyyp'),'TAVALINE'):: VARCHAR(20) AS tabeli_tyyp,
+                  $2::INTEGER                                                                 AS userid,
+                  'PALK_LIB'                                                                  AS doc_type_id,
+                  (l.properties::JSONB -&gt;&gt; 'liik') :: INTEGER                                 AS liik,
+                  (l.properties::JSONB -&gt;&gt; 'tund') :: INTEGER                                 AS tund,
+                  (l.properties::JSONB -&gt;&gt; 'maks') :: INTEGER                                 AS maks,
+                  (l.properties::JSONB -&gt;&gt; 'asutusest') :: INTEGER                            AS asutusest,
+                  (l.properties::JSONB -&gt;&gt; 'palgafond') :: INTEGER                            AS palgafond,
+                  (l.properties::JSONB -&gt;&gt; 'sots') :: INTEGER                                 AS sots,
+                  (l.properties::JSONB -&gt;&gt; 'round') :: NUMERIC(12, 4)                         AS round,
+                  (l.properties::JSONB -&gt;&gt; 'konto') :: VARCHAR(20)                            AS konto,
+                  (l.properties::JSONB -&gt;&gt; 'korrkonto') :: VARCHAR(20)                        AS korrkonto,
+                  (l.properties::JSONB -&gt;&gt; 'tunnusid') :: INTEGER                             AS tunnusId,
+                  (l.properties::JSONB -&gt;&gt; 'elatis') :: INTEGER                               AS elatis,
+                  (l.properties::JSONB -&gt;&gt; 'uuritus') :: VARCHAR(20)                          AS uuritus,
+                  (l.properties::JSONB -&gt;&gt; 'proj') :: VARCHAR(20)                             AS proj,
+                  (l.properties::JSONB -&gt;&gt; 'tegev') :: VARCHAR(20)                            AS tegev,
+                  (l.properties::JSONB -&gt;&gt; 'allikas') :: VARCHAR(20)                          AS allikas,
+                  (l.properties::JSONB -&gt;&gt; 'artikkel') :: VARCHAR(20)                         AS artikkel,
+                  (l.properties::JSONB -&gt;&gt; 'tululiik') :: VARCHAR(20)                         AS tululiik,
+                  (l.properties::JSONB -&gt;&gt; 'valid')::DATE                                     AS valid,
+                  coalesce((l.properties::JSONB -&gt;&gt; 'tabeli_tyyp'), 'TAVALINE'):: VARCHAR(20) AS tabeli_tyyp,
                   l.muud
               FROM
                   libs.library l
@@ -83,7 +83,7 @@
             null::varchar(20) as artikkel,
             null::varchar(20) as tululiik,
             null::date as valid,
-            null:::: VARCHAR(20) as tabeli_tyyp,
+            'TAVALINE'::VARCHAR(20) as tabeli_tyyp,
             null::text as muud</sqlAsNew>
     <query />
     <multiple>false</multiple>
@@ -91,10 +91,12 @@
   </select>
   <select>
     <sql>SELECT *
-                  FROM jsonb_to_recordset(
-                               fnc_check_libs($2::JSON, $3::DATE, $1::INTEGER))
-                           AS x (error_message TEXT)
-                  WHERE error_message IS NOT NULL
+                  FROM
+                      jsonb_to_recordset(
+                              fnc_check_libs($2::JSON, $3::DATE, $1::INTEGER))
+                          AS x (error_message TEXT)
+                  WHERE
+                      error_message IS NOT NULL
             </sql>
     <query />
     <multiple>true</multiple>
@@ -102,10 +104,12 @@
   </select>
   <select>
     <sql>SELECT *
-                  FROM jsonb_to_recordset(
-                               get_palk_lib_kasutus($1::INTEGER, $2::DATE)
-                           ) AS x (error_message TEXT, error_code INTEGER)
-                  WHERE error_message IS NOT NULL
+                  FROM
+                      jsonb_to_recordset(
+                              get_palk_lib_kasutus($1::INTEGER, $2::DATE)
+                      ) AS x (error_message TEXT, error_code INTEGER)
+                  WHERE
+                      error_message IS NOT NULL
             </sql>
     <query />
     <multiple>true</multiple>
@@ -113,8 +117,10 @@
   </select>
   <selectAsLibs>
     <sql>SELECT *
-                   FROM palk.com_palk_lib l
-                   WHERE l.rekvId = $1</sql>
+                   FROM
+                       palk.com_palk_lib l
+                   WHERE
+                       l.rekvId = $1</sql>
     <alias>selectAsLibs</alias>
   </selectAsLibs>
   <saveDoc>
@@ -122,8 +128,12 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>SELECT error_code, result, error_message
-                FROM libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
+    <sql>SELECT
+                    error_code,
+                    result,
+                    error_message
+                FROM
+                    libs.sp_delete_library($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -151,24 +161,32 @@
   </generateJournal>
   <print></print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()              AS id,
-                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)         AS kustutatud
+    <sql>SELECT
+                      ROW_NUMBER() OVER ()              AS id,
+                      (ajalugu -&gt;&gt; 'user')::VARCHAR(20) AS kasutaja,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)         AS koostatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)         AS muudatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)         AS prinditud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)         AS kustutatud
 
-                  FROM (SELECT $2                                                      AS user_id,
-                               jsonb_array_elements(jsonb_agg(jsonb_build_object('updated', propertis -&gt;&gt; 'updated', 'user',
-                                                            ltrim(rtrim(u.kasutaja))))) AS ajalugu
-                        FROM ou.logs l
-                                 LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
-                        WHERE propertis -&gt;&gt; 'table' = 'library'
-                          AND doc_id = $1) qry
+                  FROM
+                      (
+                          SELECT
+                              $2                                                                            AS user_id,
+                              jsonb_array_elements(jsonb_agg(jsonb_build_object('updated', propertis -&gt;&gt; 'updated',
+                                                                                'user',
+                                                                                ltrim(rtrim(u.kasutaja))))) AS ajalugu
+                          FROM
+                              ou.logs                       l
+                                  LEFT OUTER JOIN ou.userid u ON u.id = l.user_id
+                          WHERE
+                                propertis -&gt;&gt; 'table' = 'library'
+                            AND doc_id = $1
+                      ) qry
         </sql>
     <alias>getLogs</alias>
   </getLog>
