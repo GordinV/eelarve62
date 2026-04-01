@@ -57,6 +57,8 @@
 
                   (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
                   case
+                      when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
+                          then (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer                      
                       when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
                            (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
                           then round((p.properties -&gt;&gt; 'puhkuse_summa')::numeric /
@@ -342,4 +344,8 @@
         </sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
