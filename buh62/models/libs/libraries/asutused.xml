@@ -7,7 +7,18 @@
     <alias>curAsutused</alias>
   </grid>
   <select>
-    <sql>SELECT *,
+    <sql>SELECT id,
+                     regkood,
+                     nimetus,
+                     omvorm,
+                     aadress,
+                     kontakt,
+                     tel,
+                     faks,
+                     email,
+                     muud,
+                     tp,
+                     staatus,
                      $2::INTEGER                                     AS userid,
                      'ASUTUSED'                                      AS doc_type_id,
                      (properties -&gt;&gt; 'pank')::VARCHAR(20)            AS pank,
@@ -21,14 +32,14 @@
     <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
             ''::text as  regkood,
             ''::text as nimetus,
-            ''::text as omvorm,
+            'ISIK'::text as omvorm,
             ''::text as aadress,
             ''::text as kontakt,
             ''::text as tel,
             ''::text as faks,
             ''::text as email,
             null::text as muud,
-            ''::text as tp,
+            '800699'::text as tp,
             0::integer as staatus,
             ''::varchar(20) as pank,
             '' :: VARCHAR(254)    AS palk_email,            
@@ -40,13 +51,13 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20)       AS aa,
-                         $2 :: INTEGER                             AS userid,
+    <sql>SELECT (e.element -&gt;&gt; 'aa') :: VARCHAR(20)                  AS aa,
+                         $2 :: INTEGER                                        AS userid,
                          ((e.element -&gt;&gt; 'kas_palk') :: BOOLEAN)::INTEGER     AS kas_palk,
                          ((e.element -&gt;&gt; 'kas_raama') :: BOOLEAN)::INTEGER    AS kas_raama,
                          ((e.element -&gt;&gt; 'kas_oppetasu') :: BOOLEAN)::INTEGER AS kas_oppetasu,
-                         row_number() OVER ()                      AS id,
-                         libs.get_asutuse_aa(a.id, 'RAAMA'::TEXT)  AS default_aa
+                         row_number() OVER ()                                 AS id,
+                         libs.get_asutuse_aa(a.id, 'RAAMA'::TEXT)             AS default_aa
                   FROM libs.asutus a,
                        json_array_elements(CASE
                                                WHEN (a.properties -&gt;&gt; 'asutus_aa') IS NULL THEN '[]'::JSON
@@ -165,4 +176,8 @@
                   WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link>http://oppetasu.narva.ee:3000/ai/get_address/</link>
+    <alias>ai</alias>
+  </ai>
 </VFPData>

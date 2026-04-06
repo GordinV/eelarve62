@@ -45,4 +45,8 @@
     <sql />
     <alias />
   </getLog>
+  <ai>
+    <link>https://check-xml-1088344506167.europe-north1.run.app</link>
+    <alias>ai</alias>
+  </ai>
 </VFPData>
