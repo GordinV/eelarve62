@@ -194,6 +194,17 @@
     <multiple>true</multiple>
     <alias>koosta_taotlus</alias>
   </select>
+  <select>
+    <sql>SELECT
+                      p.*
+                  from
+                      eelarve.import_eelarve_taotlused($2::integer, $3::integer,
+                                                       $1::JSONB) p
+            </sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>importDok</alias>
+  </select>
   <selectAsLibs>
     <sql></sql>
     <alias>selectAsLibs</alias>
@@ -261,4 +272,8 @@
                   WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
