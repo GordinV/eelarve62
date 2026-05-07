@@ -22,42 +22,46 @@
                   SELECT
                       d.id,
                       d.docs_ids,
-                      (to_char(created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT              AS created,
-                      (to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT           AS lastupdate,
+                      (to_char(created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT               AS created,
+                      (to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT            AS lastupdate,
                       d.bpm,
-                      trim(l.nimetus)                                                AS doc,
-                      trim(l.kood)                                                   AS doc_type_id,
-                      trim(s.nimetus)                                                AS status,
-                      k.number::VARCHAR(20)                                          AS number,
+                      trim(l.nimetus)                                                 AS doc,
+                      trim(l.kood)                                                    AS doc_type_id,
+                      trim(s.nimetus)                                                 AS status,
+                      k.number::VARCHAR(20)                                           AS number,
                       k.summa,
-                      k.kassaid                                                      AS kassa_id,
-                      trim(aa.nimetus)                                               AS kassa,
+                      k.kassaid                                                       AS kassa_id,
+                      trim(aa.nimetus)                                                AS kassa,
                       k.rekvId,
-                      k.kpv                                                          AS kpv,
+                      k.kpv                                                           AS kpv,
                       k.asutusid,
-                      trim(coalesce(k.dokument, ''))                                 AS dokument,
+                      trim(coalesce(k.dokument, ''))                                  AS dokument,
                       k.alus,
                       k.muud,
                       k.nimi,
-                      coalesce(k.aadress, '')                                        AS aadress,
+                      coalesce(k.aadress, '')                                         AS aadress,
                       k.tyyp,
                       asutus.regkood,
-                      trim(asutus.nimetus)                                           AS asutus,
+                      trim(asutus.nimetus)                                            AS asutus,
                       k.arvid,
                       ('Number:' || arv.number :: TEXT || ' Kuupäev:' || arv.kpv :: TEXT || ' Jääk:' ||
-                       arv.jaak :: TEXT)                                             AS arvnr,
+                       arv.jaak :: TEXT)                                              AS arvnr,
                       k.doklausid,
                       k.journalid,
-                      coalesce(jid.number, 0)::INTEGER                               AS lausnr,
-                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS konto,
-                      dp.selg::VARCHAR(120)                                          AS dokprop,
-                      summad.kokku :: NUMERIC(12, 2)                                 AS kokku,
-                      (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                      AS koostaja,
-                      (fnc_round_5(summad.kokku) - summad.kokku)::numeric(6, 2)      as umardamine
+                      coalesce(jid.number, 0)::INTEGER                                AS lausnr,
+                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20)  AS konto,
+                      dp.selg::VARCHAR(120)                                           AS dokprop,
+                      summad.kokku :: NUMERIC(12, 2)                                  AS kokku,
+                      (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                       AS koostaja,
+                      case
+                          when d.bpm -&gt;&gt; 'umardamine' is null then
+                              (fnc_round_5(summad.kokku) - summad.kokku)::numeric(6, 2)
+                          else (d.bpm -&gt;&gt; 'umardamine')::numeric(6, 2) end::numeric(6, 2) as umardamine
                   FROM
                       summad,
                       docs.doc d
-                          INNER JOIN      libs.library l ON l.id = d.doc_type_id
+                          INNER JOIN      libs.library l
+                                          ON l.id = d.doc_type_id
                           INNER JOIN      docs.korder1 k ON k.parentId = d.id
                           INNER JOIN      ou.userid u ON u.id = $2 :: INTEGER
                           LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
@@ -68,7 +72,8 @@
                           LEFT OUTER JOIN docs.journalid jid ON jid.journalid = j.id
                           LEFT OUTER JOIN libs.dokprop dp ON dp.id = k.doklausid
                   WHERE
-                      d.id = $1</sql>
+                      d.id =
+                      $1</sql>
     <sqlAsNew>SELECT
                            $1 :: INTEGER                                                     AS id,
                            $2 :: INTEGER                                                     AS userid,
@@ -229,4 +234,8 @@
                        ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

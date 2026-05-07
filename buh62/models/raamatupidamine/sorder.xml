@@ -4,6 +4,8 @@
     <sql>SELECT *
                     FROM cur_korder k
                         WHERE k.rekvId = $1
+                          and k.kpv &gt;= $3::date 
+                          and k.kpv &lt;= $4::date
                              AND coalesce(docs.usersRigths(k.id, 'select', $2::INTEGER), TRUE)</sql>
     <alias>curKorder</alias>
   </grid>
@@ -201,4 +203,8 @@
                        ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

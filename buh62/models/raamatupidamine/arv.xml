@@ -50,7 +50,9 @@
                                      AND kassa = 1
                                    LIMIT 1) qry_aa
                              WHERE a.rekvId = params.rekv_id::INTEGER
-                         ),
+                               and a.kpv &gt;= $3
+                               and a.kpv &lt;= $4
+                                  ),
                          ebatoenaolised_tagastamine AS (
                              SELECT DISTINCT doc_arv_id AS arv_id
                              FROM docs.arvtasu,
@@ -614,4 +616,8 @@
                        ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
