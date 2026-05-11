@@ -1,0 +1,97 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>WITH qryReport AS (
+            SELECT rekv_id,
+                   tegev,
+                   allikas,
+                   artikkel,
+                   tunnus,
+                   proj,
+                   uritus,
+                   objekt,
+                   a.nimetus,
+                   eelarve,
+                   eelarve_kassa,
+                   taitmine,
+                   taitmine_kassa,
+                   r.nimetus::varchar(254) AS asutus
+            FROM eelarve.tulude_taitmine_jaak($1::DATE, $2::INTEGER, $3::INTEGER, $4::jsonb) qryReport
+                     LEFT OUTER JOIN com_artikkel a ON ltrim(rtrim(a.kood)) = ltrim(rtrim(qryReport.artikkel))
+                     INNER JOIN (SELECT id, parentid, regkood, nimetus
+                                 FROM ou.rekv
+                                 WHERE parentid &lt; 999
+                                     UNION ALL
+                                     SELECT 999999
+                                     , 0
+                                     , '' AS regkood
+                                     , 'Koond' AS nimetus) r
+                                ON r.id = qryReport.rekv_id
+                     LEFT OUTER JOIN ou.rekv p ON r.parentid = p.id
+            ORDER BY rekv_id DESC, artikkel, allikas, tegev, tunnus, objekt
+        )
+            SELECT rekv_id,
+            tegev,
+            allikas,
+            artikkel,
+            tunnus,
+            proj,
+            uritus,
+            objekt,
+            nimetus,
+            (eelarve) AS eelarve,
+            (eelarve_kassa) AS eelarve_kassa,
+            (taitmine) AS taitmine,
+            (taitmine_kassa) AS taitmine_kassa,
+            asutus
+            FROM qryReport
+            where eelarve &lt;&gt; 0 or eelarve_kassa &lt;&gt; 0 or taitmine &lt;&gt; 0 or taitmine_kassa &lt;&gt; 0
+            </sql>
+    <alias>tulude_taitmine_jaak</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
+</VFPData>
