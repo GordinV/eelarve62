@@ -18,6 +18,7 @@
                   p.lepingid,
                   p.libid,
                   p.summa,
+                  coalesce((p.properties -&gt;&gt; 'uleajatunnid')::numeric, 0)::numeric         as uleajatunnid,
                   p.kpv1,
                   p.kpv2,
                   p.paevad,
@@ -58,7 +59,7 @@
                   (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
                   case
                       when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
-                          then (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer                      
+                          then (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
                       when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
                            (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
                           then round((p.properties -&gt;&gt; 'puhkuse_summa')::numeric /
@@ -210,7 +211,7 @@
   <select>
     <sql>select *
                   from
-                      palk.get_full_keskpalga_arvestus($1::integer, $2::text, $3::text)</sql>
+                      palk.get_full_keskpalga_arvestus($1::integer, $2::text, $3::text, $4::jsonb)</sql>
     <query />
     <multiple>true</multiple>
     <alias>getFullArvestus</alias>
