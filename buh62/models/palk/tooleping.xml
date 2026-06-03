@@ -104,6 +104,73 @@
     <multiple>false</multiple>
     <alias>row</alias>
   </select>
+  <select>
+    <sql>select
+                     s.id,
+                     s.isik_id,
+                     s.allika_leping_id,
+                     s.siht_leping_id,
+                     s.period as kpv,
+                     s.konto,
+                     s.kood1  as tegev,
+                     s.kood2  as allikas,
+                     coalesce(s.kood3,'')::varchar(20)  as rv,
+                     coalesce(s.kood4,'')::varchar(20)  as uritus,
+                     s.kood5  as artikkel,
+                     coalesce(s.proj,'')::varchar(20) as proj,
+                     coalesce(s.tunnus,'')::varchar(20) as tunnus,
+                     s.summa,
+                     a.kood   as ameti_kood
+                 from
+                     palk.palk_summad_cache_data        s
+                         inner join      palk.tooleping t on t.id = s.allika_leping_id
+                         left outer join libs.library   a on a.id = t.ametid
+                 where
+                     s.siht_leping_id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>details</alias>
+  </select>
+  <select>
+    <sql>select
+                     s.id,
+                     isik_id,
+                     allika_leping_id,
+                     siht_leping_id,
+                     period::varchar(10)                            as period,
+                     array_to_string(vs_kooded, ',') ::varchar(120) as vs_kooded,
+                     alg_puudumise_kpv,
+                     lopp_puudumise_kpv,
+                     pidu_paevad_puhkusel,
+                     katkestuse_paevad,
+                     katkestuse_toopaevad,
+                     liik::varchar(20)                              as liik,
+                     a.kood::varchar(20)                            as ameti_kood
+                 from
+                     palk.palk_paevad_cache_data        s
+                         inner join      palk.tooleping t on t.id = s.allika_leping_id
+                         left outer join libs.library   a on a.id = t.ametid
+                 where
+                     s.siht_leping_id = $1</sql>
+    <query />
+    <multiple>true</multiple>
+    <alias>paevad_cache_data</alias>
+  </select>
+  <select>
+    <sql>select
+                 palk.sp_salvesta_palk_cache_data($1::jsonb, $2::integer, $3::integer)</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>import_lepingu_andmed</alias>
+  </select>
+  <select>
+    <sql>insert into ou.logs (rekvid, user_id, doc_id, propertis ) values ($3, $2, $1, jsonb_build_object('table','palk_summad_cache_data','tegevus','delete'));
+            delete from  palk.palk_summad_cache_data where siht_leping_id = $1;
+            delete from  palk.palk_paevad_cache_data where siht_leping_id = $1;</sql>
+    <query />
+    <multiple>false</multiple>
+    <alias>delete_palk_cache_data</alias>
+  </select>
   <selectAsLibs>
     <sql>SELECT *
                    FROM palk.com_toolepingud a
@@ -169,4 +236,8 @@
                   WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
