@@ -11,86 +11,127 @@
     <alias>curPuudumine</alias>
   </grid>
   <select>
-    <sql>SELECT
-                  $2 :: INTEGER                                                            AS userid,
-                  'PUUDUMINE'                                                              AS doc_type_id,
-                  p.id,
-                  p.lepingid,
-                  p.libid,
-                  p.summa,
-                  coalesce((p.properties -&gt;&gt; 'uleajatunnid')::numeric, 0)::numeric         as uleajatunnid,
-                  p.kpv1,
-                  p.kpv2,
-                  p.paevad,
-                  coalesce((p.properties -&gt;&gt; 'arvestatud_paevad')::integer, p.paevad)      as arvestatud_paevad,
-                  coalesce((p.properties -&gt;&gt; 'arvestatud_paevad_j')::integer, p.paevad)    as arvestatud_paevad_j,
-                  p.puudumiste_liik::varchar(20),
-                  p.tyyp,
-                  p.status,
-                  p.muud,
-                  t.parentid,
+    <sql>with
+                  puudumine as (
+                                   SELECT
+                                       $2 :: INTEGER                                                            AS userid,
+                                       'PUUDUMINE'                                                              AS doc_type_id,
+                                       p.id,
+                                       p.lepingid,
+                                       p.libid,
+                                       p.summa,
+                                       (p.properties -&gt;&gt; 'uleajatunnid')::numeric         as uleajatunnid_salvestatud,
+                                       (p.properties -&gt;&gt; 'pidu_tunnid')::numeric          as pidu_tunnid_salvestatud,
+                                       p.kpv1,
+                                       p.kpv2,
+                                       p.paevad,
+                                       coalesce((p.properties -&gt;&gt; 'arvestatud_paevad')::numeric(6, 3),
+                                                p.paevad)::numeric(6, 3)                                        as arvestatud_paevad,
+                                       coalesce((p.properties -&gt;&gt; 'arvestatud_paevad_j')::numeric(6, 3),
+                                                p.paevad):: numeric(6, 3)                                       as arvestatud_paevad_j,
+                                       p.puudumiste_liik::varchar(20),
+                                       p.tyyp,
+                                       p.status,
+                                       p.muud,
+                                       t.parentid,
+                                       t.toopaev,
 --                  coalesce((p.properties -&gt;&gt; 'palk_oper_id')::integer, 0)::integer         as palk_oper_id,
-                  case
-                      when (p.properties -&gt;&gt; 'palk_oper_id') is not null and
-                           exists
-                           (
-                               select 1 from palk.palk_oper po where po.parentid = (p.properties -&gt;&gt; 'palk_oper_id')::integer
-                           )
-                          then (p.properties -&gt;&gt; 'palk_oper_id')::integer
-                      else 0 end::integer                                                  as palk_oper_id,
+                                       case
+                                           when (p.properties -&gt;&gt; 'palk_oper_id') is not null and
+                                                exists
+                                                (
+                                                    select
+                                                        1
+                                                    from
+                                                        palk.palk_oper po
+                                                    where
+                                                        po.parentid = (p.properties -&gt;&gt; 'palk_oper_id')::integer
+                                                )
+                                               then (p.properties -&gt;&gt; 'palk_oper_id')::integer
+                                           else 0 end::integer                                                  as palk_oper_id,
 
-                  (p.properties -&gt;&gt; 'algorithm')::varchar(100)                             as algorithm,
-                  (p.properties -&gt;&gt; 'amet')::varchar(254)                                  as amet,
-                  case
-                      when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
-                          then round((p.properties -&gt;&gt; 'arv_paevad_perioodis')::numeric *
-                                     (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric, 2)
+                                       (p.properties -&gt;&gt; 'algorithm')::varchar(100)                             as algorithm,
+                                       (p.properties -&gt;&gt; 'amet')::varchar(254)                                  as amet,
+                                       case
+                                           when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
+                                               then round((p.properties -&gt;&gt; 'arv_paevad_perioodis')::numeric *
+                                                          (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric, 2)
 
-                      when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
-                           (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
-                          then (p.properties -&gt;&gt; 'puhkuse_summa')::numeric(12, 2)
-                      when p.properties -&gt; 'data' is not null and p.properties -&gt; 'data' -&gt; 0 is not null
-                          then (p.properties -&gt; 'data' -&gt; 0 -&gt;&gt; 'summa')::numeric
-                      else
-                          round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric *
-                                (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,
-                                2) end::numeric(12, 2)                                     as puhkuse_summa,
+                                           when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
+                                                (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
+                                               then (p.properties -&gt;&gt; 'puhkuse_summa')::numeric(12, 2)
+                                           when p.properties -&gt; 'data' is not null and
+                                                p.properties -&gt; 'data' -&gt; 0 is not null
+                                               then (p.properties -&gt; 'data' -&gt; 0 -&gt;&gt; 'summa')::numeric
+                                           else
+                                               round((p.properties -&gt;&gt; 'avg_paeva_summa')::numeric *
+                                                     (p.properties -&gt;&gt; 'arvestatud_paevad')::numeric,
+                                                     2) end::numeric(12, 2)                                     as puhkuse_summa,
 
-                  (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
-                  case
-                      when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
-                          then (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
-                      when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
-                           (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
-                          then round((p.properties -&gt;&gt; 'puhkuse_summa')::numeric /
-                                     (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric, 0)
-                      else (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
-                      end::integer                                                         as arv_paevad_perioodis,
-                  p.properties -&gt;&gt; 'selg'                                                  as selg,
-                  coalesce((p.properties -&gt;&gt; 'konto'), '')::varchar(20)                    as konto,
-                  (p.properties -&gt;&gt; 'allikas')::varchar(20)                                as allikas,
-                  (p.properties -&gt;&gt; 'tegev')::varchar(20)                                  as tegev,
-                  (p.properties -&gt;&gt; 'artikkel')::varchar(20)                               as artikkel,
-                  (p.properties -&gt;&gt; 'tunnus')::varchar(20)                                 as tunnus,
-                  (p.properties -&gt;&gt; 'kpv1')::date                                          as params_kpv1,
-                  (p.properties -&gt;&gt; 'kpv2')::date                                          as params_kpv2,
-                  (p.properties -&gt;&gt; 'vm_kpv')::date                                        as params_vm_kpv,
-                  (p.properties -&gt;&gt; 'kokkuleppe_summa')::numeric                           as kokkuleppe_summa,
-                  coalesce((p.properties -&gt;&gt; 'kas_arvesta_parandus')::integer, 0)::integer as kas_arvesta_parandus,
-                  pt.vs_kooded,
-                  pt.eesti                                                                 as pt_nimetus,
-                  (p.properties -&gt;&gt; 'puudumiste_kood')::varchar(20)                        as puudumiste_kood,
-                  (p.properties -&gt;&gt; 'puudumise_tyyp')::char(1)                             as puudumise_tyyp,
-                  (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id,
-                  (p.properties -&gt;&gt; 'allikas_e')::varchar(20)                              as allikas_e,
-                  (p.properties -&gt;&gt; 'allikas_j')::varchar(20)                              as allikas_j,
-                  (p.properties -&gt;&gt; 'pohi_leping_id')::integer                             as pohi_lepingid
-              FROM
-                  palk.puudumine                               p
-                      inner join      palk.tooleping           t on t.id = p.lepingid
-                      left outer join palk.com_puudumiste_tyyp pt on pt.liik = p.puudumiste_liik and pt.id = p.tyyp
-              WHERE
-                  p.id = $1</sql>
+                                       (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric                            as avg_paeva_summa,
+                                       case
+                                           when (p.properties -&gt;&gt; 'algorithm')::text ilike '%sitsi%'
+                                               then (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
+                                           when p.properties -&gt;&gt; 'puhkuse_summa' is not null and
+                                                (p.properties -&gt;&gt; 'puhkuse_summa')::numeric &gt; 0
+                                               then round((p.properties -&gt;&gt; 'puhkuse_summa')::numeric /
+                                                          (p.properties -&gt;&gt; 'avg_paeva_summa')::numeric, 0)
+                                           else (p.properties -&gt;&gt; 'arv_paevad_perioodis')::integer
+                                           end::integer                                                         as arv_paevad_perioodis,
+                                       p.properties -&gt;&gt; 'selg'                                                  as selg,
+                                       coalesce((p.properties -&gt;&gt; 'konto'), '')::varchar(20)                    as konto,
+                                       (p.properties -&gt;&gt; 'allikas')::varchar(20)                                as allikas,
+                                       (p.properties -&gt;&gt; 'tegev')::varchar(20)                                  as tegev,
+                                       (p.properties -&gt;&gt; 'artikkel')::varchar(20)                               as artikkel,
+                                       (p.properties -&gt;&gt; 'tunnus')::varchar(20)                                 as tunnus,
+                                       (p.properties -&gt;&gt; 'kpv1')::date                                          as params_kpv1,
+                                       (p.properties -&gt;&gt; 'kpv2')::date                                          as params_kpv2,
+                                       (p.properties -&gt;&gt; 'vm_kpv')::date                                        as params_vm_kpv,
+                                       (p.properties -&gt;&gt; 'kokkuleppe_summa')::numeric                           as kokkuleppe_summa,
+                                       coalesce((p.properties -&gt;&gt; 'kas_arvesta_parandus')::integer, 0)::integer as kas_arvesta_parandus,
+                                       pt.vs_kooded,
+                                       pt.eesti                                                                 as pt_nimetus,
+                                       (p.properties -&gt;&gt; 'puudumiste_kood')::varchar(20)                        as puudumiste_kood,
+                                       (p.properties -&gt;&gt; 'puudumise_tyyp')::char(1)                             as puudumise_tyyp,
+                                       (p.properties -&gt;&gt; 'eelmise_puudumine_id')::integer                       as eelmise_puudumine_id,
+                                       (p.properties -&gt;&gt; 'allikas_e')::varchar(20)                              as allikas_e,
+                                       (p.properties -&gt;&gt; 'allikas_j')::varchar(20)                              as allikas_j,
+                                       (p.properties -&gt;&gt; 'pohi_leping_id')::integer                             as pohi_lepingid
+                                   FROM
+                                       palk.puudumine                               p
+                                           inner join      palk.tooleping           t on t.id = p.lepingid
+                                           left outer join palk.com_puudumiste_tyyp pt
+                                                           on pt.liik = p.puudumiste_liik and pt.id = p.tyyp
+                                   WHERE
+                                       p.id = $1
+                               ),
+                  tunnid as (
+                                   select u.*
+                                   from
+                                       puudumine                                                                  p,
+                                       palk.get_uletunnid(jsonb_build_object('alg_kpv', p.kpv1, 'lopp_kpv', p.kpv2,
+                                                                             'toopaev',
+                                                                             p.toopaev, 'tunnid_kokku', p.summa)) u
+                                   where
+                                       p.puudumiste_liik::text = 'KOOLITUS'
+                                   union all
+                                   select
+                                       0::numeric  as too_tunnid_kokku,
+                                       0:: numeric as ule_tunnid,
+                                       0::numeric  as pidu_tunnid,
+                                       0::numeric  as pidupaeva_luhi_tunnid
+                                   from
+                                       puudumine p
+                                   where
+                                       p.puudumiste_liik::text not in ('KOOLITUS')                                   
+                               )
+              select
+                  p.*,
+                  case when p.uleajatunnid_salvestatud is null then  t.ule_tunnid else p.uleajatunnid_salvestatud end::numeric(6,3) as uleajatunnid,
+                  case when p.pidu_tunnid_salvestatud is null then t.pidu_tunnid else p.pidu_tunnid_salvestatud end as pidu_tunnid
+              from
+                  puudumine p,
+                  tunnid    t</sql>
     <sqlAsNew>SELECT
                       $1 :: INTEGER        AS id,
                       $2 :: INTEGER        AS userid,
