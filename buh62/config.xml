@@ -4,7 +4,7 @@
 		<name>narvalv_db</name>
 		<description>uus narvalv db</description>
 		<type>connection</type>
-		<conn_str>DRIVER=PostgreSQL Unicode;DATABASE=db;server=80.235.127.119;PORT=5438;MaxVarcharSize=254;</conn_str>
+		<conn_str>DRIVER=PostgreSQL Unicode;DATABASE=db;server=80.235.127.119;PORT=5438;MaxVarcharSize=254;KeepAliveTime=60;KeepAliveInterval=10</conn_str>
 		<app_name>
 			Raamatupidamine 7.0
 		</app_name>
