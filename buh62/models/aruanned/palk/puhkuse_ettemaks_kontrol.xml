@@ -1,0 +1,67 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>select
+                        qry.asutus,
+                        qry.isik,
+                        qry.isik_id,
+                        coalesce(qry.arv_tunnus, qry.lausend_tunnus)     as tunnus,
+                        coalesce(qry.arv_tegev, qry.lausend_tegev)       as tegev,
+                        coalesce(qry.arv_allikas, qry.lausend_allikas)   as allikas,
+                        coalesce(qry.arv_artikkel, qry.lausend_artikkel) as artikkel,
+                        coalesce(qry.arv_proj, qry.lausend_proj)     as proj,
+                        qry.arv_deebet                                   as deebet,
+                        qry.lausend_deebet                               as kreedit,
+                        qry.arv_summa                                    as arv_summa,
+                        qry.lausend_summa                                as lausend_summa
+
+                    FROM
+                        palk.puhkuse_ettemaks_kontrol($1::integer, $2::jsonb, $3::integer) qry</sql>
+    <alias>puhkuse_ettemaks_kontrol</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
+</VFPData>
