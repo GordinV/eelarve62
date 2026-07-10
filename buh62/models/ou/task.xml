@@ -2,23 +2,23 @@
 <VFPData>
   <grid>
     <sql>SELECT
-                        $2                                                                            AS user_id,
-                        $1                                                                            as rekv_id,
+                        $2                                                                              AS user_id,
+                        $1                                                                              as rekv_id,
                         u.kasutaja,
                         t.id,
-                        to_char(t.created, 'DD.MM.YYYY HH24:MI:SS')::varchar(20)                      AS created,
-                        coalesce(to_char(t.finished, 'DD.MM.YYYY HH24:MI:SS'), '')::varchar(20)       AS finished,
-                        t.tulemused                                                                   as viga,
-                        t.nimetus::varchar(254)                                                       as nimetus,
+                        to_char(t.created, 'DD.MM.YYYY HH24:MI:SS')::varchar(20)                        AS created,
+                        coalesce(to_char(t.finished, 'DD.MM.YYYY HH24:MI:SS'), '')::varchar(20)         AS finished,
+                        t.tulemused                                                                     as viga,
+                        t.nimetus::varchar(254)                                                         as nimetus,
                         to_char((t.properties -&gt;&gt; 'execute_time')::interval, 'HH24:MI:SS')::varchar(20) as execute_time,
                         case
                             when t.status = 0 then 'Ootel'
-                            when t.status = 1 and t.finished is null  then 'Arvestan'
+                            when t.status = 1 and t.finished is null then 'Arvestan'
                             when t.status = 1 and t.finished is not null then 'Edukalt'
                             when t.status = 2 then 'Vigane'
                             else
                                 ''
-                            end::varchar(20)                                                          as status
+                            end::varchar(20)                                                            as status
                     from
                         ou.task                  t
                             inner join ou.userid u on u.id = t.user_id
@@ -31,11 +31,11 @@
   </grid>
   <select>
     <sql>SELECT
-                  'TASK'                                                          AS doc_type_id,
-                  $2::INTEGER                                                       AS userid,
+                  'TASK'      AS doc_type_id,
+                  $2::INTEGER AS userid,
                   t.*
               FROM
-                  ou.task t,
+                  ou.task   t,
                   ou.userid u
               WHERE
                     t.id = $1
@@ -52,14 +52,18 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>select * from ou.tuhista_task_staatus($1::INTEGER , $2::jsonb)</sql>
+    <sql>select *
+                  from
+                      ou.tuhista_task_staatus($1::INTEGER, $2::jsonb)</sql>
     <query />
     <multiple>true</multiple>
     <alias>tuhistaTaskStaatus</alias>
     <not_initial_load>true</not_initial_load>
   </select>
   <select>
-    <sql>select * from ou.execute_task($1::jsonb)</sql>
+    <sql>select *
+                  from
+                      ou.execute_task($1::jsonb)</sql>
     <query />
     <multiple>true</multiple>
     <alias>startTask</alias>
@@ -74,7 +78,12 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql />
+    <sql>SELECT
+                    error_code,
+                    result,
+                    error_message
+                FROM
+                    ou.sp_delete_task($1, $2)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>

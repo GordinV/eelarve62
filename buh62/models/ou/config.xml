@@ -26,8 +26,8 @@
                   coalesce((c.properties -&gt;&gt; 'earved')::VARCHAR(254))::VARCHAR(254) AS earved,
                   c.tahtpaev,
                   coalesce((c.properties -&gt;&gt; 'pdf')::VARCHAR(254))::VARCHAR(254)    AS pdf,
-                  coalesce((c.properties -&gt;&gt; 'round_arve')::integer, 0)::integer    as round_arve
-
+                  coalesce((c.properties -&gt;&gt; 'round_arve')::integer, 0)::integer    as round_arve,
+                  coalesce((c.properties -&gt;&gt; 'web_server')::VARCHAR(254))           AS web_server
               FROM
                   ou.config c,
                   ou.userid u
@@ -95,4 +95,8 @@
     <sql />
     <alias />
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
