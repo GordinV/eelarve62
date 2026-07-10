@@ -153,13 +153,21 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT j1.*, $2 :: INTEGER AS userid, 1 :: NUMERIC AS kuurs, 'EUR' :: VARCHAR(20) AS valuuta
-                  FROM docs.journal1 AS j1
-                           INNER JOIN docs.journal j ON j.id = j1.parentId
-                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                  WHERE j.parentid = $1
+    <sql>SELECT
+                      j1.*,
+                      $2 :: INTEGER        AS userid,
+                      1 :: NUMERIC         AS kuurs,
+                      'EUR' :: VARCHAR(20) AS valuuta
+                  FROM
+                      docs.journal1 AS            j1
+                          INNER JOIN docs.journal j ON j.id = j1.parentId
+                          INNER JOIN ou.userid    u ON u.id = $2 :: INTEGER
+                  WHERE
+                        j.parentid = $1
                     AND j1.summa &lt;&gt; 0
-                      ORDER BY j1.id DESC</sql>
+                  ORDER BY
+                      j1.objekt, j1.kood2, j1.kood5, j1.proj, j1.kood4, j1.deebet, j1.kreedit
+            </sql>
     <query />
     <multiple>true</multiple>
     <alias>details</alias>

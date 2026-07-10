@@ -7,28 +7,40 @@
     <alias>curTootajad</alias>
   </grid>
   <select>
-    <sql>SELECT a.id,
-                     a.regkood,
-                     a.nimetus,
-                     a.omvorm,
-                     a.aadress,
-                     a.kontakt,
-                     a.aadress,
-                     a.tel,
-                     a.faks,
-                     a.email,
-                     a.muud,
-                     a.tp,
-                     a.staatus,
-                     TRUE::BOOLEAN                                AS is_tootaja,
-                     a.mark,
-                     $2:: INTEGER                                 AS userid,
-                     'TOOTAJA'                                    AS doc_type_id,
-                     (properties -&gt;&gt; 'pank'):: TEXT               AS pank,
-                     (properties -&gt;&gt; 'palk_email'):: VARCHAR(254) AS palk_email,
-                     a.tp
-              FROM libs.asutus a
-              WHERE id = $1</sql>
+    <sql>SELECT
+                  a.id,
+                  a.regkood,
+                  a.nimetus,
+                  a.omvorm,
+                  a.aadress,
+                  a.kontakt,
+                  a.aadress,
+                  a.tel,
+                  a.faks,
+                  a.email,
+                  a.muud,
+                  a.tp,
+                  a.staatus,
+                  TRUE::BOOLEAN                                      AS is_tootaja,
+                  a.mark,
+                  $2:: INTEGER                                       AS userid,
+                  'TOOTAJA'                                          AS doc_type_id,
+                  (properties -&gt;&gt; 'pank'):: TEXT                     AS pank,
+                  (properties -&gt;&gt; 'palk_email'):: VARCHAR(254)       AS palk_email,
+                  (properties -&gt;&gt; 'country'):: VARCHAR(254)          AS country,
+                  (properties -&gt;&gt; 'region'):: VARCHAR(254)           AS region,
+                  (properties -&gt;&gt; 'city_or_town'):: VARCHAR(254)     AS city_or_town,
+                  (properties -&gt;&gt; 'street'):: VARCHAR(254)           AS street,
+                  (properties -&gt;&gt; 'house_number'):: VARCHAR(254)     AS house_number,
+                  (properties -&gt;&gt; 'apartment_number'):: VARCHAR(254) AS apartment_number,
+                  (properties -&gt;&gt; 'postal_code'):: VARCHAR(254)      AS postal_code,
+                  (properties -&gt;&gt; 'farmer_name'):: VARCHAR(254)      AS farmer_name,
+                  (properties -&gt;&gt; 'village'):: VARCHAR(254)          AS village,
+                  a.tp
+              FROM
+                  libs.asutus a
+              WHERE
+                  id = $1</sql>
     <sqlAsNew>SELECT
                   $1 :: INTEGER            AS id,
                   $2 :: INTEGER            AS userid,
@@ -332,4 +344,8 @@
                   WHERE (ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link>http://oppetasu.narva.ee:3000/ai/get_address/</link>
+    <alias>ai</alias>
+  </ai>
 </VFPData>

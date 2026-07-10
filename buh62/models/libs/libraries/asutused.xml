@@ -7,28 +7,40 @@
     <alias>curAsutused</alias>
   </grid>
   <select>
-    <sql>SELECT id,
-                     regkood,
-                     nimetus,
-                     omvorm,
-                     aadress,
-                     kontakt,
-                     tel,
-                     faks,
-                     email,
-                     muud,
-                     tp,
-                     staatus,
-                     $2::INTEGER                                     AS userid,
-                     'ASUTUSED'                                      AS doc_type_id,
-                     (properties -&gt;&gt; 'pank')::VARCHAR(20)            AS pank,
-                     (properties -&gt;&gt; 'kmkr')::VARCHAR(20)            AS kmkr,
-                     (properties -&gt;&gt; 'kehtivus')::DATE               AS kehtivus,
-                     (properties -&gt;&gt; 'kehtivus')::DATE               AS valid,
-                     (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT AS aa,
-                     (properties -&gt;&gt; 'palk_email'):: VARCHAR(254)    AS palk_email
-              FROM libs.asutus
-              WHERE id = $1</sql>
+    <sql>SELECT
+                  id,
+                  regkood,
+                  nimetus,
+                  omvorm,
+                  aadress,
+                  kontakt,
+                  tel,
+                  faks,
+                  email,
+                  muud,
+                  tp,
+                  staatus,
+                  $2::INTEGER                                        AS userid,
+                  'ASUTUSED'                                         AS doc_type_id,
+                  (properties -&gt;&gt; 'pank')::VARCHAR(20)               AS pank,
+                  (properties -&gt;&gt; 'kmkr')::VARCHAR(20)               AS kmkr,
+                  (properties -&gt;&gt; 'kehtivus')::DATE                  AS kehtivus,
+                  (properties -&gt;&gt; 'kehtivus')::DATE                  AS valid,
+                  (properties -&gt; 'asutus_aa' -&gt; 0 -&gt;&gt; 'aa')::TEXT    AS aa,
+                  (properties -&gt;&gt; 'palk_email'):: VARCHAR(254)       AS palk_email,
+                  (properties -&gt;&gt; 'country'):: VARCHAR(254)          AS country,
+                  (properties -&gt;&gt; 'region'):: VARCHAR(254)           AS region,
+                  (properties -&gt;&gt; 'city_or_town'):: VARCHAR(254)     AS city_or_town,
+                  (properties -&gt;&gt; 'street'):: VARCHAR(254)           AS street,
+                  (properties -&gt;&gt; 'house_number'):: VARCHAR(254)     AS house_number,
+                  (properties -&gt;&gt; 'apartment_number'):: VARCHAR(254) AS apartment_number,
+                  (properties -&gt;&gt; 'postal_code'):: VARCHAR(254)      AS postal_code,
+                  (properties -&gt;&gt; 'farmer_name'):: VARCHAR(254)      AS farmer_name,
+                  (properties -&gt;&gt; 'village'):: VARCHAR(254)      AS village                  
+              FROM
+                  libs.asutus
+              WHERE
+                  id = $1</sql>
     <sqlAsNew>select $1::integer as id , $2::integer as userid, 'ASUTUSED' as doc_type_id,
             ''::text as  regkood,
             ''::text as nimetus,
@@ -45,6 +57,13 @@
             '' :: VARCHAR(254)    AS palk_email,            
             ''::varchar(20) as kmkr,
             ''::text as mark,
+            null::text as country,
+            null::text as region,
+            null::text as country,
+            null::text as city_or_town,
+            null::text as street,
+            null::text as house_number,
+            null::text as apartment_number,
             ''::TEXT AS aa</sqlAsNew>
     <query />
     <multiple>false</multiple>
