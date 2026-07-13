@@ -2,19 +2,7 @@
 <VFPData>
   <grid>
     <sql>select
-                        qry.asutus,
-                        qry.isik,
-                        qry.isik_id,
-                        coalesce(qry.arv_tunnus, qry.lausend_tunnus)     as tunnus,
-                        coalesce(qry.arv_tegev, qry.lausend_tegev)       as tegev,
-                        coalesce(qry.arv_allikas, qry.lausend_allikas)   as allikas,
-                        coalesce(qry.arv_artikkel, qry.lausend_artikkel) as artikkel,
-                        coalesce(qry.arv_proj, qry.lausend_proj)     as proj,
-                        qry.arv_deebet                                   as deebet,
-                        qry.lausend_deebet                               as kreedit,
-                        qry.arv_summa                                    as arv_summa,
-                        qry.lausend_summa                                as lausend_summa
-
+                    *
                     FROM
                         palk.puhkuse_ettemaks_kontrol($1::integer, $2::jsonb, $3::integer) qry</sql>
     <alias>puhkuse_ettemaks_kontrol</alias>
