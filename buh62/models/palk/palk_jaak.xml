@@ -48,9 +48,27 @@
                       $2 AS user_id
                   FROM
                       (
+                          with
+                              params as (
+                                            select
+                                                $4::date as kpv1,
+                                                $5::date as kpv2
+                              ),
+                              jaak as (
+                                          select
+                                              j.lepingid,
+                                              sum(j.jaak)                        as jaak,
+                                              max(make_date(j.aasta, j.kuu, 01)) as period
+                                          from
+                                              params         ,
+                                              palk.palk_jaak j
+                                          where
+                                              make_date(j.aasta, j.kuu, 1) &lt; make_date(year(params.kpv1), month(params.kpv1), 01)
+                                          group by j.lepingid
+                                      )                              
                           SELECT
                               CASE
-                                  WHEN $3::TEXT IS NULL THEN j.jaak
+                                  WHEN $3::TEXT IS NULL THEN coalesce(jaak.jaak) + (coalesce(p.arv,0) - coalesce(p.tasu,0) - coalesce(p.tki,0) - coalesce(p.pm,0) - coalesce(p.tm,0) - coalesce(p.kinni,0))                                  
                                   ELSE palk.get_projekt_jaak(j.lepingid,
                                                              (gomonth(make_date(j.aasta, j.kuu, 01), 1) - 1)::DATE,
                                                              $3::TEXT) END::NUMERIC(12, 2) AS jaak,
@@ -75,11 +93,12 @@
                               o.nimetus                                                    AS osakonna_nimetus,
                               coalesce(p.status, 2)                                        AS status
                           FROM
-                              palk.palk_jaak                     j
+                              params,
+                              palk.palk_jaak j
                                   INNER JOIN      palk.tooleping t ON t.id = j.lepingid
-                                  INNER JOIN      libs.asutus    a ON a.id = t.parentid
-                                  INNER JOIN      libs.library   o ON o.id = t.osakondid
-                                  
+                                  INNER JOIN      libs.asutus a ON a.id = t.parentid
+                                  INNER JOIN      libs.library o ON o.id = t.osakondid
+                                  left outer join jaak on jaak.lepingid = t.id
                                   LEFT OUTER JOIN (
                                                       SELECT
                                                           month(p.kpv)                                                       AS kuu,
@@ -112,25 +131,32 @@
                                                           p.lepingid,
                                                           t.status
                                                       FROM
-                                                          docs.doc                      d
+                                                          params,
+                                                          docs.doc d
                                                               INNER JOIN palk.palk_oper p ON p.parentid = d.id
-                                                              INNER JOIN libs.library   lib ON p.libid = lib.id AND lib.library = 'PALK'
+                                                              INNER JOIN libs.library lib ON p.libid = lib.id AND lib.library = 'PALK'
                                                               INNER JOIN palk.tooleping t ON p.lepingid = t.id
-                                                      WHERE d.status &lt;&gt; 3
+                                                      WHERE
+                                                            d.status &lt;&gt; 3
                                                         AND lib.status &lt;&gt; 3
                                                         AND t.status &lt;&gt; 3
                                                         AND d.rekvId = $1::INTEGER
+                                                        and p.kpv between params.kpv1 and params.kpv2
                                                         AND ($3::TEXT IS NULL OR p.proj ILIKE $3::TEXT)
                                                       GROUP BY
                                                           month(p.kpv)
                                                         , year(p.kpv)
                                                         , p.lepingid
                                                         , t.status
-                                                  )              p
+                                                  ) p
                                                   ON p.lepingid = j.lepingid AND p.kuu = j.kuu AND p.aasta = j.aasta
+                          where
+                              make_date(j.aasta, j.kuu, 01) between params.kpv1 and params.kpv2
+
                       ) p
                   WHERE
-                        p.rekvId = $1::INTEGER
+                      p.rekvId = $1::INTEGER
+
             </sql>
     <alias>printPalkJaak</alias>
   </print>
@@ -138,4 +164,8 @@
     <sql />
     <alias />
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>
