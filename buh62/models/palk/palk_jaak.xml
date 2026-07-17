@@ -68,7 +68,7 @@
                                       )                              
                           SELECT
                               CASE
-                                  WHEN $3::TEXT IS NULL THEN coalesce(jaak.jaak) + (coalesce(p.arv,0) - coalesce(p.tasu,0) - coalesce(p.tki,0) - coalesce(p.pm,0) - coalesce(p.tm,0) - coalesce(p.kinni,0))                                  
+                                  WHEN $3::TEXT IS NULL THEN coalesce(jaak.jaak,0) + (coalesce(p.arv,0) - coalesce(p.tasu,0) - coalesce(p.tki,0) - coalesce(p.pm,0) - coalesce(p.tm,0) - coalesce(p.kinni,0))                                  
                                   ELSE palk.get_projekt_jaak(j.lepingid,
                                                              (gomonth(make_date(j.aasta, j.kuu, 01), 1) - 1)::DATE,
                                                              $3::TEXT) END::NUMERIC(12, 2) AS jaak,
