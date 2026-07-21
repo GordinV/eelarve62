@@ -53,22 +53,37 @@
                                             select
                                                 $4::date as kpv1,
                                                 $5::date as kpv2
-                              ),
+                                        ),
+                              palk_jaak as (
+                                            select
+                                                max(id) as id,
+                                                lepingid
+                                            from
+                                                params,
+                                                palk.palk_jaak pj
+                                            where
+                                                make_date(pj.aasta, pj.kuu, 1) &lt;
+                                                make_date(year(params.kpv1), month(params.kpv1), 01)
+                                            group by lepingid
+                                        ),
+
                               jaak as (
-                                          select
-                                              j.lepingid,
-                                              sum(j.jaak)                        as jaak,
-                                              max(make_date(j.aasta, j.kuu, 01)) as period
-                                          from
-                                              params         ,
-                                              palk.palk_jaak j
-                                          where
-                                              make_date(j.aasta, j.kuu, 1) &lt; make_date(year(params.kpv1), month(params.kpv1), 01)
-                                          group by j.lepingid
-                                      )                              
+                                            select
+                                                j.lepingid,
+                                                sum(j.jaak)                        as jaak,
+                                                max(make_date(j.aasta, j.kuu, 01)) as period
+                                            from
+                                                params,
+                                                palk.palk_jaak j
+                                                    inner join palk_jaak pj on pj.id = j.id
+                                            group by j.lepingid
+                                        )
                           SELECT
                               CASE
-                                  WHEN $3::TEXT IS NULL THEN coalesce(jaak.jaak,0) + (coalesce(p.arv,0) - coalesce(p.tasu,0) - coalesce(p.tki,0) - coalesce(p.pm,0) - coalesce(p.tm,0) - coalesce(p.kinni,0))                                  
+                                  WHEN $3::TEXT IS NULL THEN coalesce(jaak.jaak, 0) +
+                                                             (coalesce(p.arv, 0) - coalesce(p.tasu, 0) -
+                                                              coalesce(p.tki, 0) - coalesce(p.pm, 0) -
+                                                              coalesce(p.tm, 0) - coalesce(p.kinni, 0))
                                   ELSE palk.get_projekt_jaak(j.lepingid,
                                                              (gomonth(make_date(j.aasta, j.kuu, 01), 1) - 1)::DATE,
                                                              $3::TEXT) END::NUMERIC(12, 2) AS jaak,
