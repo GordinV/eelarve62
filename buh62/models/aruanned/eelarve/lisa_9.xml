@@ -1,10 +1,23 @@
 <?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
 <VFPData>
   <grid>
-    <sql>SELECT qryReport.*, r.nimetus as asutus
-                    FROM eelarve.lisa_9($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER) qryReport
-                             INNER JOIN ou.rekv r ON r.id = qryReport.rekv_id
-                    ORDER BY maksja_regkood, asutus, saaja_nimi, kpv, artikkel, tegev
+    <sql>with
+                        report as (
+                                      SELECT
+                                          qryReport.*,
+                                          sum(qryReport.summa) over (partition by saaja_regkood, maksja_regkood) as saaja_summa,
+                                          r.nimetus                                              as asutus
+                                      FROM
+                                          eelarve.lisa_9($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER) qryReport
+                                              INNER JOIN ou.rekv                                       r ON r.id = qryReport.rekv_id
+                        )
+                    select *
+                    from
+                        report r
+                    where
+                        r.saaja_summa &gt; 0
+                    ORDER BY
+                        maksja_regkood, asutus, saaja_nimi, kpv, artikkel, tegev
         </sql>
     <alias>lisa_9</alias>
   </grid>
