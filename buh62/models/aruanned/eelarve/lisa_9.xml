@@ -5,7 +5,7 @@
                         report as (
                                       SELECT
                                           qryReport.*,
-                                          sum(qryReport.summa) over (partition by saaja_regkood, maksja_regkood) as saaja_summa,
+                                          sum(qryReport.summa) over (partition by saaja_regkood, maksja_regkood, tehingu_arv) as saaja_summa,
                                           r.nimetus                                              as asutus
                                       FROM
                                           eelarve.lisa_9($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER) qryReport
