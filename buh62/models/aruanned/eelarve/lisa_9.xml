@@ -5,17 +5,32 @@
                         report as (
                                       SELECT
                                           qryReport.*,
-                                          sum(qryReport.summa) over (partition by saaja_regkood, maksja_regkood, tehingu_arv) as saaja_summa,
-                                          r.nimetus                                              as asutus
+                                          sum(qryReport.summa)
+                                          over (partition by saaja_regkood, maksja_regkood, tehingu_arv) as saaja_summa,
+                                          r.nimetus                                                      as asutus
                                       FROM
                                           eelarve.lisa_9($1::DATE, $2::DATE, $3::INTEGER, $4::INTEGER) qryReport
                                               INNER JOIN ou.rekv                                       r ON r.id = qryReport.rekv_id
                         )
-                    select *
+                    select
+                        r.rekv_id,
+                        maksja_regkood,
+                        saaja_regkood,
+                        saaja_tp,
+                        saaja_nimi,
+                        kpv,
+                        sum(summa)       as summa,
+                        artikkel,
+                        tegev,
+                        sum(saaja_summa) as saaja_summa,
+                        asutus
+
                     from
                         report r
                     where
                         r.saaja_summa &gt; 0
+                    group by
+                        r.rekv_id, maksja_regkood, saaja_regkood, saaja_tp, saaja_nimi, kpv, artikkel, tegev, asutus
                     ORDER BY
                         maksja_regkood, asutus, saaja_nimi, kpv, artikkel, tegev
         </sql>
