@@ -33,6 +33,9 @@
                           rekv.id = r.parentid
                   )                                                                AS parent_asutus,
                   r.aadress,
+                  coalesce(r.properties -&gt;&gt; 'city_or_town', 'Narva')::varchar(254) as city_or_town,
+                  coalesce(r.properties -&gt;&gt; 'country', 'Estonia')::varchar(254)    as country,
+                  coalesce(c.ctry, 'EE')::varchar(3)                               as riigi_kood,
                   r.email::VARCHAR(254),
                   r.faks::VARCHAR(254),
                   r.haldus::VARCHAR(254),
@@ -68,8 +71,9 @@
                   r.properties -&gt;&gt; 'API_KEY'                                       as ai_api_key
 
               FROM
-                  ou.rekv   r,
-                  ou.userid u
+                  ou.rekv                         r
+                      left outer join libs.cities c on c.linn = trim(r.properties -&gt;&gt; 'city_or_town'),
+                  ou.userid                       u
               WHERE
                     r.id = $1
                 AND u.id = $2</sql>
@@ -82,6 +86,9 @@
                       NULL :: VARCHAR(254) AS nimetus,
                       NULL :: VARCHAR(20)  AS kbmkood,
                       NULL :: TEXT         AS aadress,
+                  'Narva'               as city_or_town,
+                  'Estonia'                  as country,
+                  'EE'                                           as riigi_kood,                      
                       NULL :: TEXT         AS haldus,
                       NULL :: VARCHAR(254) AS tel,
                       NULL :: VARCHAR(254) AS faks,
@@ -251,4 +258,8 @@
     <sql />
     <alias />
   </getLog>
+  <ai>
+    <link>http://oppetasu.narva.ee:3000/ai/get_address/</link>
+    <alias>ai</alias>
+  </ai>
 </VFPData>
