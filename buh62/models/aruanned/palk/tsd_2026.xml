@@ -1,0 +1,81 @@
+<?xml version = "1.0" encoding="Windows-1252" standalone="yes"?>
+<VFPData>
+  <grid>
+    <sql>with
+                        params as (
+                                      select
+                                          case
+                                              when $1::date &gt; $2::date then date(year($2::date), month($2::date), 1)
+                                              else $1::date end::date as kpv1,
+                                          $2::date                    as kpv2,
+                                          r.id                        as rekv_id,
+                                          $4::integer                 as kond,
+                                          r.regkood
+                                      from
+                                          ou.rekv r
+                                      where
+                                          id = $3::integer
+
+                                  ),
+                        report as (
+                                      select
+                                          *
+                                      FROM
+                                          params                           p,
+                                          palk.tsd_2026(p.kpv1::date, p.kpv2::date, p.rekv_id::integer,
+                                                          p.kond::integer) qry
+                                  )
+                    select
+                        r.*
+                    from
+                        report r
+                    order by
+                        r.isikukood, r.tululiik</sql>
+    <alias>tsd_2026</alias>
+  </grid>
+  <select></select>
+  <selectAsLibs>
+    <sql></sql>
+    <alias>selectAsLibs</alias>
+  </selectAsLibs>
+  <saveDoc>
+    <sql></sql>
+    <alias>saveDoc</alias>
+  </saveDoc>
+  <deleteDoc>
+    <sql></sql>
+    <alias>deleteDoc</alias>
+  </deleteDoc>
+  <requiredFields>
+    <validate></validate>
+  </requiredFields>
+  <executeSql>
+    <sql></sql>
+    <alias></alias>
+  </executeSql>
+  <executeCommand>
+    <sql></sql>
+    <alias></alias>
+  </executeCommand>
+  <register>
+    <sql></sql>
+    <alias></alias>
+  </register>
+  <endProcess>
+    <sql />
+    <alias />
+  </endProcess>
+  <generateJournal>
+    <sql />
+    <alias />
+  </generateJournal>
+  <print></print>
+  <getLog>
+    <sql />
+    <alias />
+  </getLog>
+  <ai>
+    <link>https://check-xml-1088344506167.europe-north1.run.app</link>
+    <alias>ai</alias>
+  </ai>
+</VFPData>
