@@ -27,10 +27,13 @@
                   c.tahtpaev,
                   coalesce((c.properties -&gt;&gt; 'pdf')::VARCHAR(254))::VARCHAR(254)    AS pdf,
                   coalesce((c.properties -&gt;&gt; 'round_arve')::integer, 0)::integer    as round_arve,
-                  coalesce((c.properties -&gt;&gt; 'web_server')::VARCHAR(254))           AS web_server
+                  coalesce((c.properties -&gt;&gt; 'web_server')::VARCHAR(254))           AS web_server,
+                  coalesce(u_palk.parool, '')::varchar(254)                         as uuid
+                  
               FROM
                   ou.config c,
                   ou.userid u
+                      left outer join ou.userid u_palk on u.rekvid = u_palk.rekvid and u_palk.kasutaja = 'palk' and u_palk.status &lt; 3              
               WHERE
                     c.rekvid = $1
                 AND u.id = $2</sql>
