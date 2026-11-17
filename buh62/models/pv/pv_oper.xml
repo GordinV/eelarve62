@@ -40,7 +40,8 @@
                      n.nimetus,
                      coalesce(jid.number, 0) :: INTEGER                             AS laus_nr,
                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS korrkonto,
-                     dp.selg :: VARCHAR(120)                                        AS dokprop
+                     dp.selg :: VARCHAR(120)                                        AS dokprop,
+                     po.properties -&gt;&gt; 'lisa_selg' as lisa_selg
               FROM docs.doc d
                        INNER JOIN libs.library l ON l.id = d.doc_type_id
                        INNER JOIN docs.pv_oper po ON po.parentId = d.id
@@ -173,4 +174,8 @@
                   WHERE (qry.ajalugu -&gt;&gt; 'user') IS NOT NULL</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

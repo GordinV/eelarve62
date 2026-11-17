@@ -132,6 +132,7 @@
                       (p.properties -&gt;&gt; 'alus_oper_ids')::text                                as alus_oper_ids,
                       (p.properties -&gt;&gt; 'ettemaksu_periood')::date                            as ettemaksu_periood,
                       (p.properties -&gt;&gt; 'ettemaksu_oper_ids')::text                           as ettemaksu_oper_ids,
+                      p.properties -&gt;&gt; 'lisa_selg'                                            as lisa_selg,
                       palk.get_palk_taabel_id(jsonb_build_object('palk_oper_id', p.parentid)) as taabel_id
                   FROM
                       docs.doc                           d
@@ -205,9 +206,11 @@
     <alias>row</alias>
   </select>
   <select>
-    <sql>SELECT d.*
-                  FROM docs.get_relative_docs($1::INTEGER) d
-                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER</sql>
+    <sql>SELECT
+                      d.*
+                  FROM
+                      docs.get_relative_docs($1::INTEGER) d
+                          INNER JOIN ou.userid            u ON u.id = $2 :: INTEGER</sql>
     <query />
     <multiple>true</multiple>
     <alias>relations</alias>
@@ -221,8 +224,12 @@
     <alias>saveDoc</alias>
   </saveDoc>
   <deleteDoc>
-    <sql>SELECT error_code, result, error_message
-                FROM palk.sp_delete_palk_oper($1::INTEGER, $2::INTEGER)</sql>
+    <sql>SELECT
+                    error_code,
+                    result,
+                    error_message
+                FROM
+                    palk.sp_delete_palk_oper($1::INTEGER, $2::INTEGER)</sql>
     <alias>deleteDoc</alias>
   </deleteDoc>
   <requiredFields>
@@ -234,12 +241,20 @@
   </executeSql>
   <executeCommand>
     <sql>SELECT DISTINCT *
-                  FROM jsonb_to_recordset(
-                               (SELECT qry.data -&gt; 'data'
-                                FROM (SELECT *
-                                      FROM sp_execute_task($1::INTEGER, $2::JSON, $3::TEXT)) qry)
-                       ) AS x (error_message TEXT, error_code INTEGER, summa NUMERIC, selg TEXT, tki NUMERIC,
-                               tka NUMERIC, tm NUMERIC, pm NUMERIC, sm NUMERIC, mvt NUMERIC)
+                  FROM
+                      jsonb_to_recordset(
+                              (
+                                  SELECT
+                                      qry.data -&gt; 'data'
+                                  FROM
+                                      (
+                                          SELECT *
+                                          FROM
+                                              sp_execute_task($1::INTEGER, $2::JSON, $3::TEXT)
+                                      ) qry
+                              )
+                      ) AS x (error_message TEXT, error_code INTEGER, summa NUMERIC, selg TEXT, tki NUMERIC,
+                              tka NUMERIC, tm NUMERIC, pm NUMERIC, sm NUMERIC, mvt NUMERIC, umb_kpv date)
         </sql>
     <alias>executeTask</alias>
   </executeCommand>
@@ -252,31 +267,48 @@
     <alias />
   </endProcess>
   <generateJournal>
-    <sql>SELECT error_code, result, error_message
-                  FROM docs.gen_lausend_avans($2::INTEGER, $1::INTEGER)</sql>
+    <sql>SELECT
+                      error_code,
+                      result,
+                      error_message
+                  FROM
+                      docs.gen_lausend_avans($2::INTEGER, $1::INTEGER)</sql>
     <alias>generateJournal</alias>
   </generateJournal>
   <print></print>
   <getLog>
-    <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
-                         (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
-                                                                                                                        email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
-                                  '')::VARCHAR(20)                                                                   AS kustutatud
-                  FROM (SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
-                        FROM docs.doc d,
-                             ou.userid u
-                        WHERE d.id = $1
-                          AND u.id = $2) qry</sql>
+    <sql>SELECT
+                      ROW_NUMBER() OVER ()                                                                        AS id,
+                      (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS koostatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS muudatud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS prinditud,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
+                                                                                                                     email,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS earve,
+                      coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
+                               '')::VARCHAR(20)                                                                   AS kustutatud
+                  FROM
+                      (
+                          SELECT
+                              jsonb_array_elements(history) AS ajalugu,
+                              d.id,
+                              d.rekvid
+                          FROM
+                              docs.doc  d,
+                              ou.userid u
+                          WHERE
+                                d.id = $1
+                            AND u.id = $2
+                      ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

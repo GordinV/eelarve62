@@ -23,46 +23,54 @@
     <alias>curMk</alias>
   </grid>
   <select>
-    <sql>SELECT d.id,
-                         d.docs_ids,
-                         (to_char(created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT              AS created,
-                         (to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT           AS lastupdate,
-                         d.bpm,
-                         trim(l.nimetus)                                                AS doc,
-                         trim(l.kood)                                                   AS doc_type_id,
-                         trim(s.nimetus)                                                AS status,
-                         k.number                                                       AS number,
-                         k.maksepaev                                                    AS maksepaev,
-                         k.viitenr,
-                         k.aaid                                                         AS aa_id,
-                         aa.pank                                                        AS pank,
-                         trim(aa.arve)::VARCHAR(20)                                     AS omaArve,
-                         k.rekvId,
-                         k.kpv                                                          AS kpv,
-                         k.selg,
-                         k.muud,
-                         k.opt,
-                         k.arvid,
-                         k.aaid,
-                         ('Number:' || arv.number :: TEXT || ' Kuupäev:' || arv.kpv :: TEXT || ' Jääk:' ||
-                          arv.jaak :: TEXT)                                             AS arvnr,
-                         (SELECT sum(summa)
-                          FROM docs.mk1
-                          WHERE parentid = k.id)                                        AS summa,
-                         coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS konto,
-                         dp.selg::VARCHAR(120)                                          AS dokprop,
-                         k.doklausid,
-                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                      AS koostaja
-
-                  FROM docs.doc d
-                           INNER JOIN docs.mk k ON k.parentId = d.id
-                           INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
-                           LEFT OUTER JOIN libs.library l ON l.id = d.doc_type_id
-                           LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
-                           LEFT OUTER JOIN ou.aa AS aa ON k.aaid = aa.Id
-                           LEFT OUTER JOIN docs.arv AS arv ON k.arvid = arv.Id
-                           LEFT OUTER JOIN libs.dokprop dp ON dp.id = k.doklausid
-                  WHERE d.id = $1
+    <sql>SELECT
+                      d.id,
+                      d.docs_ids,
+                      (to_char(created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT              AS created,
+                      (to_char(lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT           AS lastupdate,
+                      d.bpm,
+                      trim(l.nimetus)                                                AS doc,
+                      trim(l.kood)                                                   AS doc_type_id,
+                      trim(s.nimetus)                                                AS status,
+                      k.number                                                       AS number,
+                      k.maksepaev                                                    AS maksepaev,
+                      k.viitenr,
+                      k.aaid                                                         AS aa_id,
+                      aa.pank                                                        AS pank,
+                      trim(aa.arve)::VARCHAR(20)                                     AS omaArve,
+                      k.rekvId,
+                      k.kpv                                                          AS kpv,
+                      k.selg,
+                      k.muud,
+                      k.opt,
+                      k.arvid,
+                      k.aaid,
+                      ('Number:' || arv.number :: TEXT || ' Kuupäev:' || arv.kpv :: TEXT || ' Jääk:' ||
+                       arv.jaak :: TEXT)                                             AS arvnr,
+                      (
+                          SELECT
+                              sum(summa)
+                          FROM
+                              docs.mk1
+                          WHERE
+                              parentid = k.id
+                      )                                                              AS summa,
+                      coalesce((dp.details :: JSONB -&gt;&gt; 'konto'), '') :: VARCHAR(20) AS konto,
+                      dp.selg::VARCHAR(120)                                          AS dokprop,
+                      k.doklausid,
+                      (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                      AS koostaja,
+                      (k.properties -&gt;&gt; 'lisa_selg')::text                          AS lisa_selg
+                  FROM
+                      docs.doc                         d
+                          INNER JOIN      docs.mk      k ON k.parentId = d.id
+                          INNER JOIN      ou.userid    u ON u.id = $2 :: INTEGER
+                          LEFT OUTER JOIN libs.library l ON l.id = d.doc_type_id
+                          LEFT OUTER JOIN libs.library s ON s.library = 'STATUS' AND s.kood = d.status :: TEXT
+                          LEFT OUTER JOIN ou.aa    AS  aa ON k.aaid = aa.Id
+                          LEFT OUTER JOIN docs.arv AS  arv ON k.arvid = arv.Id
+                          LEFT OUTER JOIN libs.dokprop dp ON dp.id = k.doklausid
+                  WHERE
+                        d.id = $1
                     AND d.status &lt; 3
             </sql>
     <sqlAsNew>SELECT $1 :: INTEGER                                  AS id,
@@ -240,4 +248,8 @@
                        ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

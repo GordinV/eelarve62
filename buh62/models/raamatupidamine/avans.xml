@@ -10,8 +10,8 @@
   <select>
     <sql>SELECT d.id,
                          d.docs_ids,
-                         (to_char(d.created, 'DD.MM.YYYY HH:MM:SS')) :: TEXT                         AS created,
-                         (to_char(d.lastupdate, 'DD.MM.YYYY HH:MM:SS')) :: TEXT                      AS lastupdate,
+                         (to_char(d.created, 'DD.MM.YYYY HH:MI:SS')) :: TEXT                         AS created,
+                         (to_char(d.lastupdate, 'DD.MM.YYYY HH:MI:SS')) :: TEXT                      AS lastupdate,
                          d.bpm,
                          trim(l.nimetus)                                                             AS doc,
                          trim(l.kood)                                                                AS doc_type_id,
@@ -33,7 +33,8 @@
                          d1.dokpropid,
                          coalesce(jid.number, 0) :: INTEGER                                          AS lausend,
                          (SELECT sum(summa) FROM docs.avans2 WHERE parentid = d1.id)::NUMERIC(14, 2) AS summa,
-                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                                   AS koostaja
+                         (d.history -&gt; 0 -&gt;&gt; 'user')::VARCHAR(120)                                   AS koostaja,
+                         (d1.properties -&gt;&gt; 'lisa_selg')::text                                        AS lisa_selg
                   FROM docs.doc d
                            INNER JOIN docs.avans1 d1 ON d1.parentId = d.id
                            INNER JOIN ou.userid u ON u.id = $2 :: INTEGER
@@ -182,17 +183,17 @@
   <getLog>
     <sql>SELECT ROW_NUMBER() OVER ()                                                                        AS id,
                          (ajalugu -&gt;&gt; 'user')::VARCHAR(20)                                                           AS kasutaja,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'created')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS koostatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'updated')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS muudatud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'print')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS prinditud,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'), '')::VARCHAR(20) AS
+                         coalesce(to_char((ajalugu -&gt;&gt; 'email')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'), '')::VARCHAR(20) AS
                                                                                                                         email,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'earve')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS earve,
-                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MM.SS'),
+                         coalesce(to_char((ajalugu -&gt;&gt; 'deleted')::TIMESTAMP, 'DD.MM.YYYY HH.MI.SS'),
                                   '')::VARCHAR(20)                                                                   AS kustutatud
                   FROM (
                            SELECT jsonb_array_elements(history) AS ajalugu, d.id, d.rekvid
@@ -203,4 +204,8 @@
                        ) qry</sql>
     <alias>getLogs</alias>
   </getLog>
+  <ai>
+    <link />
+    <alias />
+  </ai>
 </VFPData>

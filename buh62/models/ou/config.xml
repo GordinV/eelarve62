@@ -28,8 +28,10 @@
                   coalesce((c.properties -&gt;&gt; 'pdf')::VARCHAR(254))::VARCHAR(254)    AS pdf,
                   coalesce((c.properties -&gt;&gt; 'round_arve')::integer, 0)::integer    as round_arve,
                   coalesce((c.properties -&gt;&gt; 'web_server')::VARCHAR(254))           AS web_server,
-                  coalesce(u_palk.parool, '')::varchar(254)                         as uuid
-                  
+                  coalesce(u_palk.parool, '')::varchar(254)                         as uuid,
+                  coalesce((c.properties -&gt;&gt; 'INFOREGISTER_API_KEY')::VARCHAR(254)) as inforegister_api_key,
+                  coalesce((c.properties -&gt;&gt; 'INFOREGISTER_HASH')::VARCHAR(254)) as inforegister_parool
+
               FROM
                   ou.config c,
                   ou.userid u
