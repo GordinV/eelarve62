@@ -179,8 +179,8 @@
                       )                                                                                AS kr_number,
                       (a.properties -&gt;&gt; 'alus_arve_id')::INTEGER                                       AS alus_arve_id,
                       (a.properties -&gt;&gt; 'raha_saaja')::VARCHAR(254)                                    AS raha_saaja,
-                      (a.properties -&gt;&gt; 'raha_saaja')::VARCHAR(254)                                    AS raha_saaja,
-                      (a.properties -&gt;&gt; 'lisa_selg')::text                                             as lisa_selg,
+                      coalesce((a.properties -&gt;&gt; 'umardamine')::numeric, 0)::numeric(12, 2)            as umardamine,
+                      coalesce((a.properties -&gt;&gt; 'lisa_selg'), '')::text                               as lisa_selg,
                       ''::varchar(20)                                                                  as rekv_regkood
                   FROM
                       docs.doc                           d
